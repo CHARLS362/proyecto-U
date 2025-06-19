@@ -2,14 +2,18 @@
 "use client"
 
 import * as React from "react"
-import type useEmblaCarousel, {
-  type EmblaOptionsType,
-  type EmblaPluginType,
-  type EmblaApiType,
+import type {
+  EmblaOptionsType,
+  EmblaPluginType,
+  EmblaApiType,
+  UseEmblaCarouselType, // For typing the require
 } from 'embla-carousel-react';
 import { ArrowLeft, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+
+// Type for the hook, as it's dynamically required
+type ActualUseEmblaCarouselType = UseEmblaCarouselType;
 
 type CarouselContextProps = {
   orientation: "horizontal" | "vertical"
@@ -17,6 +21,7 @@ type CarouselContextProps = {
   scrollNext: () => void
   canScrollPrev: boolean
   canScrollNext: boolean
+  emblaApi: EmblaApiType | undefined; // Expose API for more advanced use cases if needed
 }
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null)
@@ -52,26 +57,23 @@ const Carousel = React.forwardRef<
     },
     ref
   ) => {
-    const [emblaRef, emblaApi] = React.useMemo(() => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const emblaHook = require("embla-carousel-react") as typeof useEmblaCarousel;
-        return emblaHook(
-          {
-            ...opts,
-            axis: orientation === "horizontal" ? "x" : "y",
-          },
-          plugins
-        );
-      }, [opts, orientation, plugins]
+    // Dynamically require embla-carousel-react and call the hook directly
+    const emblaHook = require("embla-carousel-react") as ActualUseEmblaCarouselType;
+    const [emblaRef, emblaApi] = emblaHook(
+      {
+        ...opts,
+        axis: orientation === "horizontal" ? "x" : "y",
+      },
+      plugins
     );
 
     const [canScrollPrev, setCanScrollPrev] = React.useState(false)
     const [canScrollNext, setCanScrollNext] = React.useState(false)
 
-    const onSelect = React.useCallback((api: EmblaApiType) => {
-      if (!api) return;
-      setCanScrollPrev(api.canScrollPrev())
-      setCanScrollNext(api.canScrollNext())
+    const onSelect = React.useCallback((currentEmblaApi: EmblaApiType) => {
+      if (!currentEmblaApi) return;
+      setCanScrollPrev(currentEmblaApi.canScrollPrev())
+      setCanScrollNext(currentEmblaApi.canScrollNext())
     }, [])
 
     const scrollPrev = React.useCallback(() => {
@@ -125,6 +127,7 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
+          emblaApi,
         }}
       >
         <div
@@ -261,4 +264,3 @@ export {
   CarouselNext,
   useCarousel,
 }
-
