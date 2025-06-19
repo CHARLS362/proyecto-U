@@ -2,15 +2,55 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ListChecks, Star, Target, TrendingUp, UserCheck, Sparkles } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+const features = [
+  {
+    icon: ListChecks,
+    title: "Características",
+    description: "Una trayectoria académica sólida suele ser esencial para asegurar la estabilidad financiera, con pocas excepciones. La escuela brinda oportunidades para forjar nuevas amistades, y algunos compañeros se convierten en compañeros para toda la vida.",
+    borderColorClass: "bg-primary",
+  },
+  {
+    icon: Star,
+    title: "Logro",
+    description: "En los premios escolares, recibí reconocimiento por la excelencia académica, la tutoría entre pares, el liderazgo ambiental, la destreza en el debate y el talento musical.",
+    borderColorClass: "bg-primary",
+  },
+  {
+    icon: Target,
+    title: "Objetivos",
+    description: "Crear un entorno donde prosperen la curiosidad, la colaboración y la innovación, fomentando la formación de los líderes resilientes del mañana. Fomentar la sed de conocimiento.",
+    borderColorClass: "bg-primary",
+  },
+  {
+    icon: TrendingUp,
+    title: "Excelencia",
+    description: "La excelencia es la culminación de la dedicación, la perseverancia y el compromiso inquebrantable con la mejora continua, estableciendo el estándar de grandeza en todos los esfuerzos.",
+    borderColorClass: "bg-accent",
+  },
+  {
+    icon: UserCheck,
+    title: "Empoderamiento",
+    description: "El empoderamiento es la clave que libera el potencial ilimitado de las personas, permitiéndoles aprovechar sus fortalezas y superar los desafíos con confianza.",
+    borderColorClass: "bg-accent",
+  },
+  {
+    icon: Sparkles,
+    title: "Creatividad",
+    description: "La creatividad es la fuerza vibrante que da vida a las ideas, iluminando nuevos caminos y dando forma al mundo con innovación e imaginación ilimitadas.",
+    borderColorClass: "bg-accent",
+  },
+];
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <LandingNavbar />
-      <main className="flex-grow container mx-auto px-4 py-12 md:py-20">
-        <section className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="space-y-6 text-center md:text-left">
+      <main className="flex-grow container mx-auto px-4">
+        <section className="py-12 md:py-20 grid md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6 text-center md:text-left animate-fade-in">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground">
               El Futuro Está Aquí.
               <br />
@@ -32,18 +72,50 @@ export default function LandingPage() {
               </Button>
             </div>
           </div>
-          <div className="relative h-64 md:h-[400px] lg:h-[500px] rounded-xl shadow-2xl overflow-hidden group">
+          <div className="relative h-64 md:h-[400px] lg:h-[500px] rounded-xl shadow-2xl overflow-hidden group animate-fade-in">
             <Image
               src="https://placehold.co/800x600.png"
               alt="Ilustración de gestión escolar moderna"
               layout="fill"
               objectFit="cover"
               className="transition-transform duration-500 group-hover:scale-105"
-              data-ai-hint="education technology"
+              data-ai-hint="education students"
             />
              <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
           </div>
         </section>
+
+        <section id="about" className="py-12 md:py-20">
+          <div className="text-center mb-12 animate-fade-in">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Descubre lo que <span className="text-primary">Nos Hace Únicos</span>
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Nuestros principios y características fundamentales que guían nuestra misión educativa.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <Card 
+                key={index} 
+                className="shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group animate-fade-in flex flex-col"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <div className={`h-1.5 rounded-t-lg ${feature.borderColorClass}`}></div>
+                <CardHeader className="flex-shrink-0">
+                  <div className="flex items-center gap-3 mb-2">
+                    <feature.icon className={`h-7 w-7 ${feature.borderColorClass === 'bg-primary' ? 'text-primary' : 'text-accent'}`} />
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-grow">
+                  <p className="text-sm text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
       </main>
       <footer className="py-6 text-center text-muted-foreground text-sm border-t">
         © {new Date().getFullYear()} Academia Nova. Todos los derechos reservados.
