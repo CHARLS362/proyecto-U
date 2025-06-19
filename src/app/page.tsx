@@ -177,6 +177,7 @@ export default function RootPage() {
             opts={{
               align: "start",
               loop: true,
+              duration: 500, // Slower manual slide transition
             }}
             plugins={[autoplayPlugin]}
             setApi={setEmblaApi}
@@ -199,13 +200,13 @@ export default function RootPage() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious 
-              variant="ghost" 
-              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/25 p-0 text-white hover:bg-black/40 dark:bg-white/25 dark:text-black dark:hover:bg-white/40" 
+            <CarouselPrevious
+              variant="ghost"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-black/30 p-0 text-white hover:bg-black/50 dark:bg-white/30 dark:text-black dark:hover:bg-white/50 transition-colors duration-200"
             />
-            <CarouselNext 
-              variant="ghost" 
-              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/25 p-0 text-white hover:bg-black/40 dark:bg-white/25 dark:text-black dark:hover:bg-white/40"
+            <CarouselNext
+              variant="ghost"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-black/30 p-0 text-white hover:bg-black/50 dark:bg-white/30 dark:text-black dark:hover:bg-white/50 transition-colors duration-200"
             />
           </Carousel>
           <div className="flex justify-center gap-2 mt-6">
