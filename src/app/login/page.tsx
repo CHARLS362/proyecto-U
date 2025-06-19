@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,30 +15,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter(); // Initialize useRouter
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // Placeholder for backend integration
     console.log('Login attempt with:', { email, password });
-    // Here you would typically call an API to authenticate the user
-    // For example:
-    // try {
-    //   const response = await fetch('/api/login', {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({ email, password }),
-    //   });
-    //   const data = await response.json();
-    //   if (response.ok) {
-    //     // Handle successful login (e.g., redirect, store token)
-    //     console.log('Login successful:', data);
-    //   } else {
-    //     // Handle login error
-    //     console.error('Login failed:', data.message);
-    //   }
-    // } catch (error) {
-    //   console.error('An error occurred during login:', error);
-    // }
+    
+    // Simulate successful login and redirect to dashboard
+    router.push('/dashboard'); 
   };
 
   return (
