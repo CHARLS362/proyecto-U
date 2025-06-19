@@ -11,17 +11,17 @@ const chartData = [
   { course: "ART101", avgGrade: 78, passRate: 85 },
   { course: "CS101", avgGrade: 92, passRate: 95 },
   { course: "QUM202", avgGrade: 75, passRate: 80 },
-  { course: "FIS201", avgGrade: 81, passRate: 88 }, // Added for more data points
+  { course: "FIS201", avgGrade: 81, passRate: 88 }, 
 ];
 
 const chartConfig = {
   avgGrade: {
     label: "Nota Prom.",
-    color: "hsl(var(--primary))",
+    color: "hsl(var(--chart-1))", // Updated to use chart colors from theme
   },
   passRate: {
     label: "Tasa Aprob.",
-    color: "hsl(var(--accent))",
+    color: "hsl(var(--chart-2))", // Updated to use chart colors from theme
   },
 } satisfies ChartConfig;
 
@@ -40,7 +40,7 @@ export function CoursePerformanceChart() {
               margin={{
                 top: 5,
                 right: 20,
-                left: -20, // Adjust to show YAxis labels
+                left: -20, 
                 bottom: 5,
               }}
             >
@@ -51,6 +51,7 @@ export function CoursePerformanceChart() {
                 axisLine={false}
                 tickMargin={8}
                 fontSize={12}
+                stroke="hsl(var(--muted-foreground))"
               />
               <YAxis
                 yAxisId="left"
@@ -73,7 +74,18 @@ export function CoursePerformanceChart() {
                 domain={[0, 100]}
                 tickFormatter={(value) => `${value}%`}
               />
-              <Tooltip cursor={{ fill: 'hsl(var(--accent)/0.3)' }} content={<ChartTooltipContent indicator="dot" />} />
+              <Tooltip 
+                cursor={{ fill: 'hsl(var(--accent)/0.3)' }} 
+                content={<ChartTooltipContent 
+                    indicator="dot" 
+                    labelFormatter={(label, payload) => {
+                        if (payload && payload.length) {
+                           return payload[0].payload.course;
+                        }
+                        return label;
+                    }}
+                />} 
+              />
               <Area
                 yAxisId="left"
                 dataKey="avgGrade"

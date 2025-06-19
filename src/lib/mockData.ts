@@ -47,11 +47,26 @@ export interface SchoolEvent {
   color?: string; // For calendar event styling
 }
 
+export interface Notice {
+  id: string;
+  title: string;
+  date: string; // YYYY-MM-DD or ISO string
+  sender: string;
+  status: "urgente" | "informativo" | "normal" | "warning"; // For status indicator color
+}
+
+export interface Reminder {
+  id: string;
+  text: string;
+  color?: string; // For the left accent bar
+}
+
+
 export const mockStudents: Student[] = [
   {
     id: "S001",
     name: "Ana Pérez",
-    avatarUrl: "https://placehold.co/100x100.png", // data-ai-hint will be added in component
+    avatarUrl: "https://placehold.co/100x100.png",
     email: "ana.perez@example.com",
     phone: "555-0101",
     courses: [
@@ -67,7 +82,7 @@ export const mockStudents: Student[] = [
   {
     id: "S002",
     name: "Luis García",
-    avatarUrl: "https://placehold.co/100x100.png", // data-ai-hint will be added in component
+    avatarUrl: "https://placehold.co/100x100.png",
     email: "luis.garcia@example.com",
     phone: "555-0103",
     courses: [
@@ -81,7 +96,7 @@ export const mockStudents: Student[] = [
   {
     id: "S003",
     name: "Sofía Rodríguez",
-    avatarUrl: "https://placehold.co/100x100.png", // data-ai-hint will be added in component
+    avatarUrl: "https://placehold.co/100x100.png",
     email: "sofia.rodriguez@example.com",
     phone: "555-0104",
     courses: [
@@ -104,7 +119,7 @@ export const mockCourses: Course[] = [
     description: "Curso avanzado sobre cálculo y álgebra lineal.",
     schedule: "Lun, Mié, Vie 10:00-11:30",
     instructor: "Dr. Eduardo López",
-    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
+    instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 25,
     capacity: 30,
     credits: 4,
@@ -117,7 +132,7 @@ export const mockCourses: Course[] = [
     description: "Exploración de los movimientos artísticos a través de la historia.",
     schedule: "Mar, Jue 08:00-09:30",
     instructor: "Prof. Isabel Vargas",
-    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
+    instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 18,
     capacity: 25,
     credits: 3,
@@ -130,7 +145,7 @@ export const mockCourses: Course[] = [
     description: "Introducción a los conceptos fundamentales de la programación.",
     schedule: "Lun, Vie 14:00-15:30",
     instructor: "Ing. Ricardo Montes",
-    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
+    instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 30,
     capacity: 30,
     credits: 4,
@@ -143,7 +158,7 @@ export const mockCourses: Course[] = [
     description: "Estudio de la estructura, propiedades, composición, reacciones y preparación de compuestos que contienen carbono.",
     schedule: "Mar, Jue 11:00-12:30",
     instructor: "Dra. Laura Fuentes",
-    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
+    instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 22,
     capacity: 25,
     credits: 4,
@@ -172,4 +187,18 @@ export const mockEvents: SchoolEvent[] = [
   { id: "E003", title: "Reunión de Padres", date: getRelativeDate(15), type: "Reunión", location: "Auditorio", color: "hsl(var(--accent))"},
   { id: "E004", title: "Feriado: Día del Trabajo", date: new Date(today.getFullYear(), 4, 1), type: "Feriado", color: "hsl(var(--muted-foreground))"}, // May 1st
   { id: "E005", title: "Actividad Deportiva", date: getRelativeDate(5), type: "Actividad", location: "Cancha Principal", color: "hsl(120, 70%, 50%)"},
+];
+
+export const mockNotices: Notice[] = [
+  { id: "N001", title: "AVISO DE VACACIONES", date: "2025-06-10", sender: "TÚ", status: "urgente" },
+  { id: "N002", title: "SUSPENCIÓN DE CLASES", date: "2025-05-31", sender: "REMOTO", status: "informativo" },
+  { id: "N003", title: "EXAMEN DE PRIMERA UNIDAD", date: "2025-05-31", sender: "REMOTO", status: "informativo" },
+  { id: "N004", title: "Aviso de vacaciones", date: "2024-06-19", sender: "TÚ", status: "warning" },
+  { id: "N005", title: "Título 2", date: "2024-06-19", sender: "TÚ", status: "normal" },
+];
+
+export const mockReminders: Reminder[] = [
+  { id: "R001", text: "Reunión con padres de familia hoy a las 3 de la tarde", color: "hsl(var(--accent))" },
+  { id: "R002", text: "Preparar material para la clase de mañana.", color: "hsl(var(--primary))" },
+  { id: "R003", text: "Calificar exámenes pendientes de Química.", color: "hsl(var(--destructive))" },
 ];

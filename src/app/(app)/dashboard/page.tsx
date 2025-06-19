@@ -1,137 +1,121 @@
 
 import { PageTitle } from "@/components/common/PageTitle";
-import { MetricCard } from "@/components/dashboard/MetricCard";
-import { EnrollmentChart } from "@/components/dashboard/EnrollmentChart";
-import { CoursePerformanceChart } from "@/components/dashboard/CoursePerformanceChart";
-import { mockStudents, mockCourses, mockEvents } from "@/lib/mockData";
-import { Users, BookOpenText, CalendarClock, Percent, Activity, LayoutGrid } from "lucide-react"; // Added LayoutGrid
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import Link from "next/link";
+import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
+import { mockNotices, mockReminders } from "@/lib/mockData"; // Updated mockData import
+import { Users, FileText, Bookmark, Newspaper, StickyNote, Filter, Plus, Info, Trash2, LayoutGrid } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+const noticeStatusColors: Record<string, string> = {
+   urgente: "bg-red-500",
+   informativo: "bg-green-500",
+   normal: "bg-blue-500",
+  warning: "bg-yellow-500",
+};
+
 export default function DashboardPage() {
-  const totalStudents = mockStudents.length;
-  const totalCourses = mockCourses.length;
-  
-  const averageAttendance = mockStudents.reduce((sum, student) => {
-    const studentCoursesProgress = student.courses.reduce((courseSum, course) => courseSum + course.progress, 0);
-    return sum + (student.courses.length > 0 ? studentCoursesProgress / student.courses.length : 0);
-  }, 0) / (totalStudents || 1); // Avoid division by zero if no students
-
-  const upcomingEvents = mockEvents
-    .filter(event => event.date >= new Date())
-    .sort((a, b) => a.date.getTime() - b.date.getTime())
-    .slice(0, 5);
-
   return (
     <div className="space-y-6 md:space-y-8">
-      <PageTitle title="Panel Principal" subtitle="Bienvenido a Academia Nova" icon={LayoutGrid} />
+      <PageTitle title="Director del panel" subtitle="Analítica" icon={LayoutGrid} />
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <MetricCard 
-          title="Total Estudiantes" 
-          value={totalStudents} 
-          icon={Users} 
-          description="Estudiantes activos en el sistema"
-          change="+12 este mes"
-          changeType="positive"
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <SimpleMetricCard
+          title="Docentes"
+          value="1"
+          icon={Users}
+          iconBgClass="bg-blue-100 dark:bg-blue-500/30"
+          iconColorClass="text-blue-500 dark:text-blue-300"
         />
-        <MetricCard 
-          title="Total Cursos" 
-          value={totalCourses} 
-          icon={BookOpenText} 
-          description="Cursos ofrecidos actualmente"
+        <SimpleMetricCard
+          title="Estudiantes"
+          value="1"
+          icon={Users}
+          iconBgClass="bg-yellow-100 dark:bg-yellow-500/30"
+          iconColorClass="text-yellow-500 dark:text-yellow-300"
         />
-        <MetricCard 
-          title="Asistencia Promedio" 
-          value={averageAttendance.toFixed(1)} 
-          unit="%" 
-          icon={Percent} 
-          description="Promedio general de asistencia"
-          change="-2% vs semana pasada"
-          changeType="negative"
+        <SimpleMetricCard
+          title="Notas"
+          value="2"
+          icon={FileText}
+          iconBgClass="bg-green-100 dark:bg-green-500/30"
+          iconColorClass="text-green-500 dark:text-green-300"
         />
-        <MetricCard 
-          title="Eventos Próximos" 
-          value={upcomingEvents.length} 
-          icon={CalendarClock} 
-          description="Eventos en los próximos 30 días"
+        <SimpleMetricCard
+          title="Avisos"
+          value="6"
+          icon={Bookmark}
+          iconBgClass="bg-red-100 dark:bg-red-500/30"
+          iconColorClass="text-red-500 dark:text-red-300"
         />
       </section>
 
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <EnrollmentChart />
-        <CoursePerformanceChart />
-      </section>
-      
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2 shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in">
-          <CardHeader>
-            <CardTitle>Actividad Reciente</CardTitle>
+      <section className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <Card className="lg:col-span-3 shadow-lg animate-fade-in">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Newspaper className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Últimos Avisos</CardTitle>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon">
+                <Filter className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[300px]">
-              <div className="space-y-4">
-                {[
-                  { user: "Ana Pérez", action: "actualizó su perfil.", time: "Hace 5 min", avatar: mockStudents[0]?.avatarUrl, type:"student"},
-                  { user: "Dr. Eduardo López", action: "creó una nueva tarea en Matemáticas Avanzadas.", time: "Hace 2 horas", avatar: mockCourses[0]?.instructorAvatar, type:"instructor"},
-                  { user: "Luis García", action: "se inscribió en Química Orgánica.", time: "Hace 1 día", avatar: mockStudents[1]?.avatarUrl, type:"student"},
-                  { user: "Admin", action: "publicó un nuevo evento: Reunión de Padres.", time: "Hace 2 días", avatar: "https://placehold.co/40x40.png", type:"admin"},
-                ].map((activity, index) => (
-                  <div key={index} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage src={activity.avatar} alt={activity.user} data-ai-hint={`${activity.type} ${activity.user === 'Admin' ? 'system icon' : 'avatar'}`} />
-                      <AvatarFallback>{activity.user.substring(0,2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="font-medium text-foreground">{activity.user}</span> {activity.action}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+            {mockNotices.length > 0 ? (
+              <ul className="space-y-3">
+                {mockNotices.map((notice) => (
+                  <li key={notice.id} className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <span className={`h-3 w-3 rounded-full ${noticeStatusColors[notice.status] || 'bg-gray-400'}`}></span>
+                      <span className="text-sm font-medium text-foreground">{notice.title}</span>
                     </div>
-                    <Activity className="h-5 w-5 text-primary" />
-                  </div>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <span>{format(new Date(notice.date), "dd 'de' MMM 'de' yyyy", { locale: es })}</span>
+                      <Badge variant="outline" className="text-xs">{notice.sender}</Badge>
+                    </div>
+                  </li>
                 ))}
-              </div>
-            </ScrollArea>
+              </ul>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-10">No hay avisos recientes.</p>
+            )}
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in">
-          <CardHeader>
-            <CardTitle>Próximos Eventos</CardTitle>
+        <Card className="lg:col-span-2 shadow-lg animate-fade-in">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <StickyNote className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-lg">Recordatorios</CardTitle>
+            </div>
+            <Button variant="ghost" size="icon">
+              <Plus className="h-4 w-4" />
+            </Button>
           </CardHeader>
           <CardContent>
-            {upcomingEvents.length > 0 ? (
-              <ScrollArea className="h-[300px]">
-                <div className="space-y-3">
-                {upcomingEvents.map(event => (
-                  <div key={event.id} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
-                    <div className="mt-1 flex h-3 w-3 items-center justify-center rounded-full" style={{backgroundColor: event.color || 'hsl(var(--primary))'}}>
-                      <span className="sr-only">Evento</span>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-foreground">{event.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(event.date, "PPP", { locale: es })} {event.location && `- ${event.location}`}
-                      </p>
-                    </div>
-                    <Badge variant="outline" style={{borderColor: event.color, color: event.color}}>{event.type}</Badge>
-                  </div>
+            {mockReminders.length > 0 ? (
+              <ul className="space-y-3">
+                {mockReminders.map((reminder) => (
+                  <li key={reminder.id} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors border-l-4" style={{ borderColor: reminder.color || 'hsl(var(--primary))' }}>
+                    <Info className={`h-5 w-5 flex-shrink-0`} style={{ color: reminder.color || 'hsl(var(--primary))' }} />
+                    <p className="text-sm text-foreground flex-grow">{reminder.text}</p>
+                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </li>
                 ))}
-                </div>
-              </ScrollArea>
+              </ul>
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-10">No hay eventos próximos.</p>
+              <p className="text-sm text-muted-foreground text-center py-10">No hay recordatorios.</p>
             )}
-             <Button asChild variant="link" className="w-full mt-4">
-                <Link href="/calendar">Ver todos los eventos</Link>
-            </Button>
           </CardContent>
         </Card>
       </section>

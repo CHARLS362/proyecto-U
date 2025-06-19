@@ -17,7 +17,7 @@ const chartData = [
 const chartConfig = {
   students: {
     label: "Estudiantes",
-    color: "hsl(var(--primary))",
+    color: "hsl(var(--chart-1))", // Updated to use chart colors from theme
   },
 } satisfies ChartConfig
 
@@ -39,6 +39,7 @@ export function EnrollmentChart() {
                 axisLine={false} 
                 tickMargin={8} 
                 fontSize={12}
+                stroke="hsl(var(--muted-foreground))"
               />
               <YAxis 
                 tickLine={false} 
@@ -46,8 +47,20 @@ export function EnrollmentChart() {
                 tickMargin={8} 
                 fontSize={12}
                 tickFormatter={(value) => `${value}`} 
+                stroke="hsl(var(--muted-foreground))"
               />
-              <Tooltip cursor={{ fill: 'hsl(var(--accent)/0.3)' }} content={<ChartTooltipContent hideLabel />} />
+              <Tooltip 
+                cursor={{ fill: 'hsl(var(--accent)/0.3)' }} 
+                content={<ChartTooltipContent 
+                    hideLabel 
+                    formatter={(value, name, item) => (
+                        <div className="flex flex-col">
+                            <span className="text-xs text-muted-foreground">{item.payload.month}</span>
+                            <span className="font-bold" style={{color: chartConfig.students.color}}>{value} Estudiantes</span>
+                        </div>
+                    )}
+                />} 
+              />
               <Bar dataKey="students" fill="var(--color-students)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

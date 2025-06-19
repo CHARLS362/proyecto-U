@@ -14,8 +14,8 @@ interface MetricCardProps {
 
 export function MetricCard({ title, value, description, icon: Icon, unit, change, changeType = "neutral" }: MetricCardProps) {
   const changeColorClass = 
-    changeType === "positive" ? "text-green-600" :
-    changeType === "negative" ? "text-red-600" :
+    changeType === "positive" ? "text-green-600 dark:text-green-400" :
+    changeType === "negative" ? "text-red-600 dark:text-red-400" :
     "text-muted-foreground";
 
   return (
