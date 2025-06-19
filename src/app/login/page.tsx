@@ -31,12 +31,12 @@ export default function LoginPage() {
               <Label htmlFor="email" className="text-muted-foreground">Correo Electrónico</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                <Input 
-                  id="email" 
-                  type="email" 
-                  placeholder="Ingrese su Correo" 
-                  className="pl-10 bg-input/50 border-border focus:bg-card" 
-                  required 
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Ingrese su Correo"
+                  className="pl-10 bg-input/50 border-border focus:bg-card"
+                  required
                 />
               </div>
             </div>
@@ -70,7 +70,7 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full bg-foreground text-background hover:bg-foreground/90 h-11 text-base">
-              Enviar
+              Iniciar Sesión
             </Button>
           </form>
         </div>
