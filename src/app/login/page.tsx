@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,15 +15,12 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter(); // Initialize useRouter
+  const router = useRouter();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Placeholder for backend integration
     console.log('Login attempt with:', { email, password });
-    
-    // Simulate successful login and redirect to dashboard
-    router.push('/dashboard'); 
+    router.push('/dashboard');
   };
 
   return (
@@ -81,7 +78,7 @@ export default function LoginPage() {
             </div>
 
             <div className="text-sm text-right">
-              <Link href="#" className="font-medium text-primary hover:underline">
+              <Link href="/forgot-password" className="font-medium text-primary hover:underline">
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
