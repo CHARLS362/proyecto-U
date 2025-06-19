@@ -37,13 +37,13 @@ export function LandingFooter() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="#" aria-label="Facebook" className="text-muted-foreground hover:text-accent transition-colors">
+            <Link href="#" aria-label="Facebook" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
               <Facebook className="h-5 w-5" />
             </Link>
-            <Link href="#" aria-label="Twitter" className="text-muted-foreground hover:text-accent transition-colors">
+            <Link href="#" aria-label="Twitter" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
               <Twitter className="h-5 w-5" />
             </Link>
-            <Link href="#" aria-label="Instagram" className="text-muted-foreground hover:text-accent transition-colors">
+            <Link href="#" aria-label="Instagram" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
               <Instagram className="h-5 w-5" />
             </Link>
           </div>
