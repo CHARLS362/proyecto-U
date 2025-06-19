@@ -1,0 +1,175 @@
+
+export interface Student {
+  id: string;
+  name: string;
+  avatarUrl: string;
+  email: string;
+  phone: string;
+  courses: Array<{ id: string; name: string; progress: number }>;
+  enrollmentDate: string;
+  address: string;
+  gradeLevel: string;
+  guardianName?: string;
+  guardianContact?: string;
+}
+
+export interface Course {
+  id:string;
+  code: string;
+  name: string;
+  description: string;
+  schedule: string;
+  instructor: string;
+  instructorAvatar?: string;
+  enrolledStudentsCount: number;
+  capacity: number;
+  credits: number;
+  department: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  courseId: string;
+  courseName: string;
+  date: string; // YYYY-MM-DD
+  status: "Presente" | "Ausente" | "Tarde" | "Justificado";
+}
+
+export interface SchoolEvent {
+  id: string;
+  title: string;
+  date: Date;
+  type: "Feriado" | "Examen" | "Reunión" | "Actividad" | "Entrega";
+  description?: string;
+  location?: string;
+  color?: string; // For calendar event styling
+}
+
+export const mockStudents: Student[] = [
+  {
+    id: "S001",
+    name: "Ana Pérez",
+    avatarUrl: "https://placehold.co/100x100.png",
+    email: "ana.perez@example.com",
+    phone: "555-0101",
+    courses: [
+      { id: "C001", name: "Matemáticas Avanzadas", progress: 75 },
+      { id: "C002", name: "Historia del Arte", progress: 60 },
+    ],
+    enrollmentDate: "2023-09-01",
+    address: "Calle Falsa 123, Ciudad",
+    gradeLevel: "10º Grado",
+    guardianName: "Carlos Pérez",
+    guardianContact: "555-0102",
+  },
+  {
+    id: "S002",
+    name: "Luis García",
+    avatarUrl: "https://placehold.co/100x100.png",
+    email: "luis.garcia@example.com",
+    phone: "555-0103",
+    courses: [
+      { id: "C001", name: "Matemáticas Avanzadas", progress: 85 },
+      { id: "C003", name: "Programación Básica", progress: 90 },
+    ],
+    enrollmentDate: "2023-09-01",
+    address: "Avenida Siempreviva 742, Ciudad",
+    gradeLevel: "11º Grado",
+  },
+  {
+    id: "S003",
+    name: "Sofía Rodríguez",
+    avatarUrl: "https://placehold.co/100x100.png",
+    email: "sofia.rodriguez@example.com",
+    phone: "555-0104",
+    courses: [
+      { id: "C002", name: "Historia del Arte", progress: 70 },
+      { id: "C004", name: "Química Orgánica", progress: 50 },
+    ],
+    enrollmentDate: "2022-09-01",
+    address: "Boulevard de los Sueños Rotos 45, Ciudad",
+    gradeLevel: "12º Grado",
+    guardianName: "Elena Rodríguez",
+    guardianContact: "555-0105",
+  },
+];
+
+export const mockCourses: Course[] = [
+  {
+    id: "C001",
+    code: "MAT301",
+    name: "Matemáticas Avanzadas",
+    description: "Curso avanzado sobre cálculo y álgebra lineal.",
+    schedule: "Lun, Mié, Vie 10:00-11:30",
+    instructor: "Dr. Eduardo López",
+    instructorAvatar: "https://placehold.co/40x40.png",
+    enrolledStudentsCount: 25,
+    capacity: 30,
+    credits: 4,
+    department: "Matemáticas"
+  },
+  {
+    id: "C002",
+    code: "ART101",
+    name: "Historia del Arte",
+    description: "Exploración de los movimientos artísticos a través de la historia.",
+    schedule: "Mar, Jue 08:00-09:30",
+    instructor: "Prof. Isabel Vargas",
+    instructorAvatar: "https://placehold.co/40x40.png",
+    enrolledStudentsCount: 18,
+    capacity: 25,
+    credits: 3,
+    department: "Humanidades"
+  },
+  {
+    id: "C003",
+    code: "CS101",
+    name: "Programación Básica",
+    description: "Introducción a los conceptos fundamentales de la programación.",
+    schedule: "Lun, Vie 14:00-15:30",
+    instructor: "Ing. Ricardo Montes",
+    instructorAvatar: "https://placehold.co/40x40.png",
+    enrolledStudentsCount: 30,
+    capacity: 30,
+    credits: 4,
+    department: "Ciencias de la Computación"
+  },
+  {
+    id: "C004",
+    code: "QUM202",
+    name: "Química Orgánica",
+    description: "Estudio de la estructura, propiedades, composición, reacciones y preparación de compuestos que contienen carbono.",
+    schedule: "Mar, Jue 11:00-12:30",
+    instructor: "Dra. Laura Fuentes",
+    instructorAvatar: "https://placehold.co/40x40.png",
+    enrolledStudentsCount: 22,
+    capacity: 25,
+    credits: 4,
+    department: "Ciencias Naturales"
+  },
+];
+
+export const mockAttendance: AttendanceRecord[] = [
+  { id: "A001", studentId: "S001", studentName: "Ana Pérez", courseId: "C001", courseName: "Matemáticas Avanzadas", date: "2024-05-01", status: "Presente" },
+  { id: "A002", studentId: "S002", studentName: "Luis García", courseId: "C001", courseName: "Matemáticas Avanzadas", date: "2024-05-01", status: "Presente" },
+  { id: "A003", studentId: "S001", studentName: "Ana Pérez", courseId: "C001", courseName: "Matemáticas Avanzadas", date: "2024-05-03", status: "Ausente" },
+  { id: "A004", studentId: "S003", studentName: "Sofía Rodríguez", courseId: "C002", courseName: "Historia del Arte", date: "2024-05-02", status: "Tarde" },
+  { id: "A005", studentId: "S002", studentName: "Luis García", courseId: "C003", courseName: "Programación Básica", date: "2024-05-03", status: "Presente" },
+];
+
+const today = new Date();
+const getRelativeDate = (daysOffset: number): Date => {
+  const date = new Date(today);
+  date.setDate(today.getDate() + daysOffset);
+  return date;
+}
+
+export const mockEvents: SchoolEvent[] = [
+  { id: "E001", title: "Examen Final de Matemáticas", date: getRelativeDate(7), type: "Examen", description: "Aula 101", color: "hsl(var(--destructive))" },
+  { id: "E002", title: "Entrega Proyecto de Arte", date: getRelativeDate(10), type: "Entrega", location: "Online", color: "hsl(var(--primary))" },
+  { id: "E003", title: "Reunión de Padres", date: getRelativeDate(15), type: "Reunión", location: "Auditorio", color: "hsl(var(--accent))"},
+  { id: "E004", title: "Feriado: Día del Trabajo", date: new Date(today.getFullYear(), 4, 1), type: "Feriado", color: "hsl(var(--muted-foreground))"}, // May 1st
+  { id: "E005", title: "Actividad Deportiva", date: getRelativeDate(5), type: "Actividad", location: "Cancha Principal", color: "hsl(120, 70%, 50%)"},
+];
