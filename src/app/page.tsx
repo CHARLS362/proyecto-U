@@ -1,4 +1,6 @@
 
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -6,6 +8,9 @@ import { ArrowRight, ListChecks, Star, Target, TrendingUp, UserCheck, Sparkles }
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { LandingShell } from "@/components/layout/LandingShell";
+import React, { useState, useEffect, useCallback } from "react";
+import Autoplay from "embla-carousel-autoplay";
+import type { EmblaApiType } from 'embla-carousel-react';
 
 const features = [
   {
@@ -47,13 +52,47 @@ const features = [
 ];
 
 const carouselImages = [
-  { src: "https://placehold.co/400x500.png", alt: "Vista del campus escolar", hint: "campus building" },
-  { src: "https://placehold.co/400x500.png", alt: "Estudiantes colaborando en un proyecto", hint: "students collaborating" },
-  { src: "https://placehold.co/400x500.png", alt: "Aula moderna con tecnología", hint: "modern classroom" },
-  { src: "https://placehold.co/400x500.png", alt: "Evento deportivo escolar", hint: "school sports" },
+  { src: "https://placehold.co/800x500.png", alt: "Vista del campus escolar", hint: "campus building modern" },
+  { src: "https://placehold.co/800x500.png", alt: "Estudiantes colaborando en un proyecto", hint: "students project" },
+  { src: "https://placehold.co/800x500.png", alt: "Aula moderna con tecnología", hint: "classroom technology" },
+  { src: "https://placehold.co/800x500.png", alt: "Evento deportivo escolar", hint: "school sports event" },
+  { src: "https://placehold.co/800x500.png", alt: "Biblioteca escolar", hint: "school library" },
 ];
 
 export default function RootPage() {
+  const [emblaApi, setEmblaApi] = useState<EmblaApiType | undefined>();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
+
+  const autoplayPlugin = React.useMemo(
+    () => Autoplay({ delay: 4000, stopOnInteraction: true, stopOnMouseEnter: true }),
+    []
+  );
+
+  const onInit = useCallback((api: EmblaApiType) => {
+    setScrollSnaps(api.scrollSnapList());
+  }, []);
+
+  const onSelect = useCallback((api: EmblaApiType) => {
+    setSelectedIndex(api.selectedScrollSnap());
+  }, []);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    onInit(emblaApi);
+    onSelect(emblaApi);
+    emblaApi.on("reInit", onInit);
+    emblaApi.on("reInit", onSelect);
+    emblaApi.on("select", onSelect);
+
+    return () => {
+      emblaApi.off("reInit", onInit);
+      emblaApi.off("reInit", onSelect);
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, onInit, onSelect]);
+
   return (
     <LandingShell>
       <section id="home" className="py-12 md:py-20 grid md:grid-cols-2 gap-12 items-center">
@@ -139,31 +178,46 @@ export default function RootPage() {
               align: "start",
               loop: true,
             }}
-            className="w-full max-w-4xl mx-auto"
+            plugins={[autoplayPlugin]}
+            setApi={setEmblaApi}
+            className="w-full max-w-4xl mx-auto relative"
           >
             <CarouselContent>
               {carouselImages.map((image, index) => (
-                <CarouselItem key={index} className="md:basis-1/2 lg:basis-full">
-                  <Card className="overflow-hidden shadow-xl">
-                    <CardContent className="p-0">
-                      <div className="relative h-[500px] overflow-hidden group">
-                        <Image
-                          src={image.src}
-                          alt={image.alt}
-                          fill
-                          style={{ objectFit: "cover" }}
-                          className="transition-transform duration-500 group-hover:scale-105"
-                          data-ai-hint={image.hint}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
+                <CarouselItem key={index} className="basis-full">
+                  <div className="relative h-[400px] md:h-[500px] overflow-hidden group rounded-xl shadow-xl">
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      fill
+                      style={{ objectFit: "cover" }}
+                      className="transition-transform duration-500 group-hover:scale-105"
+                      data-ai-hint={image.hint}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
+                    />
+                  </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="ml-14 sm:ml-10" />
-            <CarouselNext className="mr-14 sm:mr-10" />
+            <CarouselPrevious 
+              variant="ghost" 
+              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/25 p-0 text-white hover:bg-black/40 dark:bg-white/25 dark:text-black dark:hover:bg-white/40" 
+            />
+            <CarouselNext 
+              variant="ghost" 
+              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-black/25 p-0 text-white hover:bg-black/40 dark:bg-white/25 dark:text-black dark:hover:bg-white/40"
+            />
           </Carousel>
+          <div className="flex justify-center gap-2 mt-6">
+            {scrollSnaps.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => emblaApi?.scrollTo(index)}
+                className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ease-in-out ${index === selectedIndex ? 'bg-primary scale-125' : 'bg-muted hover:bg-muted-foreground/50'}`}
+                aria-label={`Ir a la diapositiva ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
     </LandingShell>
