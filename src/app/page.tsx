@@ -50,10 +50,10 @@ const features = [
 ];
 
 const carouselImages = [
-  { src: "https://placehold.co/1200x600.png", alt: "Vista del campus escolar", hint: "campus building" },
-  { src: "https://placehold.co/1200x600.png", alt: "Estudiantes colaborando en un proyecto", hint: "students collaborating" },
-  { src: "https://placehold.co/1200x600.png", alt: "Aula moderna con tecnología", hint: "modern classroom" },
-  { src: "https://placehold.co/1200x600.png", alt: "Evento deportivo escolar", hint: "school sports" },
+  { src: "https://placehold.co/400x500.png", alt: "Vista del campus escolar", hint: "campus building" },
+  { src: "https://placehold.co/400x500.png", alt: "Estudiantes colaborando en un proyecto", hint: "students collaborating" },
+  { src: "https://placehold.co/400x500.png", alt: "Aula moderna con tecnología", hint: "modern classroom" },
+  { src: "https://placehold.co/400x500.png", alt: "Evento deportivo escolar", hint: "school sports" },
 ];
 
 export default function LandingPage() {
@@ -154,10 +154,10 @@ export default function LandingPage() {
             >
               <CarouselContent>
                 {carouselImages.map((image, index) => (
-                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/1">
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-full">
                     <Card className="overflow-hidden shadow-xl">
                       <CardContent className="p-0">
-                        <div className="aspect-video relative">
+                        <div className="relative h-[500px] overflow-hidden">
                           <Image
                             src={image.src}
                             alt={image.alt}
