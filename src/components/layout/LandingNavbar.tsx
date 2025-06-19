@@ -25,7 +25,7 @@ export function LandingNavbar() {
         <div className="flex items-center gap-3">
           <ThemeToggle />
           <Button asChild>
-            <Link href="/dashboard">Acceso</Link>
+            <Link href="/login">Acceso</Link>
           </Button>
         </div>
       </div>
