@@ -13,7 +13,7 @@ import {
   TableRow,
   TableCaption,
 } from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -23,17 +23,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { DatePickerWithRange } from "@/components/common/DatePickerWithRange"; // Assume this component exists
+import { DatePickerWithRange } from "@/components/common/DatePickerWithRange"; 
 
-// Helper to get badge variant based on status
 const getAttendanceBadgeVariant = (status: AttendanceRecord["status"]): "default" | "secondary" | "outline" | "destructive" => {
   switch (status) {
     case "Presente":
-      return "default"; // Or a success-like variant if available
+      return "default"; 
     case "Ausente":
       return "destructive";
     case "Tarde":
-      return "outline"; // Orange-like or warning
+      return "outline"; 
     case "Justificado":
       return "secondary";
     default:
@@ -63,8 +62,8 @@ export default function AttendancePage() {
               <CardDescription>Filtre para ver registros específicos.</CardDescription>
             </div>
             <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              {/* TODO: DatePickerWithRange is not implemented yet. Placeholder.*/}
-              {/* <DatePickerWithRange className="w-full sm:w-auto" /> */}
+              
+              
               <Button variant="outline" className="w-full sm:w-auto bg-card">
                 <Filter className="mr-2 h-4 w-4" /> Filtrar Fechas
               </Button>
@@ -145,4 +144,3 @@ export default function AttendancePage() {
     </div>
   );
 }
-

@@ -25,7 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/students', label: 'Estudiantes', icon: Users },
   { href: '/courses', label: 'Cursos', icon: BookOpenText },
   { href: '/attendance', label: 'Asistencia', icon: ClipboardCheck },
@@ -36,7 +36,8 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    if (href === '/') return pathname === href;
+    // For dashboard, exact match. For others, startsWith.
+    if (href === '/dashboard') return pathname === href || pathname ==='/';
     return pathname.startsWith(href);
   };
 
@@ -55,7 +56,7 @@ export function AppSidebar() {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <SidebarMenuButton
+               <SidebarMenuButton
                 asChild
                 isActive={isActive(item.href)}
                 tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
@@ -86,6 +87,7 @@ export function AppSidebar() {
            <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
+                  isActive={isActive('/settings')}
                   tooltip={{ children: 'Configuración', className:"bg-card text-card-foreground border-border shadow-md" }}
                   className="justify-start"
                 >

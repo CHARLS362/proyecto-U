@@ -8,6 +8,13 @@ export default {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
@@ -109,10 +116,10 @@ export default {
         'spacing': 'margin, padding',
       },
       transitionDuration: {
-        '200': '200ms', // For sidebar collapse/expand to be less jarring
+        '200': '200ms', 
       },
       transitionTimingFunction: {
-        'ease-linear': 'linear', // For sidebar transitions
+        'ease-linear': 'linear', 
       }
     },
   },
