@@ -203,13 +203,13 @@ export default function LandingPage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <Link href="#" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="#" aria-label="Facebook" className="text-muted-foreground hover:text-accent transition-colors">
                 <Facebook className="h-5 w-5" />
               </Link>
-              <Link href="#" aria-label="Twitter" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="#" aria-label="Twitter" className="text-muted-foreground hover:text-accent transition-colors">
                 <Twitter className="h-5 w-5" />
               </Link>
-              <Link href="#" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
+              <Link href="#" aria-label="Instagram" className="text-muted-foreground hover:text-accent transition-colors">
                 <Instagram className="h-5 w-5" />
               </Link>
             </div>
