@@ -12,42 +12,60 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import {
-  LayoutDashboard,
+  LayoutGrid, // Changed from LayoutDashboard to LayoutGrid for Panel
   Users,
-  BookOpenText,
+  GraduationCap, // Changed from Users for Estudiantes
+  BookCopy, // For Temas
   ClipboardCheck,
-  CalendarDays,
+  Newspaper, // For Tabla de noticias
+  CalendarClock, // For Horario (was CalendarDays)
+  LibraryBig, // For Programas de estudio
+  NotebookText, // For Notas
+  Award, // For Calificaciones
+  Bus, // For Servicio de Bus
   Settings,
   LogOut,
-  School,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/students', label: 'Estudiantes', icon: Users },
-  { href: '/courses', label: 'Cursos', icon: BookOpenText },
-  { href: '/attendance', label: 'Asistencia', icon: ClipboardCheck },
-  { href: '/calendar', label: 'Calendario', icon: CalendarDays },
+  { href: '/dashboard', label: 'Panel', icon: LayoutGrid }, // Changed from Dashboard
+  { href: '/teachers', label: 'Docentes', icon: Users },
+  { href: '/students', label: 'Estudiantes', icon: GraduationCap },
+  { href: '/subjects', label: 'Temas', icon: BookCopy },
+  { href: '/attendance', label: 'Asistencias', icon: ClipboardCheck }, // Kept 'Asistencias' as per image
+  { href: '/news', label: 'Tabla de noticias', icon: Newspaper },
+  { href: '/calendar', label: 'Horario', icon: CalendarClock }, // Was 'Calendario', changed to 'Horario'
+  { href: '/curriculum', label: 'Programas de estudio', icon: LibraryBig },
+  { href: '/grades', label: 'Notas', icon: NotebookText },
+  { href: '/qualifications', label: 'Calificaciones', icon: Award },
+  { href: '/bus-service', label: 'Servicio de Bus', icon: Bus },
 ];
 
 export function AppSidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    // For dashboard, exact match. For others, startsWith.
     if (href === '/dashboard') return pathname === href || pathname ==='/';
-    return pathname.startsWith(href);
+    // For other main sections, allow startsWith for sub-pages
+    if (navItems.some(item => item.href === href && href !== '/dashboard')) {
+        return pathname.startsWith(href);
+    }
+    // For settings and logout, exact match
+    if (href === '/settings' || href === '/logout') {
+        return pathname === href;
+    }
+    return false;
   };
 
   return (
     <>
       <SidebarHeader className="p-4">
         <Link href="/" className="flex items-center gap-2 group/logo">
-          <School className="h-8 w-8 text-primary group-hover/logo:animate-pulse" />
+          <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
           <h1 className="text-xl font-semibold text-foreground group-data-[collapsible=icon]:hidden">
-            Academia Nova
+            Panel
           </h1>
         </Link>
       </SidebarHeader>
@@ -75,7 +93,7 @@ export function AppSidebar() {
       <SidebarFooter className="p-4">
         <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
           <Avatar className="h-9 w-9">
-            <AvatarImage src="https://placehold.co/40x40.png" alt="Usuario" data-ai-hint="user profile" />
+            <AvatarImage src="https://placehold.co/40x40.png" alt="Usuario" data-ai-hint="user profile random" />
             <AvatarFallback>AN</AvatarFallback>
           </Avatar>
           <div className="group-data-[collapsible=icon]:hidden">
@@ -88,19 +106,19 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={isActive('/settings')}
-                  tooltip={{ children: 'Configuración', className:"bg-card text-card-foreground border-border shadow-md" }}
+                  tooltip={{ children: 'Configuraciones', className:"bg-card text-card-foreground border-border shadow-md" }}
                   className="justify-start"
                 >
                   <Link href="/settings">
                     <Settings />
-                    <span className="group-data-[collapsible=icon]:hidden">Configuración</span>
+                    <span className="group-data-[collapsible=icon]:hidden">Configuraciones</span>
                   </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
              <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  variant="destructive"
+                  variant="destructive" // This variant should handle the red color for logout
                   tooltip={{ children: 'Cerrar Sesión', className:"bg-destructive text-destructive-foreground border-border shadow-md" }}
                   className="justify-start group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive hover:bg-destructive/90 hover:text-destructive-foreground"
                 >

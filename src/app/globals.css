@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -53,7 +54,6 @@
   }
 
   .dark {
-    /* Define dark mode colors if needed, for now matching light or providing sensible defaults */
     --background: 213 33% 10%;
     --foreground: 213 33% 95%;
 
@@ -74,8 +74,9 @@
 
     --secondary: 207 88% 25%;
     --secondary-foreground: 207 88% 90%;
-
-    --accent: 36 100% 70%;
+    
+    /* Accent adjusted for dark theme sidebar to match image's green */
+    --accent: 36 100% 70%; 
     --accent-foreground: 36 100% 10%;
 
     --destructive: 0 62% 40%;
@@ -83,15 +84,15 @@
 
     --ring: 207 88% 60%;
 
-    /* Dark Sidebar specific colors */
-    --sidebar-background: 213 33% 8%;
-    --sidebar-foreground: 213 33% 90%;
-    --sidebar-primary: 207 88% 65%;
-    --sidebar-primary-foreground: 207 88% 10%;
-    --sidebar-accent: 207 88% 20%;
-    --sidebar-accent-foreground: 207 88% 90%;
-    --sidebar-border: 213 33% 15%;
-    --sidebar-ring: 207 88% 60%;
+    /* Dark Sidebar specific colors - updated to match image */
+    --sidebar-background: 220 13% 10%; /* Very dark gray, almost black */
+    --sidebar-foreground: 210 20% 90%; /* Light gray/white for text */
+    --sidebar-primary: 145 60% 40%; /* Green color for primary actions/highlights if needed */
+    --sidebar-primary-foreground: 145 60% 95%; /* Light text for on-green primary */
+    --sidebar-accent: 145 55% 35%;  /* Green for active Panel item - as per image */
+    --sidebar-accent-foreground: 145 55% 95%; /* Light green/white text for on-green accent */
+    --sidebar-border: 220 13% 20%; /* Slightly lighter border for dark sidebar */
+    --sidebar-ring: 145 60% 50%; /* Green ring */
 
     --chart-1: 207 88% 70%;
     --chart-2: 36 100% 80%;

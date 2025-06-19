@@ -51,7 +51,7 @@ export const mockStudents: Student[] = [
   {
     id: "S001",
     name: "Ana Pérez",
-    avatarUrl: "https://placehold.co/100x100.png",
+    avatarUrl: "https://placehold.co/100x100.png", // data-ai-hint will be added in component
     email: "ana.perez@example.com",
     phone: "555-0101",
     courses: [
@@ -67,7 +67,7 @@ export const mockStudents: Student[] = [
   {
     id: "S002",
     name: "Luis García",
-    avatarUrl: "https://placehold.co/100x100.png",
+    avatarUrl: "https://placehold.co/100x100.png", // data-ai-hint will be added in component
     email: "luis.garcia@example.com",
     phone: "555-0103",
     courses: [
@@ -81,7 +81,7 @@ export const mockStudents: Student[] = [
   {
     id: "S003",
     name: "Sofía Rodríguez",
-    avatarUrl: "https://placehold.co/100x100.png",
+    avatarUrl: "https://placehold.co/100x100.png", // data-ai-hint will be added in component
     email: "sofia.rodriguez@example.com",
     phone: "555-0104",
     courses: [
@@ -104,7 +104,7 @@ export const mockCourses: Course[] = [
     description: "Curso avanzado sobre cálculo y álgebra lineal.",
     schedule: "Lun, Mié, Vie 10:00-11:30",
     instructor: "Dr. Eduardo López",
-    instructorAvatar: "https://placehold.co/40x40.png",
+    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
     enrolledStudentsCount: 25,
     capacity: 30,
     credits: 4,
@@ -117,7 +117,7 @@ export const mockCourses: Course[] = [
     description: "Exploración de los movimientos artísticos a través de la historia.",
     schedule: "Mar, Jue 08:00-09:30",
     instructor: "Prof. Isabel Vargas",
-    instructorAvatar: "https://placehold.co/40x40.png",
+    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
     enrolledStudentsCount: 18,
     capacity: 25,
     credits: 3,
@@ -130,7 +130,7 @@ export const mockCourses: Course[] = [
     description: "Introducción a los conceptos fundamentales de la programación.",
     schedule: "Lun, Vie 14:00-15:30",
     instructor: "Ing. Ricardo Montes",
-    instructorAvatar: "https://placehold.co/40x40.png",
+    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
     enrolledStudentsCount: 30,
     capacity: 30,
     credits: 4,
@@ -143,7 +143,7 @@ export const mockCourses: Course[] = [
     description: "Estudio de la estructura, propiedades, composición, reacciones y preparación de compuestos que contienen carbono.",
     schedule: "Mar, Jue 11:00-12:30",
     instructor: "Dra. Laura Fuentes",
-    instructorAvatar: "https://placehold.co/40x40.png",
+    instructorAvatar: "https://placehold.co/40x40.png", // data-ai-hint will be added in component
     enrolledStudentsCount: 22,
     capacity: 25,
     credits: 4,

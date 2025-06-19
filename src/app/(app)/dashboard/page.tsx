@@ -4,7 +4,7 @@ import { MetricCard } from "@/components/dashboard/MetricCard";
 import { EnrollmentChart } from "@/components/dashboard/EnrollmentChart";
 import { CoursePerformanceChart } from "@/components/dashboard/CoursePerformanceChart";
 import { mockStudents, mockCourses, mockEvents } from "@/lib/mockData";
-import { Users, BookOpenText, CalendarClock, Percent, Activity } from "lucide-react";
+import { Users, BookOpenText, CalendarClock, Percent, Activity, LayoutGrid } from "lucide-react"; // Added LayoutGrid
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -21,7 +21,7 @@ export default function DashboardPage() {
   const averageAttendance = mockStudents.reduce((sum, student) => {
     const studentCoursesProgress = student.courses.reduce((courseSum, course) => courseSum + course.progress, 0);
     return sum + (student.courses.length > 0 ? studentCoursesProgress / student.courses.length : 0);
-  }, 0) / totalStudents;
+  }, 0) / (totalStudents || 1); // Avoid division by zero if no students
 
   const upcomingEvents = mockEvents
     .filter(event => event.date >= new Date())
@@ -30,7 +30,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      <PageTitle title="Dashboard Principal" subtitle="Bienvenido a Academia Nova" />
+      <PageTitle title="Panel Principal" subtitle="Bienvenido a Academia Nova" icon={LayoutGrid} />
 
       <section className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard 
@@ -85,7 +85,7 @@ export default function DashboardPage() {
                 ].map((activity, index) => (
                   <div key={index} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors">
                     <Avatar className="h-9 w-9">
-                      <AvatarImage src={activity.avatar} alt={activity.user} data-ai-hint={`${activity.type} avatar`} />
+                      <AvatarImage src={activity.avatar} alt={activity.user} data-ai-hint={`${activity.type} ${activity.user === 'Admin' ? 'system icon' : 'avatar'}`} />
                       <AvatarFallback>{activity.user.substring(0,2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1">

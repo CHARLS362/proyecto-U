@@ -14,15 +14,37 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import Link from 'next/link';
+import * as React from "react"; // Import React for Fragment
 
 const getPathBreadcrumbs = (pathname: string) => {
   const segments = pathname.split('/').filter(Boolean);
-  const breadcrumbs = segments.map((segment, index) => {
-    const href = '/' + segments.slice(0, index + 1).join('/');
+  
+  // Define a mapping for special first segments if needed
+  const firstSegmentLabel = segments.length > 0 && segments[0].toLowerCase() === 'dashboard' 
+    ? 'Panel' 
+    : segments.length > 0 ? segments[0].charAt(0).toUpperCase() + segments[0].slice(1).replace(/-/g, ' ') : 'Panel';
+
+  const initialCrumb = { href: segments.length > 0 && segments[0].toLowerCase() === 'dashboard' ? '/dashboard' : '/', label: firstSegmentLabel };
+  
+  const breadcrumbs = segments.slice(1).map((segment, index) => {
+    // For segments after the first one (e.g., 'dashboard'), build the path relative to the first segment
+    const href = '/' + segments.slice(0, index + 2).join('/');
     const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
     return { href, label };
   });
-  return [{ href: '/', label: 'Dashboard' }, ...breadcrumbs];
+  
+  if (pathname === '/' || pathname === '/dashboard') {
+     return [{ href: '/dashboard', label: 'Panel' }];
+  }
+  
+  // Handle cases where dashboard is not the first segment or there are no segments
+  if (segments.length > 0 && segments[0].toLowerCase() !== 'dashboard') {
+    const pageLabel = segments[0].charAt(0).toUpperCase() + segments[0].slice(1).replace(/-/g, ' ');
+    return [{ href: `/${segments[0]}`, label: pageLabel }, ...breadcrumbs];
+  }
+
+
+  return [initialCrumb, ...breadcrumbs];
 };
 
 
@@ -30,8 +52,7 @@ export function AppHeader() {
   const pathname = usePathname();
   const breadcrumbs = getPathBreadcrumbs(pathname);
   
-  // A simple way to get a page title, can be improved
-  const pageTitle = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].label : "Academia Nova";
+  const pageTitle = breadcrumbs.length > 0 ? breadcrumbs[breadcrumbs.length - 1].label : "Panel";
 
 
   return (
@@ -75,5 +96,3 @@ export function AppHeader() {
     </header>
   );
 }
-// Need React for Fragment
-import * as React from "react"
