@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -54,6 +57,12 @@ const carouselImages = [
 ];
 
 export default function LandingPage() {
+  const [currentYear, setCurrentYear] = useState<number | null>(null);
+
+  useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <LandingNavbar />
@@ -173,7 +182,6 @@ export default function LandingPage() {
       <footer className="border-t bg-muted/20 py-8 text-muted-foreground">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            {/* Left Side: Brand and Copyright */}
             <div className="text-center md:text-left">
               <Link href="/" className="flex items-center justify-center md:justify-start gap-2 mb-2 group">
                 <School className="h-7 w-7 text-primary group-hover:animate-pulse" />
@@ -182,17 +190,18 @@ export default function LandingPage() {
                 </span>
               </Link>
               <p className="text-xs">
-                © {new Date().getFullYear()} Academia Nova. Todos los derechos reservados.
+                {currentYear !== null ?
+                  `© ${currentYear} Academia Nova. Todos los derechos reservados.` :
+                  `© Cargando año... Academia Nova. Todos los derechos reservados.`
+                }
               </p>
             </div>
 
-            {/* Center: Location & Timezone */}
             <div className="text-center text-xs">
               <p>Perú</p>
               <p>Zona Horaria: PET (GMT-5)</p>
             </div>
 
-            {/* Right Side: Social Media Icons */}
             <div className="flex items-center gap-4">
               <Link href="#" aria-label="Facebook" className="text-muted-foreground hover:text-primary transition-colors">
                 <Facebook className="h-5 w-5" />
