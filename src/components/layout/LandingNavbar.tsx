@@ -15,10 +15,10 @@ export function LandingNavbar() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="#home" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/" className="text-muted-foreground hover:text-foreground transition-colors">
             Inicio
           </Link>
-          <Link href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
             Acerca de
           </Link>
         </nav>
