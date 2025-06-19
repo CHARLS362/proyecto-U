@@ -4,11 +4,11 @@ import { mockStudents } from "@/lib/mockData";
 import type { Student } from "@/lib/mockData";
 import { Users, PlusCircle, Mail, Phone, BookOpen } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
+import Image from "next/image"; // Required for Avatar fallback or direct use if needed.
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge"; // Badge might be useful later, keep import for now.
 import { Input } from "@/components/ui/input";
 
 // This would typically be a client component if search/filter is interactive client-side
@@ -24,9 +24,9 @@ export default function StudentsPage() {
   return (
     <div className="space-y-6">
       <PageTitle title="Gestión de Estudiantes" subtitle={`Total de ${students.length} estudiantes registrados.`} icon={Users}>
-         {/* <div className="flex items-center gap-2">
-          <Input placeholder="Buscar estudiante..." className="max-w-xs bg-card"/>
-        </div> TODO: Implement search functionality */}
+         <div className="flex items-center gap-2">
+          {/* <Input placeholder="Buscar estudiante..." className="max-w-xs bg-card"/>  TODO: Implement search functionality if needed in future */}
+        </div>
         <Button asChild>
           <Link href="/students/new">
             <PlusCircle className="mr-2 h-4 w-4" /> Agregar Estudiante
@@ -35,14 +35,14 @@ export default function StudentsPage() {
       </PageTitle>
 
       {students.length === 0 ? (
-        <Card className="text-center py-12">
+        <Card className="text-center py-12 animate-fade-in">
           <CardHeader>
             <Users className="mx-auto h-12 w-12 text-muted-foreground" />
-            <CardTitle className="mt-4">No hay estudiantes registrados</CardTitle>
-            <CardDescription>Comience agregando un nuevo estudiante.</CardDescription>
+            <CardTitle className="mt-4 text-2xl">No hay estudiantes registrados</CardTitle>
+            <CardDescription className="mt-2">Comience agregando un nuevo estudiante a la plataforma.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
+          <CardContent className="mt-6">
+            <Button asChild size="lg">
               <Link href="/students/new">
                 <PlusCircle className="mr-2 h-4 w-4" /> Agregar Estudiante
               </Link>
@@ -51,32 +51,36 @@ export default function StudentsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {students.map((student) => (
-            <Card key={student.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300 animate-slide-in-from-left">
-              <CardHeader className="items-center text-center">
-                <Avatar className="h-24 w-24 mb-2 border-2 border-primary">
+          {students.map((student, index) => (
+            <Card 
+              key={student.id} 
+              className="flex flex-col shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group animate-slide-in-from-left"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <CardHeader className="items-center text-center pt-6 pb-4">
+                <Avatar className="h-24 w-24 mb-3 border-4 border-primary/50 group-hover:border-primary transition-colors">
                   <AvatarImage src={student.avatarUrl} alt={student.name} data-ai-hint="student avatar" />
-                  <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarFallback className="text-3xl">{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <CardTitle className="text-lg">{student.name}</CardTitle>
-                <CardDescription>{student.gradeLevel}</CardDescription>
+                <CardTitle className="text-xl font-semibold">{student.name}</CardTitle>
+                <CardDescription className="text-sm">{student.gradeLevel}</CardDescription>
               </CardHeader>
-              <CardContent className="flex-grow space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  <span>{student.email}</span>
+              <CardContent className="flex-grow space-y-3 text-sm px-6 pb-4">
+                <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
+                  <Mail className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate" title={student.email}>{student.email}</span>
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <Phone className="h-4 w-4" />
+                <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
+                  <Phone className="h-4 w-4 flex-shrink-0" />
                   <span>{student.phone}</span>
                 </div>
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <BookOpen className="h-4 w-4" />
-                  <span>{student.courses.length} cursos</span>
+                <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
+                  <BookOpen className="h-4 w-4 flex-shrink-0" />
+                  <span>{student.courses.length} {student.courses.length === 1 ? 'curso' : 'cursos'}</span>
                 </div>
               </CardContent>
-              <CardFooter>
-                <Button asChild variant="outline" className="w-full">
+              <CardFooter className="p-4">
+                <Button asChild variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
                   <Link href={`/students/${student.id}`}>Ver Perfil</Link>
                 </Button>
               </CardFooter>
