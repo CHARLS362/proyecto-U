@@ -194,10 +194,25 @@ export default function TeachersPage() {
               </section>
 
               <Tabs defaultValue="pendientes" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 sm:max-w-md">
-                  <TabsTrigger value="pendientes">Hojas pendientes</TabsTrigger>
-                  <TabsTrigger value="aprobadas">Licencias Aprobadas</TabsTrigger>
-                  <TabsTrigger value="rechazadas">Hojas rechazadas</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-3 sm:max-w-md bg-background p-1 rounded-md">
+                  <TabsTrigger 
+                    value="pendientes" 
+                    className="rounded-sm px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-muted text-muted-foreground hover:bg-muted/80 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm dark:data-[state=active]:bg-white dark:data-[state=active]:text-black"
+                  >
+                    Hojas pendientes
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="aprobadas"
+                    className="rounded-sm px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-muted text-muted-foreground hover:bg-muted/80 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm dark:data-[state=active]:bg-white dark:data-[state=active]:text-black"
+                  >
+                    Licencias Aprobadas
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="rechazadas"
+                    className="rounded-sm px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-muted text-muted-foreground hover:bg-muted/80 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm dark:data-[state=active]:bg-white dark:data-[state=active]:text-black"
+                  >
+                    Hojas rechazadas
+                  </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="pendientes" className="mt-6">
