@@ -1,3 +1,4 @@
+'use client';
 
 import { PageTitle } from "@/components/common/PageTitle";
 import { LogOut } from "lucide-react";
