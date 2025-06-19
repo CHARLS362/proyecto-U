@@ -55,19 +55,17 @@ export function AppSidebar() {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive(item.href)}
-                  tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
-                  className="justify-start"
-                >
-                  <>
-                    <item.icon />
-                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                  </>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.href)}
+                tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
+                className="justify-start"
+              >
+                <Link href={item.href}>
+                  <item.icon />
+                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
