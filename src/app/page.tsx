@@ -1,9 +1,11 @@
+
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LandingNavbar } from "@/components/layout/LandingNavbar";
 import { ArrowRight, ListChecks, Star, Target, TrendingUp, UserCheck, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const features = [
   {
@@ -44,12 +46,19 @@ const features = [
   },
 ];
 
+const carouselImages = [
+  { src: "https://placehold.co/1200x600.png", alt: "Vista del campus escolar", hint: "campus building" },
+  { src: "https://placehold.co/1200x600.png", alt: "Estudiantes colaborando en un proyecto", hint: "students collaborating" },
+  { src: "https://placehold.co/1200x600.png", alt: "Aula moderna con tecnología", hint: "modern classroom" },
+  { src: "https://placehold.co/1200x600.png", alt: "Evento deportivo escolar", hint: "school sports" },
+];
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <LandingNavbar />
       <main className="flex-grow container mx-auto px-4">
-        <section className="py-12 md:py-20 grid md:grid-cols-2 gap-12 items-center">
+        <section id="home" className="py-12 md:py-20 grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 text-center md:text-left animate-fade-in">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-foreground">
               El Futuro Está Aquí.
@@ -76,10 +85,11 @@ export default function LandingPage() {
             <Image
               src="https://placehold.co/800x600.png"
               alt="Ilustración de gestión escolar moderna"
-              layout="fill"
-              objectFit="cover"
+              fill // Changed from layout="fill"
+              style={{ objectFit: "cover" }} // Changed from objectFit="cover"
               className="transition-transform duration-500 group-hover:scale-105"
               data-ai-hint="education students"
+              priority
             />
              <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
           </div>
@@ -96,8 +106,8 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card 
-                key={index} 
+              <Card
+                key={index}
                 className="shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group animate-fade-in flex flex-col"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
@@ -113,6 +123,49 @@ export default function LandingPage() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </section>
+
+        <section id="gallery" className="py-12 md:py-20">
+          <div className="text-center mb-12 animate-fade-in">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
+              Nuestra Institución en <span className="text-primary">Imágenes</span>
+            </h2>
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+              Un vistazo a nuestras instalaciones y la vida estudiantil.
+            </p>
+          </div>
+          <div className="animate-fade-in" style={{ animationDelay: "300ms" }}>
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              className="w-full max-w-4xl mx-auto"
+            >
+              <CarouselContent>
+                {carouselImages.map((image, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/1">
+                    <Card className="overflow-hidden shadow-xl">
+                      <CardContent className="p-0">
+                        <div className="aspect-video relative">
+                          <Image
+                            src={image.src}
+                            alt={image.alt}
+                            fill
+                            style={{ objectFit: "cover" }}
+                            className="transition-transform duration-500 hover:scale-105"
+                            data-ai-hint={image.hint}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="ml-14 sm:ml-10" />
+              <CarouselNext className="mr-14 sm:mr-10" />
+            </Carousel>
           </div>
         </section>
 
