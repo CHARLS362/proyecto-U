@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { AttendanceDoughnutChart } from "@/components/dashboard/AttendanceDoughnutChart";
+import { DailyAttendanceCalendar } from "@/components/dashboard/DailyAttendanceCalendar"; // Changed import
 import { cn } from "@/lib/utils";
 import type { RecentActivity } from "@/lib/mockData";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // For potential use in recent activities
@@ -146,7 +146,7 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-5 mt-6">
-        <AttendanceDoughnutChart className="xl:col-span-2" />
+        <DailyAttendanceCalendar className="xl:col-span-2" /> {/* Replaced Doughnut Chart */}
         
         <Card className="xl:col-span-3 shadow-lg animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between">
