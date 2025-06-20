@@ -12,17 +12,17 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import {
-  LayoutGrid, // Changed from LayoutDashboard to LayoutGrid for Panel
+  LayoutGrid, 
   Users,
-  GraduationCap, // Changed from Users for Estudiantes
-  BookCopy, // For Temas
+  GraduationCap, 
+  BookCopy, 
   ClipboardCheck,
-  Newspaper, // For Tabla de noticias
-  CalendarClock, // For Horario (was CalendarDays)
-  LibraryBig, // For Programas de estudio
-  NotebookText, // For Notas
-  Award, // For Calificaciones
-  Bus, // For Servicio de Bus
+  Newspaper, 
+  CalendarClock, 
+  LibraryBig, 
+  NotebookText, 
+  Award, 
+  Bus, 
   Settings,
   LogOut,
 } from 'lucide-react';
@@ -30,13 +30,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 
 const navItems = [
-  { href: '/dashboard', label: 'Panel', icon: LayoutGrid }, // Changed from Dashboard
+  { href: '/dashboard', label: 'Panel', icon: LayoutGrid },
   { href: '/teachers', label: 'Docentes', icon: Users },
   { href: '/students', label: 'Estudiantes', icon: GraduationCap },
   { href: '/subjects', label: 'Temas', icon: BookCopy },
-  { href: '/attendance', label: 'Asistencias', icon: ClipboardCheck }, // Kept 'Asistencias' as per image
+  { href: '/attendance', label: 'Asistencias', icon: ClipboardCheck },
   { href: '/news', label: 'Tabla de noticias', icon: Newspaper },
-  { href: '/calendar', label: 'Horario', icon: CalendarClock }, // Was 'Calendario', changed to 'Horario'
+  { href: '/calendar', label: 'Horario', icon: CalendarClock },
   { href: '/curriculum', label: 'Programas de estudio', icon: LibraryBig },
   { href: '/grades', label: 'Notas', icon: NotebookText },
   { href: '/qualifications', label: 'Calificaciones', icon: Award },
@@ -118,7 +118,7 @@ export function AppSidebar() {
              <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  variant="destructive" // This variant should handle the red color for logout
+                  // variant="destructive" // This variant is not standard in the CVA, custom classes handle destruction look
                   tooltip={{ children: 'Cerrar Sesión', className:"bg-destructive text-destructive-foreground border-border shadow-md" }}
                   className="justify-start group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive hover:bg-destructive/90 hover:text-destructive-foreground"
                 >

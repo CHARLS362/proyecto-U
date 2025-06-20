@@ -10,7 +10,7 @@ export default function AppLayout({
 }>) {
   return (
     <SidebarProvider defaultOpen={true}>
-      <Sidebar variant="inset" collapsible="icon">
+      <Sidebar variant="inset" collapsible="icon" side="left">
         <AppSidebar />
       </Sidebar>
       <SidebarInset>
