@@ -1,5 +1,5 @@
 
-import { Users, Filter, UserPlus, UserMinus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon } from "lucide-react";
+import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -75,13 +75,13 @@ export default function TeachersPage() {
 
                 <Button
                   variant="outline"
-                  className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-destructive/50"
+                  className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-purple-500/50"
                 >
-                  <div className="bg-red-100 dark:bg-red-500/20 p-5 rounded-xl group-hover:bg-red-200 dark:group-hover:bg-red-500/30 transition-colors">
-                    <UserMinus className="h-10 w-10 text-red-600 dark:text-red-400" />
+                  <div className="bg-purple-100 dark:bg-purple-500/20 p-5 rounded-xl group-hover:bg-purple-200 dark:group-hover:bg-purple-500/30 transition-colors">
+                    <UserCog className="h-10 w-10 text-purple-600 dark:text-purple-400" />
                   </div>
-                  <span className="text-lg font-semibold text-foreground group-hover:text-destructive transition-colors">
-                    Eliminar Maestro
+                  <span className="text-lg font-semibold text-foreground group-hover:text-purple-600 transition-colors">
+                    Gestionar Estado
                   </span>
                 </Button>
               </div>
@@ -271,4 +271,3 @@ export default function TeachersPage() {
     </div>
   );
 }
-
