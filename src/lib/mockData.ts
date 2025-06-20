@@ -61,6 +61,19 @@ export interface Reminder {
   color?: string; // For the left accent bar
 }
 
+export interface AttendanceStat {
+  status: "presente" | "ausente" | "tarde" | "justificado";
+  students: number;
+  fill: string; // For chart color, corresponds to chartConfig
+}
+
+export interface RecentActivity {
+  id: string;
+  icon: "UserPlus" | "ClipboardEdit" | "CalendarPlus" | "Megaphone" | "FileText"; // Lucide icon names
+  description: string;
+  timestamp: string; // e.g., "Hace 5 minutos", "Hace 2 horas"
+}
+
 
 export const mockStudents: Student[] = [
   {
@@ -201,4 +214,19 @@ export const mockReminders: Reminder[] = [
   { id: "R001", text: "Reunión con padres de familia hoy a las 3 de la tarde", color: "hsl(var(--accent))" },
   { id: "R002", text: "Preparar material para la clase de mañana.", color: "hsl(var(--primary))" },
   { id: "R003", text: "Calificar exámenes pendientes de Química.", color: "hsl(var(--destructive))" },
+];
+
+export const mockAttendanceStats: AttendanceStat[] = [
+  { status: "presente", students: 180, fill: "hsl(var(--chart-1))" },
+  { status: "ausente", students: 15, fill: "hsl(var(--chart-2))" },
+  { status: "tarde", students: 5, fill: "hsl(var(--chart-3))" },
+  { status: "justificado", students: 2, fill: "hsl(var(--chart-4))" },
+];
+
+export const mockRecentActivities: RecentActivity[] = [
+  { id: "RA001", icon: "UserPlus", description: "Nuevo estudiante 'Carlos Luna' registrado.", timestamp: "Hace 5 minutos" },
+  { id: "RA002", icon: "ClipboardEdit", description: "Notas actualizadas para 'Matemáticas Avanzadas'.", timestamp: "Hace 30 minutos" },
+  { id: "RA003", icon: "CalendarPlus", description: "Nuevo evento 'Feria de Ciencias' añadido al calendario.", timestamp: "Hace 1 hora" },
+  { id: "RA004", icon: "Megaphone", description: "Publicado nuevo aviso: 'Reunión General de Docentes'.", timestamp: "Hace 2 horas" },
+  { id: "RA005", icon: "FileText", description: "Se subió el reporte de 'Asistencia Mensual'.", timestamp: "Hace 4 horas" },
 ];
