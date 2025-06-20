@@ -4,8 +4,9 @@
 import * as React from "react"
 import { Pie, PieChart, ResponsiveContainer, Cell } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartConfig, ChartContainer, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart"
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from "@/components/ui/chart" // Added ChartTooltip
 import { mockAttendanceStats } from "@/lib/mockData" // Assuming you'll add this to mockData
+import { cn } from "@/lib/utils"; // Added this import
 
 const chartConfig = {
   presente: {
@@ -85,3 +86,4 @@ export function AttendanceDoughnutChart({ className }: AttendanceDoughnutChartPr
     </Card>
   )
 }
+
