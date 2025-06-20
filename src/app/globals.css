@@ -109,3 +109,5 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
+
+/* Removed .background-cubes-container, .cube, and @keyframes float */

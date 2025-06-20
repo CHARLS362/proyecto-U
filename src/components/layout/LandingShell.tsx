@@ -10,6 +10,7 @@ interface LandingShellProps {
 export function LandingShell({ children }: LandingShellProps) {
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* AnimatedBackgroundCubes component removed */}
       <LandingNavbar />
       <main className="flex-grow container mx-auto px-4">
         {children}
