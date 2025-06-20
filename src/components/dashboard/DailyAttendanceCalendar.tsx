@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -13,13 +12,6 @@ import { cn } from '@/lib/utils';
 export function DailyAttendanceCalendar({ className }: { className?: string }) {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
 
-  // In a real app, you'd fetch or filter data based on selectedDate.
-  // For now, the chart will show the same global data regardless of selectedDate.
-  const chartDataForSelectedDate: AttendanceData[] = mockAttendanceStats.map(stat => ({
-    ...stat,
-    status: stat.status as keyof typeof chartConfig, // Ensure status matches ChartConfig keys
-  }));
-  
   // This needs to be defined here or imported if it's part of chartConfig in AttendanceDoughnutChart
   const chartConfig = {
     presente: { label: "Presente", color: "hsl(var(--chart-1))" },
@@ -27,6 +19,13 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
     tarde: { label: "Tarde", color: "hsl(var(--chart-3))" },
     justificado: { label: "Justificado", color: "hsl(var(--chart-4))" },
   };
+
+  // In a real app, you'd fetch or filter data based on selectedDate.
+  // For now, the chart will show the same global data regardless of selectedDate.
+  const chartDataForSelectedDate: AttendanceData[] = mockAttendanceStats.map(stat => ({
+    ...stat,
+    status: stat.status as keyof typeof chartConfig, // Ensure status matches ChartConfig keys
+  }));
 
 
   return (
