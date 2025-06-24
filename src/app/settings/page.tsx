@@ -19,7 +19,7 @@ export default function SettingsPage() {
        <Card className="shadow-lg animate-fade-in">
         <CardHeader>
           <CardTitle>Configuración del Sistema</CardTitle>
-          <CardDescription>Ajustes globales para la plataforma Academia Nova.</CardDescription>
+          <CardDescription>Ajustes globales para la plataforma Sofía Educa.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">Contenido de configuración del sistema aquí...</p>

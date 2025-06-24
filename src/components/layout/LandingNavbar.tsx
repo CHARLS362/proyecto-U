@@ -32,7 +32,7 @@ export function LandingNavbar() {
         <Link href="/" className="flex items-center gap-2 group">
           <School className="h-7 w-7 text-primary group-hover:scale-110 group-hover:text-primary transition-all duration-300 ease-in-out" />
           <span className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-            Gestión Escolar
+            Sofía Educa
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">

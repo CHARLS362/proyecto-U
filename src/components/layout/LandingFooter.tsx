@@ -20,13 +20,13 @@ export function LandingFooter() {
             <Link href="/" className="flex items-center justify-center md:justify-start gap-2 mb-2 group">
               <School className="h-7 w-7 text-primary group-hover:animate-pulse" />
               <span className="text-lg font-semibold text-foreground">
-                Gestión Escolar
+                Sofía Educa
               </span>
             </Link>
             <p className="text-xs">
               {currentYear !== null ?
-                `© ${currentYear} Academia Nova. Todos los derechos reservados.` :
-                `© Cargando año... Academia Nova. Todos los derechos reservados.`
+                `© ${currentYear} Sofía Educa. Todos los derechos reservados.` :
+                `© Cargando año... Sofía Educa. Todos los derechos reservados.`
               }
             </p>
           </div>

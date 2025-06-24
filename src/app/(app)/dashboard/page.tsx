@@ -44,7 +44,7 @@ const activityIconColor: Record<RecentActivity["icon"], string> = {
 export default function DashboardPage() {
   return (
     <div className="space-y-6 md:space-y-8">
-      <PageTitle title="Director del panel" subtitle="Analítica" icon={LayoutGrid} />
+      <PageTitle title="Panel de Control" subtitle="Bienvenido a Sofía Educa" icon={LayoutGrid} />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SimpleMetricCard

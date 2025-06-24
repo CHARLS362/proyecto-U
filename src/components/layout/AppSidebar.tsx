@@ -25,6 +25,7 @@ import {
   Bus, 
   Settings,
   LogOut,
+  School,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -63,9 +64,9 @@ export function AppSidebar() {
     <>
       <SidebarHeader className="p-4">
         <Link href="/" className="flex items-center gap-2 group/logo">
-          <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
+          <School className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
           <h1 className="text-xl font-semibold text-foreground group-data-[collapsible=icon]:hidden">
-            Panel
+            Sofía Educa
           </h1>
         </Link>
       </SidebarHeader>

@@ -11,7 +11,7 @@ export default function AboutPage() {
           Acerca de <span className="text-primary">Nuestra Institución</span>
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-          Somos Academia Nova, una institución comprometida con la excelencia educativa y el desarrollo integral de nuestros estudiantes. Creemos en el poder de la educación para transformar vidas y construir un futuro mejor.
+          Somos Sofía Educa, una institución comprometida con la excelencia educativa y el desarrollo integral de nuestros estudiantes. Creemos en el poder de la educación para transformar vidas y construir un futuro mejor.
         </p>
       </section>
 
@@ -29,7 +29,7 @@ export default function AboutPage() {
         <div className="relative h-80 md:h-96 rounded-xl shadow-xl overflow-hidden group">
           <Image
             src="https://placehold.co/800x600.png"
-            alt="Instalaciones de Academia Nova"
+            alt="Instalaciones de Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}
             className="transition-transform duration-500 group-hover:scale-105"

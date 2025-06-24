@@ -92,17 +92,15 @@ export default function LoginPage() {
         <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
           <Image
             src="https://placehold.co/600x800.png"
-            alt="Bienvenido a Academia Nova"
+            alt="Bienvenido a Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}
             className="opacity-30"
             data-ai-hint="anime student hero"
           />
           <div className="relative z-10 text-center text-background drop-shadow-lg">
-            <p className="text-xs font-semibold tracking-wider uppercase mb-2 text-background/80">TO BE HERO</p>
-            <p className="text-sm font-light tracking-wider uppercase mb-6 text-background/70">PRE-UNIVERSITY PREPARAT</p>
-            <h2 className="text-5xl font-bold mb-2">GESTIÓN ESCOLAR</h2>
-            <p className="text-lg font-light">Planificar, Servir</p>
+            <h2 className="text-5xl font-bold mb-2">SOFÍA EDUCA</h2>
+            <p className="text-lg font-light">Sistema Integral de Aprendizaje</p>
           </div>
         </div>
       </Card>

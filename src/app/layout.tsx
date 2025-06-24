@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -12,10 +13,10 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Academia Nova',
-    template: '%s | Academia Nova',
+    default: 'Sofía Educa',
+    template: '%s | Sofía Educa',
   },
-  description: 'Sistema de Gestión Escolar Moderno y Atractivo',
+  description: 'Sofía Educa – Sistema Integral de Aprendizaje',
 };
 
 export default function RootLayout({
