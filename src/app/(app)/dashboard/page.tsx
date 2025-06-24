@@ -3,7 +3,7 @@ import { PageTitle } from "@/components/common/PageTitle";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
 import { mockNotices, mockReminders, mockRecentActivities } from "@/lib/mockData"; // Updated mockData import
 import { 
-  Users, FileText, Bookmark, Newspaper, StickyNote, Filter, Plus, Info, Trash2, LayoutGrid,
+  Users, Bookmark, Newspaper, StickyNote, Filter, Plus, Info, Trash2, LayoutGrid,
   UserPlus as UserPlusIcon, ClipboardEdit as ClipboardEditIcon, CalendarPlus as CalendarPlusIcon, Megaphone as MegaphoneIcon, FileText as FileTextIcon, MoreHorizontal
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -64,7 +64,7 @@ export default function DashboardPage() {
         <SimpleMetricCard
           title="Notas"
           value="2"
-          icon={FileText}
+          icon={FileTextIcon}
           iconBgClass="bg-green-100 dark:bg-green-500/30"
           iconColorClass="text-green-500 dark:text-green-300"
         />
