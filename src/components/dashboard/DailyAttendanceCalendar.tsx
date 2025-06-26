@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -29,7 +30,7 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
 
 
   return (
-    <Card className={cn("shadow-lg animate-fade-in", className)}>
+    <Card className={cn("shadow-lg animate-fade-in flex flex-col", className)}>
       <CardHeader>
         <CardTitle>Resumen de Asistencia Diario</CardTitle>
         <CardDescription>
@@ -38,8 +39,8 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
             : 'Seleccione un día del calendario.'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div className="flex justify-center">
+      <CardContent className="grid flex-grow grid-cols-1 md:grid-cols-2 gap-6 items-center">
+        <div className="flex justify-center overflow-x-auto py-2">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -56,7 +57,7 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
             }}
           />
         </div>
-        <div className="min-h-[300px] flex items-center justify-center">
+        <div className="flex h-full w-full min-h-[300px] items-center justify-center">
           {selectedDate ? (
             <AttendanceDoughnutChart chartData={chartDataForSelectedDate} className="border-none shadow-none" />
           ) : (
