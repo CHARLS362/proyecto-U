@@ -11,7 +11,12 @@ import { cn } from '@/lib/utils';
 import type { ChartConfig } from '@/components/ui/chart';
 
 export function DailyAttendanceCalendar({ className }: { className?: string }) {
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
+
+  React.useEffect(() => {
+    setSelectedDate(new Date());
+  }, []);
+
 
   const chartConfig = {
     presente: { label: "Presente", color: "hsl(var(--chart-1))" },
@@ -40,8 +45,8 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
             : 'Seleccione un día del calendario.'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid flex-grow grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-        <div className="lg:col-span-2 flex justify-center">
+      <CardContent className="grid flex-grow grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div className="flex justify-center items-center">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -53,31 +58,34 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
                 day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary",
                 day_today: "bg-accent text-accent-foreground ring-2 ring-primary/50",
                 head_cell: "text-muted-foreground font-semibold text-xs",
-                cell: "h-9",
+                cell: "h-9 w-9 p-0", // Reduced padding
                 day: "h-9 w-9",
+                caption_label: "text-sm font-semibold",
+                nav_button: "h-8 w-8",
               }}
           />
         </div>
-        <div className="lg:col-span-3 flex flex-col items-center justify-center h-full space-y-4">
+        <div className="flex flex-col items-center justify-center h-full space-y-4">
           {selectedDate ? (
             <>
-              <div className='text-center'>
-                 <h3 className="text-lg font-semibold">Asistencia del Día</h3>
-                 <p className="text-sm text-muted-foreground">Distribución general</p>
+              <div className='relative w-full max-w-[200px] aspect-square mx-auto'>
+                 <AttendanceDoughnutChart chartData={chartData} chartConfig={chartConfig} />
+                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span className="text-2xl font-bold">{totalStudents}</span>
+                    <span className="text-xs text-muted-foreground">Estudiantes</span>
+                 </div>
               </div>
-              <AttendanceDoughnutChart chartData={chartData} chartConfig={chartConfig} />
+
               <div className="w-full text-xs text-muted-foreground">
-                <div className="flex flex-wrap justify-center gap-x-6 gap-y-1">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                   {Object.entries(chartConfig).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-1.5">
-                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: value.color }} />
-                      <span>{value.label}</span>
+                    <div key={key} className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: value.color }} />
+                      <span className="font-medium flex-1">{value.label}</span>
+                      <span className='font-semibold'>{chartData.find(d => d.status === key)?.students || 0}</span>
                     </div>
                   ))}
                 </div>
-              </div>
-              <div className="text-center text-sm font-medium">
-                Total de Estudiantes en Datos: {totalStudents}
               </div>
             </>
           ) : (
