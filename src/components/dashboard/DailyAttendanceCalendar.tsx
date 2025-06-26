@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -7,27 +6,29 @@ import { es } from 'date-fns/locale';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AttendanceDoughnutChart, type AttendanceData } from './AttendanceDoughnutChart';
-import { mockAttendanceStats } from "@/lib/mockData"; // Using global stats for now
+import { mockAttendanceStats } from "@/lib/mockData";
 import { cn } from '@/lib/utils';
+import type { ChartConfig } from '@/components/ui/chart';
 
 export function DailyAttendanceCalendar({ className }: { className?: string }) {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(new Date());
 
-  // This needs to be defined here or imported if it's part of chartConfig in AttendanceDoughnutChart
   const chartConfig = {
     presente: { label: "Presente", color: "hsl(var(--chart-1))" },
     ausente: { label: "Ausente", color: "hsl(var(--chart-2))" },
     tarde: { label: "Tarde", color: "hsl(var(--chart-3))" },
     justificado: { label: "Justificado", color: "hsl(var(--chart-4))" },
-  };
+  } satisfies ChartConfig;
 
   // In a real app, you'd fetch or filter data based on selectedDate.
-  // For now, the chart will show the same global data regardless of selectedDate.
-  const chartDataForSelectedDate: AttendanceData[] = mockAttendanceStats.map(stat => ({
+  const chartData: AttendanceData[] = mockAttendanceStats.map(stat => ({
     ...stat,
     status: stat.status as keyof typeof chartConfig, // Ensure status matches ChartConfig keys
   }));
 
+  const totalStudents = React.useMemo(() => {
+    return chartData.reduce((acc, curr) => acc + curr.students, 0)
+  }, [chartData])
 
   return (
     <Card className={cn("shadow-lg animate-fade-in flex flex-col", className)}>
@@ -39,8 +40,8 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
             : 'Seleccione un día del calendario.'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid flex-grow grid-cols-1 md:grid-cols-2 gap-6 items-center">
-        <div className="flex justify-center overflow-x-auto py-2">
+      <CardContent className="grid flex-grow grid-cols-1 lg:grid-cols-5 gap-6 items-start">
+        <div className="lg:col-span-2 flex justify-center">
           <Calendar
             mode="single"
             selected={selectedDate}
@@ -49,20 +50,39 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
             locale={es}
             className="rounded-md border p-3 shadow-inner bg-muted/20"
             classNames={{
-              day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-              day_today: "bg-accent text-accent-foreground ring-2 ring-primary/70 dark:ring-accent-foreground/70",
-              head_cell: "text-muted-foreground font-semibold w-10",
-              cell: "w-10 h-10",
-              day: "w-10 h-10 p-0",
-            }}
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary",
+                day_today: "bg-accent text-accent-foreground ring-2 ring-primary/50",
+                head_cell: "text-muted-foreground font-semibold text-xs",
+                cell: "h-9",
+                day: "h-9 w-9",
+              }}
           />
         </div>
-        <div className="flex h-full w-full min-h-[300px] items-center justify-center">
+        <div className="lg:col-span-3 flex flex-col items-center justify-center h-full space-y-4">
           {selectedDate ? (
-            <AttendanceDoughnutChart chartData={chartDataForSelectedDate} className="border-none shadow-none" />
+            <>
+              <div className='text-center'>
+                 <h3 className="text-lg font-semibold">Asistencia del Día</h3>
+                 <p className="text-sm text-muted-foreground">Distribución general</p>
+              </div>
+              <AttendanceDoughnutChart chartData={chartData} chartConfig={chartConfig} />
+              <div className="w-full text-xs text-muted-foreground">
+                <div className="flex flex-wrap justify-center gap-x-6 gap-y-1">
+                  {Object.entries(chartConfig).map(([key, value]) => (
+                    <div key={key} className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: value.color }} />
+                      <span>{value.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="text-center text-sm font-medium">
+                Total de Estudiantes en Datos: {totalStudents}
+              </div>
+            </>
           ) : (
-             <div className="text-center text-muted-foreground p-4">
-                <p>Seleccione una fecha en el calendario para ver el resumen de asistencia.</p>
+             <div className="text-center text-muted-foreground p-4 h-full flex items-center justify-center">
+                <p>Seleccione una fecha para ver el resumen.</p>
             </div>
           )}
         </div>
