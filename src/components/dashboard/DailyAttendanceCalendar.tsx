@@ -11,9 +11,10 @@ import { cn } from '@/lib/utils';
 import type { ChartConfig } from '@/components/ui/chart';
 
 export function DailyAttendanceCalendar({ className }: { className?: string }) {
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(undefined);
 
   React.useEffect(() => {
+    // This will only run on the client, after initial hydration
     setSelectedDate(new Date());
   }, []);
 
@@ -45,44 +46,46 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
             : 'Seleccione un día del calendario.'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid flex-grow grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        <div className="flex justify-center items-center">
+      <CardContent className="flex-grow grid grid-cols-1 lg:grid-cols-2 gap-4 items-center p-4">
+        <div className="flex justify-center">
           <Calendar
             mode="single"
             selected={selectedDate}
             onSelect={setSelectedDate}
-            initialFocus
             locale={es}
-            className="rounded-md border p-3 shadow-inner bg-muted/20"
+            className="rounded-md border p-2 shadow-inner bg-muted/20"
+            formatters={{
+              formatWeekdayName: (day) => format(day, 'EE', { locale: es }).slice(0, 2).toLowerCase(),
+            }}
             classNames={{
-                day_selected: "bg-primary text-primary-foreground hover:bg-primary/90 focus:bg-primary",
-                day_today: "bg-accent text-accent-foreground ring-2 ring-primary/50",
-                head_cell: "text-muted-foreground font-semibold text-xs",
-                cell: "h-9 w-9 p-0", // Reduced padding
-                day: "h-9 w-9",
-                caption_label: "text-sm font-semibold",
-                nav_button: "h-8 w-8",
-              }}
+              day_selected: "bg-accent text-accent-foreground hover:bg-accent/90 focus:bg-accent",
+              day_today: "bg-background ring-1 ring-primary",
+              head_cell: "text-muted-foreground font-semibold text-xs w-8",
+              cell: "h-8 w-8 p-0",
+              day: "h-8 w-8",
+              caption_label: "text-sm font-semibold",
+              nav_button: "h-7 w-7",
+            }}
           />
         </div>
-        <div className="flex flex-col items-center justify-center h-full space-y-4">
+        <div className="flex flex-col items-center justify-center space-y-4 w-full">
           {selectedDate ? (
             <>
-              <div className='relative w-full max-w-[200px] aspect-square mx-auto'>
+              <div className='relative w-full max-w-[180px] aspect-square mx-auto'>
                  <AttendanceDoughnutChart chartData={chartData} chartConfig={chartConfig} />
                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                    <span className="text-2xl font-bold">{totalStudents}</span>
+                    <span className="text-3xl font-bold">{totalStudents}</span>
                     <span className="text-xs text-muted-foreground">Estudiantes</span>
                  </div>
               </div>
 
-              <div className="w-full text-xs text-muted-foreground">
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                  {Object.entries(chartConfig).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: value.color }} />
-                      <span className="font-medium flex-1">{value.label}</span>
-                      <span className='font-semibold'>{chartData.find(d => d.status === key)?.students || 0}</span>
+              <div className="w-full text-xs text-muted-foreground max-w-[220px]">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                  {chartData.map((item) => (
+                    <div key={item.status} className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartConfig[item.status].color }} />
+                      <span className="text-foreground/80 flex-1">{chartConfig[item.status].label}</span>
+                      <span className='font-semibold text-foreground'>{item.students}</span>
                     </div>
                   ))}
                 </div>
