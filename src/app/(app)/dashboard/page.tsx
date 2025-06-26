@@ -146,9 +146,9 @@ export default function DashboardPage() {
       </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-5 mt-6">
-        <DailyAttendanceCalendar className="lg:col-span-2" /> {/* Replaced Doughnut Chart */}
+        <DailyAttendanceCalendar className="lg:col-span-3" />
         
-        <Card className="lg:col-span-3 shadow-lg animate-fade-in">
+        <Card className="lg:col-span-2 shadow-lg animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between">
              <div className="flex items-center gap-2">
                 <LayoutGrid className="h-5 w-5 text-muted-foreground" />
