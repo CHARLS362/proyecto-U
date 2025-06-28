@@ -2,7 +2,7 @@
 import { PageTitle } from "@/components/common/PageTitle";
 import { mockAttendance, mockStudents, mockCourses } from "@/lib/mockData";
 import type { AttendanceRecord } from "@/lib/mockData";
-import { ClipboardCheck, PlusCircle, Filter, Download } from "lucide-react";
+import { ClipboardCheck, PlusCircle, Download } from "lucide-react";
 import Link from "next/link";
 import {
   Table,
@@ -11,7 +11,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption,
 } from "@/components/ui/table";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,12 +60,8 @@ export default function AttendancePage() {
               <CardTitle>Registros de Asistencia</CardTitle>
               <CardDescription>Filtre para ver registros específicos.</CardDescription>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              
-              
-              <Button variant="outline" className="w-full sm:w-auto bg-card">
-                <Filter className="mr-2 h-4 w-4" /> Filtrar Fechas
-              </Button>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
+              <DatePickerWithRange />
               <Select>
                 <SelectTrigger className="w-full sm:w-[180px] bg-card">
                   <SelectValue placeholder="Filtrar por Curso" />
