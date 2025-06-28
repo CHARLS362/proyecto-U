@@ -32,7 +32,7 @@ import { Separator } from '@/components/ui/separator';
 const navItems = [
   { href: '/dashboard', label: 'Panel', icon: LayoutGrid },
   { href: '/teachers', label: 'Docentes', icon: Users },
-  { href: '/students', label: 'Estudiantes', icon: GraduationCap },
+  { href: '/students', label: 'Gestión de Estudiantes', icon: GraduationCap },
   { href: '/subjects', label: 'Temas', icon: BookCopy },
   { href: '/attendance', label: 'Asistencias', icon: ClipboardCheck },
   { href: '/news', label: 'Tabla de noticias', icon: Newspaper },
