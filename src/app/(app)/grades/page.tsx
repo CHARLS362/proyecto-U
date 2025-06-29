@@ -15,6 +15,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function GradesPage() {
   const assignments = [
@@ -85,9 +95,70 @@ export default function GradesPage() {
                   <span>{assignment.file.size} ({assignment.file.name.split('.').pop()})</span>
                 </div>
                 <div className="flex items-center">
-                  <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700">
-                    <Edit className="h-4 w-4"/>
-                  </Button>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700">
+                        <Edit className="h-4 w-4"/>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                      <DialogHeader>
+                          <DialogTitle>Editar notas cargadas</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                          <div className="grid grid-cols-2 gap-4">
+                              <div className="grid gap-2">
+                                  <Label htmlFor="class-edit">Clase</Label>
+                                  <Select defaultValue="12-comercio">
+                                      <SelectTrigger id="class-edit"><SelectValue /></SelectTrigger>
+                                      <SelectContent>
+                                          <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                                          <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                                          <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                                      </SelectContent>
+                                  </Select>
+                              </div>
+                              <div className="grid gap-2">
+                                  <Label htmlFor="subject-edit">Sujeto</Label>
+                                  <Select defaultValue="hindi">
+                                      <SelectTrigger id="subject-edit"><SelectValue /></SelectTrigger>
+                                      <SelectContent>
+                                          <SelectItem value="hindi">Hindi</SelectItem>
+                                          <SelectItem value="ingles">Inglés</SelectItem>
+                                          <SelectItem value="matematicas">Matemáticas</SelectItem>
+                                      </SelectContent>
+                                  </Select>
+                              </div>
+                          </div>
+                          <div className="grid gap-2">
+                              <Label htmlFor="title-edit">título</Label>
+                              <Input id="title-edit" defaultValue="Hindi Homework" />
+                          </div>
+                          <div className="grid gap-2">
+                              <Label htmlFor="comment-edit">Comentario</Label>
+                              <Textarea id="comment-edit" defaultValue="do this on time" />
+                          </div>
+                          <div className="grid gap-2">
+                              <Label>archivo</Label>
+                              <div className="space-y-2">
+                                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+                                      <UploadCloud className="h-5 w-5" />
+                                  </Button>
+                                  <Button className="w-full bg-yellow-500 hover:bg-yellow-600 text-black">
+                                      <Eye className="h-5 w-5" />
+                                  </Button>
+                              </div>
+                          </div>
+                      </div>
+                      <DialogFooter className="flex-row justify-between items-center pt-4 border-t">
+                          <p className="text-xs text-muted-foreground">Última edición por Admin Kumar</p>
+                          <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                              <UploadCloud className="mr-2 h-4 w-4" />
+                              Editar
+                          </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                   <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80">
                     <Trash2 className="h-4 w-4"/>
                   </Button>
