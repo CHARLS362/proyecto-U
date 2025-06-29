@@ -13,7 +13,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -44,21 +43,49 @@ export default function CurriculumPage() {
     <DialogContent className="sm:max-w-[425px]">
       <DialogHeader>
         <DialogTitle>Subir programa de estudios</DialogTitle>
-        <DialogDescription>
-          Subir archivo pdf (tamaño máximo 200 MB)
-        </DialogDescription>
       </DialogHeader>
-      <div className="py-4">
-        <div className="flex items-center gap-2">
+      <div className="py-4 space-y-4">
+        <div className="grid gap-2">
+          <Label htmlFor={`class-select-${idSuffix}`}>Clase</Label>
+          <Select defaultValue="12-comercio">
+            <SelectTrigger id={`class-select-${idSuffix}`}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+              <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+              <SelectItem value="10-arte">10 (Arte)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor={`subject-select-${idSuffix}`}>Sujeto</Label>
+          <Select>
+            <SelectTrigger id={`subject-select-${idSuffix}`}>
+              <SelectValue placeholder="--select--" />
+            </SelectTrigger>
+            <SelectContent>
+              {subjects.map((subject) => (
+                <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor={`syllabus-file-${idSuffix}`} className="text-sm text-muted-foreground">
+            Subir archivo pdf (tamaño máximo 200 MB)
+          </Label>
+          <div className="flex items-center gap-2">
             <Input id={`syllabus-file-${idSuffix}`} type="file" className="hidden" onChange={handleFileChange} accept=".pdf" />
             <Button asChild variant="outline" className="shrink-0">
-                <Label htmlFor={`syllabus-file-${idSuffix}`} className="cursor-pointer font-normal">Seleccionar archivo</Label>
+              <Label htmlFor={`syllabus-file-${idSuffix}`} className="cursor-pointer font-normal">Seleccionar archivo</Label>
             </Button>
             <span className="text-sm text-muted-foreground truncate">{fileName}</span>
+          </div>
         </div>
       </div>
       <DialogFooter>
-        <Button type="submit">
+        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
           <UploadCloud className="mr-2 h-4 w-4" />
           Subir
         </Button>
