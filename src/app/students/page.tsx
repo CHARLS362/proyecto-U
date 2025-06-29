@@ -1,2 +1,4 @@
-// This file has been moved to src/app/(app)/students/page.tsx to improve modularity and avoid routing conflicts.
-// This file is intentionally left blank to prevent a parallel route from being created.
+// This file is intentionally left blank.
+// The active page for this route is now at /src/app/(app)/students/page.tsx
+// to ensure it uses the main application layout and avoids routing conflicts.
+export {};
