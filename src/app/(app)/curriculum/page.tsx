@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from "react";
 import { PageTitle } from "@/components/common/PageTitle";
 import { LibraryBig, FileText, UploadCloud, Search, Download, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,16 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 const subjects = [
   { id: 1, name: "No" },
@@ -19,6 +30,42 @@ const subjects = [
 ];
 
 export default function CurriculumPage() {
+  const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setFileName(event.target.files[0].name);
+    } else {
+      setFileName('Ningún archivo seleccionado');
+    }
+  };
+
+  const UploadDialogContent = ({ idSuffix }: { idSuffix: string | number }) => (
+    <DialogContent className="sm:max-w-[425px]">
+      <DialogHeader>
+        <DialogTitle>Subir programa de estudios</DialogTitle>
+        <DialogDescription>
+          Subir archivo pdf (tamaño máximo 200 MB)
+        </DialogDescription>
+      </DialogHeader>
+      <div className="py-4">
+        <div className="flex items-center gap-2">
+            <Input id={`syllabus-file-${idSuffix}`} type="file" className="hidden" onChange={handleFileChange} accept=".pdf" />
+            <Button asChild variant="outline" className="shrink-0">
+                <Label htmlFor={`syllabus-file-${idSuffix}`} className="cursor-pointer font-normal">Seleccionar archivo</Label>
+            </Button>
+            <span className="text-sm text-muted-foreground truncate">{fileName}</span>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button type="submit">
+          <UploadCloud className="mr-2 h-4 w-4" />
+          Subir
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+
   return (
     <div className="space-y-6">
       <PageTitle title="Programa de estudios" icon={LibraryBig} />
@@ -29,10 +76,15 @@ export default function CurriculumPage() {
             <FileText className="h-5 w-5 text-muted-foreground" />
             <CardTitle className="text-lg">Programa de estudios</CardTitle>
           </div>
-          <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
-            <UploadCloud className="mr-2 h-4 w-4" />
-            Subir programa de estudios
-          </Button>
+          <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
+            <DialogTrigger asChild>
+              <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Subir programa de estudios
+              </Button>
+            </DialogTrigger>
+            <UploadDialogContent idSuffix="header" />
+          </Dialog>
         </CardHeader>
         <Separator />
         <CardContent className="pt-6 space-y-6">
@@ -76,10 +128,15 @@ export default function CurriculumPage() {
                                     <Download className="mr-2 h-4 w-4" />
                                     Descargar
                                 </Button>
-                                <Button className="bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900">
-                                    <Upload className="mr-2 h-4 w-4" />
-                                    Subir
-                                </Button>
+                                <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
+                                  <DialogTrigger asChild>
+                                    <Button className="bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900">
+                                        <Upload className="mr-2 h-4 w-4" />
+                                        Subir
+                                    </Button>
+                                  </DialogTrigger>
+                                  <UploadDialogContent idSuffix={subject.id} />
+                                </Dialog>
                             </TableCell>
                         </TableRow>
                     ))}
