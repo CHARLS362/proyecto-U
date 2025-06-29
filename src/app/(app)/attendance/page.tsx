@@ -1,9 +1,25 @@
 
-import { PageTitle } from "@/components/common/PageTitle";
-import { mockAttendance, mockStudents, mockCourses } from "@/lib/mockData";
-import type { AttendanceRecord } from "@/lib/mockData";
-import { ClipboardCheck, PlusCircle, Download } from "lucide-react";
-import Link from "next/link";
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+  CardDescription,
+} from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
+import { Search, FileText, Filter } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -11,131 +27,131 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { DatePickerWithRange } from "@/components/common/DatePickerWithRange"; 
-
-const getAttendanceBadgeVariant = (status: AttendanceRecord["status"]): "default" | "secondary" | "outline" | "destructive" => {
-  switch (status) {
-    case "Presente":
-      return "default"; 
-    case "Ausente":
-      return "destructive";
-    case "Tarde":
-      return "outline"; 
-    case "Justificado":
-      return "secondary";
-    default:
-      return "secondary";
-  }
-};
+} from '@/components/ui/table';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Switch } from '@/components/ui/switch';
 
 export default function AttendancePage() {
-  const attendanceRecords = mockAttendance;
-
   return (
     <div className="space-y-6">
-      <PageTitle title="Registro de Asistencia" subtitle="Visualice y gestione la asistencia de los estudiantes." icon={ClipboardCheck}>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" /> Registrar Asistencia
-        </Button>
-        <Button variant="outline">
-          <Download className="mr-2 h-4 w-4" /> Exportar
-        </Button>
-      </PageTitle>
+      <Tabs defaultValue="tomar-asistencia" className="w-full animate-fade-in">
+        <TabsList className="grid w-full grid-cols-2 sm:max-w-xs">
+          <TabsTrigger value="tomar-asistencia">Tomar asistencia</TabsTrigger>
+          <TabsTrigger value="asistencia-fecha">Asistencia según la fecha</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tomar-asistencia" className="mt-6">
+          <div className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle className="text-lg">Mostrar asistencia</CardTitle>
+                </div>
+                <Button variant="ghost" size="icon">
+                    <Filter className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div className="grid gap-2">
+                    <Label htmlFor="class">Clase</Label>
+                    <Select defaultValue="12-comercio">
+                      <SelectTrigger id="class">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="section">Sección</Label>
+                    <Select defaultValue="A">
+                      <SelectTrigger id="section">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button className="w-full md:w-auto">
+                    <Search className="mr-2 h-4 w-4" />
+                    Encontrar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-      <Card className="shadow-lg animate-fade-in">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <CardTitle>Registros de Asistencia</CardTitle>
-              <CardDescription>Filtre para ver registros específicos.</CardDescription>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto items-center">
-              <DatePickerWithRange />
-              <Select>
-                <SelectTrigger className="w-full sm:w-[180px] bg-card">
-                  <SelectValue placeholder="Filtrar por Curso" />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockCourses.map(course => (
-                    <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-               <Select>
-                <SelectTrigger className="w-full sm:w-[180px] bg-card">
-                  <SelectValue placeholder="Filtrar por Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Presente">Presente</SelectItem>
-                  <SelectItem value="Ausente">Ausente</SelectItem>
-                  <SelectItem value="Tarde">Tarde</SelectItem>
-                  <SelectItem value="Justificado">Justificado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Card className="shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle className="text-lg">Lista de estudiantes</CardTitle>
+                </div>
+                 <Button variant="ghost" size="icon">
+                    <Filter className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>#</TableHead>
+                      <TableHead>Número de rollo</TableHead>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead className="text-center">Total de días</TableHead>
+                      <TableHead className="text-center">Presente</TableHead>
+                      <TableHead className="text-center">Porcentaje</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">1.</TableCell>
+                      <TableCell>S1718791292</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-9 w-9">
+                            <AvatarImage src="https://placehold.co/40x40.png" alt="Estudiante kumar" data-ai-hint="robot avatar" />
+                            <AvatarFallback>EK</AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium text-foreground">Estudiante kumar</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">0</TableCell>
+                      <TableCell className="text-center">0</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center">
+                            <Switch id="attendance-switch-1" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+              <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                  <Button variant="outline">Reiniciar</Button>
+                  <Button>Entregar</Button>
+              </CardFooter>
+            </Card>
           </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          {attendanceRecords.length === 0 ? (
-            <div className="text-center py-12">
-              <ClipboardCheck className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-lg font-medium">No hay registros de asistencia</p>
-              <p className="text-sm text-muted-foreground">Comience registrando la asistencia de los estudiantes.</p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Estudiante</TableHead>
-                  <TableHead>Curso</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead className="text-center">Estado</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attendanceRecords.map((record) => (
-                  <TableRow key={record.id} className="hover:bg-muted/50 transition-colors">
-                    <TableCell>
-                      <Link href={`/students/${record.studentId}`} className="font-medium text-foreground hover:underline">
-                        {record.studentName}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link href={`/courses/${record.courseId}`} className="text-sm text-muted-foreground hover:underline">
-                        {record.courseName}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{new Date(record.date).toLocaleDateString('es-ES', {day: '2-digit', month: 'short', year: 'numeric'})}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={getAttendanceBadgeVariant(record.status)}>{record.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">Editar</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-         {attendanceRecords.length > 0 && (
-          <CardFooter className="py-4 border-t">
-            <p className="text-sm text-muted-foreground">Mostrando {attendanceRecords.length} registros.</p>
-          </CardFooter>
-        )}
-      </Card>
+        </TabsContent>
+        <TabsContent value="asistencia-fecha" className="mt-6">
+          <Card className="shadow-lg">
+            <CardHeader>
+                <CardTitle>Asistencia por Fecha</CardTitle>
+                <CardDescription>Esta funcionalidad se implementará pronto.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <p className="text-muted-foreground">Aquí podrá ver los registros de asistencia filtrados por un rango de fechas.</p>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
