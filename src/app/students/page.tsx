@@ -1,3 +1,2 @@
-// Este archivo se deja en blanco intencionadamente para resolver un conflicto de enrutamiento.
-// La página correcta se encuentra en /src/app/(app)/students/page.tsx.
-// Al no exportar un componente por defecto, Next.js no tratará esto como una página.
+// This file has been moved to src/app/(app)/students/page.tsx to improve modularity and avoid routing conflicts.
+// This file is intentionally left blank to prevent a parallel route from being created.
