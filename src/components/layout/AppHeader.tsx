@@ -18,33 +18,41 @@ import * as React from "react"; // Import React for Fragment
 
 const getPathBreadcrumbs = (pathname: string) => {
   const segments = pathname.split('/').filter(Boolean);
-  
-  // Define a mapping for special first segments if needed
-  const firstSegmentLabel = segments.length > 0 && segments[0].toLowerCase() === 'dashboard' 
-    ? 'Panel' 
-    : segments.length > 0 ? segments[0].charAt(0).toUpperCase() + segments[0].slice(1).replace(/-/g, ' ') : 'Panel';
 
-  const initialCrumb = { href: segments.length > 0 && segments[0].toLowerCase() === 'dashboard' ? '/dashboard' : '/', label: firstSegmentLabel };
-  
-  const breadcrumbs = segments.slice(1).map((segment, index) => {
-    // For segments after the first one (e.g., 'dashboard'), build the path relative to the first segment
-    const href = '/' + segments.slice(0, index + 2).join('/');
-    const label = segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+  // If it's the root, go to dashboard
+  if (pathname === '/') {
+    return [{ href: '/dashboard', label: 'Panel' }];
+  }
+
+  // Define a mapping for labels to match sidebar
+  const labelMapping: { [key: string]: string } = {
+    dashboard: 'Panel',
+    teachers: 'Docentes',
+    students: 'Gestión de Estudiantes',
+    subjects: 'Temas',
+    attendance: 'Asistencias',
+    news: 'Tabla de noticias',
+    calendar: 'Horario',
+    curriculum: 'Programas de estudio',
+    grades: 'Notas',
+    qualifications: 'Calificaciones',
+    'bus-service': 'Servicio de Bus',
+    settings: 'Configuraciones',
+    new: 'Nuevo',
+  };
+
+  const breadcrumbs = segments.map((segment, index) => {
+    const href = '/' + segments.slice(0, index + 1).join('/');
+    const label = labelMapping[segment.toLowerCase()] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
     return { href, label };
   });
-  
-  if (pathname === '/' || pathname === '/dashboard') {
-     return [{ href: '/dashboard', label: 'Panel' }];
+
+  // If the path isn't the dashboard itself, prepend the dashboard link.
+  if (segments[0] !== 'dashboard') {
+     return [{ href: '/dashboard', label: 'Panel' }, ...breadcrumbs];
   }
   
-  // Handle cases where dashboard is not the first segment or there are no segments
-  if (segments.length > 0 && segments[0].toLowerCase() !== 'dashboard') {
-    const pageLabel = segments[0].charAt(0).toUpperCase() + segments[0].slice(1).replace(/-/g, ' ');
-    return [{ href: `/${segments[0]}`, label: pageLabel }, ...breadcrumbs];
-  }
-
-
-  return [initialCrumb, ...breadcrumbs];
+  return breadcrumbs;
 };
 
 
