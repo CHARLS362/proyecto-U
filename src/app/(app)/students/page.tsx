@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +13,8 @@ import {
   Trash2,
   FileText,
   ListOrdered,
+  MessageSquare,
+  Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -46,6 +47,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function StudentsPage() {
   const router = useRouter();
@@ -226,18 +229,102 @@ export default function StudentsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="comentario" className="mt-6">
+        <TabsContent value="comentario" className="mt-6 space-y-6">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle>Comentarios</CardTitle>
-              <CardDescription>
-                Deje comentarios o notas sobre los estudiantes.
-              </CardDescription>
+              <div className="flex items-center gap-2">
+                <MessageSquare className="h-6 w-6 text-muted-foreground" />
+                <CardTitle>Comentarios de los estudiantes</CardTitle>
+              </div>
             </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">La funcionalidad de comentarios se mostrará aquí.</p>
+            <Separator />
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div className="grid gap-2">
+                  <Label htmlFor="comment-class">Clase</Label>
+                  <Select defaultValue="12-comercio">
+                    <SelectTrigger id="comment-class">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                      <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                      <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="comment-section">Sección</Label>
+                  <Select defaultValue="A">
+                    <SelectTrigger id="comment-section">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="A">A</SelectItem>
+                      <SelectItem value="B">B</SelectItem>
+                      <SelectItem value="C">C</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="comment-student">Alumno</Label>
+                  <Select defaultValue="kumar">
+                    <SelectTrigger id="comment-student">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="S001">Ana Pérez</SelectItem>
+                        <SelectItem value="S002">Luis García</SelectItem>
+                        <SelectItem value="S003">Sofía Rodríguez</SelectItem>
+                        <SelectItem value="kumar">Student kumar</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button className="w-full md:w-auto">
+                  <SearchIcon className="mr-2 h-4 w-4" />
+                  Encontrar
+                </Button>
+              </div>
             </CardContent>
           </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="lg:col-span-1 shadow-lg">
+                <CardHeader>
+                    <CardTitle>Alumno</CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center text-center">
+                    <Avatar className="h-32 w-32 mb-4 border-2 border-border">
+                        <AvatarImage src="https://placehold.co/128x128.png" alt="Estudiante kumar" data-ai-hint="robot avatar" />
+                        <AvatarFallback>SK</AvatarFallback>
+                    </Avatar>
+                    <h3 className="text-xl font-semibold text-foreground">Estudiante kumar</h3>
+                    <div className="text-left text-sm text-muted-foreground mt-4 space-y-2 w-full bg-muted/30 p-4 rounded-lg">
+                        <p><span className="font-medium text-foreground/80">Identificación:</span> S1718791292</p>
+                        <p><span className="font-medium text-foreground/80">Teléfono:</span> 7894561230</p>
+                        <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> 19/06/2024</p>
+                    </div>
+                </CardContent>
+            </Card>
+            
+            <Card className="lg:col-span-2 shadow-lg flex flex-col">
+                <CardHeader>
+                    <CardTitle>Comentarios</CardTitle>
+                </CardHeader>
+                <CardContent className="flex-grow flex items-center justify-center bg-muted/50 rounded-md min-h-[200px]">
+                    <p className="text-muted-foreground">Sin comentarios</p>
+                </CardContent>
+                <CardFooter className="p-2 border-t mt-auto">
+                    <div className="relative w-full">
+                        <Textarea placeholder="Escribe un comentario..." className="pr-12 bg-card resize-none" rows={1} />
+                        <Button size="icon" className="absolute right-2 bottom-2 h-8 w-8">
+                            <Send className="h-4 w-4"/>
+                            <span className="sr-only">Enviar comentario</span>
+                        </Button>
+                    </div>
+                </CardFooter>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
