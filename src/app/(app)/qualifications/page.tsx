@@ -11,7 +11,9 @@ import {
   ChevronRight, 
   List, 
   Save, 
-  ArrowLeft 
+  ArrowLeft,
+  Search,
+  Database
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -196,7 +198,10 @@ export default function QualificationsPage() {
                     <List className="h-5 w-5 text-muted-foreground" />
                     <h3 className="font-semibold text-foreground">Clase 12c A</h3>
                   </div>
-                  <Button variant="outline" onClick={handleBack}>Atrás</Button>
+                  <Button variant="outline" onClick={handleBack}>
+                    <ArrowLeft className="mr-2 h-4 w-4" />
+                    Atrás
+                  </Button>
                 </div>
                 <Table>
                   <TableHeader>
@@ -240,14 +245,82 @@ export default function QualificationsPage() {
         </TabsContent>
 
         <TabsContent value="ver-calificaciones" className="mt-6">
-           <Card className="shadow-lg">
-                <CardHeader>
-                    <CardTitle>Ver Calificaciones</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-muted-foreground">El contenido para ver calificaciones se mostrará aquí.</p>
-                </CardContent>
-           </Card>
+           <div className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle className="text-lg">Información</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                  <div className="grid gap-2">
+                    <Label htmlFor="view-class">Clase</Label>
+                    <Select defaultValue="11-comercio">
+                      <SelectTrigger id="view-class">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                        <SelectItem value="11-comercio">11 (Comercio)</SelectItem>
+                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="view-section">Sección</Label>
+                    <Select defaultValue="A">
+                      <SelectTrigger id="view-section">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="view-session">Sesión</Label>
+                    <Select defaultValue="2025-26">
+                      <SelectTrigger id="view-session">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2025-26">2025-26</SelectItem>
+                        <SelectItem value="2024-25">2024-25</SelectItem>
+                        <SelectItem value="2023-24">2023-24</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button className="w-full md:w-auto">
+                    <Search className="mr-2 h-4 w-4" />
+                    Encontrar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Separator />
+
+            <Card className="shadow-lg">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle className="text-lg">Exámenes</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="p-4 bg-accent/20 rounded-full mb-4">
+                    <Database className="h-12 w-12 text-accent" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground">Sin registro</h3>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
