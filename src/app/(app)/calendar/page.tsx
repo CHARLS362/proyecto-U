@@ -26,8 +26,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Separator } from '@/components/ui/separator';
-import { CalendarClock, Search, Edit } from 'lucide-react';
+import { CalendarClock, Search, Edit, Save, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 
 type SchedulePeriod = {
   start: string;
@@ -43,8 +44,7 @@ type ScheduleBreak = {
 type ScheduleItem = SchedulePeriod | ScheduleBreak;
 
 
-// Mock data based on the image for different days
-const scheduleData: { [key: string]: ScheduleItem[] } = {
+const initialScheduleData: { [key: string]: ScheduleItem[] } = {
   lunes: [
     { start: '07:00', end: '08:00', subject: 'Hindi' },
     { start: '08:00', end: '09:00', subject: 'Inglés' },
@@ -113,12 +113,42 @@ const daysOfWeek = [
 export default function SchedulePage() {
   const [showSchedule, setShowSchedule] = useState(false);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
+  const [isEditing, setIsEditing] = useState(false);
+  const [schedules, setSchedules] = useState(initialScheduleData);
+  const [tempSchedules, setTempSchedules] = useState(initialScheduleData);
 
   const handleFind = () => {
     setShowSchedule(true);
   };
+  
+  const handleEdit = () => {
+    setTempSchedules(schedules);
+    setIsEditing(true);
+  };
+  
+  const handleSave = () => {
+    setSchedules(tempSchedules);
+    setIsEditing(false);
+    console.log("Horario guardado:", tempSchedules);
+  };
+  
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
+  
+  const handleScheduleChange = (dayKey: string, itemIndex: number, field: keyof SchedulePeriod, value: string) => {
+    setTempSchedules(prev => {
+        const newSchedules = { ...prev };
+        const daySchedule = [...newSchedules[dayKey]];
+        const updatedItem = { ...daySchedule[itemIndex], [field]: value };
+        daySchedule[itemIndex] = updatedItem as SchedulePeriod;
+        newSchedules[dayKey] = daySchedule;
+        return newSchedules;
+    });
+  };
 
   const handleDayChange = (offset: number) => {
+    if (isEditing) return;
     setSelectedDayIndex((prevIndex) => {
       const newIndex = prevIndex + offset;
       if (newIndex < 0) return daysOfWeek.length - 1;
@@ -128,7 +158,7 @@ export default function SchedulePage() {
   };
 
   const currentDayKey = daysOfWeek[selectedDayIndex].key;
-  const currentSchedule = scheduleData[currentDayKey] || [];
+  const currentSchedule = (isEditing ? tempSchedules[currentDayKey] : schedules[currentDayKey]) || [];
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -151,7 +181,7 @@ export default function SchedulePage() {
           <div className="flex flex-wrap items-end gap-4">
             <div className="grid gap-1.5 flex-grow sm:flex-grow-0">
               <Label htmlFor="class">Clase</Label>
-              <Select defaultValue="12-comercio">
+              <Select defaultValue="12-comercio" disabled={isEditing}>
                 <SelectTrigger id="class" className="w-full sm:w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -164,7 +194,7 @@ export default function SchedulePage() {
             </div>
             <div className="grid gap-1.5 flex-grow sm:flex-grow-0">
               <Label htmlFor="section">Sección</Label>
-              <Select defaultValue="A">
+              <Select defaultValue="A" disabled={isEditing}>
                 <SelectTrigger id="section" className="w-full sm:w-[200px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -175,7 +205,7 @@ export default function SchedulePage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full sm:w-auto" onClick={handleFind}>
+            <Button className="w-full sm:w-auto" onClick={handleFind} disabled={isEditing}>
               <Search className="mr-2 h-4 w-4" />
               Encontrar
             </Button>
@@ -190,15 +220,15 @@ export default function SchedulePage() {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between border rounded-md p-1 bg-muted/50 mb-6">
-              <Button variant="ghost" className="text-muted-foreground" onClick={() => handleDayChange(-1)}>
+              <Button variant="ghost" className="text-muted-foreground" onClick={() => handleDayChange(-1)} disabled={isEditing}>
                 anterior
               </Button>
               <div className="flex-grow text-center">
-                 <Button variant="default" className="w-32 shadow-md">
+                 <Button variant="default" className="w-32 shadow-md" disabled={isEditing}>
                     {daysOfWeek[selectedDayIndex].label}
                  </Button>
               </div>
-              <Button variant="ghost" className="text-muted-foreground" onClick={() => handleDayChange(1)}>
+              <Button variant="ghost" className="text-muted-foreground" onClick={() => handleDayChange(1)} disabled={isEditing}>
                 próximo
               </Button>
             </div>
@@ -221,9 +251,39 @@ export default function SchedulePage() {
                     </TableRow>
                   ) : (
                     <TableRow key={index}>
-                      <TableCell>{(item as SchedulePeriod).start}</TableCell>
-                      <TableCell>{(item as SchedulePeriod).end}</TableCell>
-                      <TableCell>{(item as SchedulePeriod).subject}</TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                           <Input 
+                            value={(item as SchedulePeriod).start} 
+                            onChange={(e) => handleScheduleChange(currentDayKey, index, 'start', e.target.value)}
+                            className="bg-background/50"
+                           />
+                        ) : (
+                          (item as SchedulePeriod).start
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {isEditing ? (
+                           <Input 
+                            value={(item as SchedulePeriod).end} 
+                            onChange={(e) => handleScheduleChange(currentDayKey, index, 'end', e.target.value)}
+                            className="bg-background/50"
+                           />
+                        ) : (
+                          (item as SchedulePeriod).end
+                        )}
+                      </TableCell>
+                       <TableCell>
+                        {isEditing ? (
+                           <Input 
+                            value={(item as SchedulePeriod).subject} 
+                            onChange={(e) => handleScheduleChange(currentDayKey, index, 'subject', e.target.value)}
+                            className="bg-background/50"
+                           />
+                        ) : (
+                          (item as SchedulePeriod).subject
+                        )}
+                      </TableCell>
                     </TableRow>
                   )
                 )}
@@ -231,9 +291,20 @@ export default function SchedulePage() {
             </Table>
           </CardContent>
           <CardFooter className="flex justify-between items-center pt-6 mt-4 border-t">
-            <Button className="bg-green-600 text-white hover:bg-green-700 font-semibold shadow-md">
-              <Edit className="mr-2 h-4 w-4" /> Editar
-            </Button>
+            {isEditing ? (
+                <div className="flex gap-2">
+                    <Button onClick={handleSave} className="bg-green-600 text-white hover:bg-green-700 font-semibold shadow-md">
+                        <Save className="mr-2 h-4 w-4" /> Guardar
+                    </Button>
+                    <Button variant="outline" onClick={handleCancel}>
+                        <XCircle className="mr-2 h-4 w-4" /> Cancelar
+                    </Button>
+                </div>
+            ) : (
+                <Button onClick={handleEdit} className="bg-blue-600 text-white hover:bg-blue-700 font-semibold shadow-md">
+                    <Edit className="mr-2 h-4 w-4" /> Editar
+                </Button>
+            )}
             <div className="text-right">
                 <p className="text-xs text-muted-foreground">Última edición por usted</p>
                 <p className="text-xs text-muted-foreground">10 de junio de 2024</p>
