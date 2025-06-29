@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { 
   NotebookText, 
   UploadCloud, 
@@ -27,6 +28,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export default function GradesPage() {
+  const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setFileName(event.target.files[0].name);
+    } else {
+      setFileName('Ningún archivo seleccionado');
+    }
+  };
+
   const assignments = [
     {
       id: 1,
@@ -37,6 +48,14 @@ export default function GradesPage() {
       file: { name: 'tarea.png', size: '7 KB' }
     }
   ];
+  
+  const subjects = [
+    { id: 1, name: "Hindi" },
+    { id: 2, name: "Inglés" },
+    { id: 3, name: "Matemáticas" },
+    { id: 4, name: "Ciencias" },
+    { id: 5, name: "Comercio" },
+  ];
 
   return (
     <div className="space-y-6">
@@ -45,10 +64,71 @@ export default function GradesPage() {
           <NotebookText className="h-7 w-7 text-muted-foreground" />
           <h1 className="text-2xl font-semibold text-foreground">Notas</h1>
         </div>
-        <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
-          <UploadCloud className="mr-2 h-4 w-4" />
-          Cargar Notas
-        </Button>
+        <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
+          <DialogTrigger asChild>
+            <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
+              <UploadCloud className="mr-2 h-4 w-4" />
+              Cargar Notas
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Subir notas</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="class-upload">Clase</Label>
+                  <Select defaultValue="12-comercio">
+                    <SelectTrigger id="class-upload"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                      <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                      <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="subject-upload">Sujeto</Label>
+                  <Select>
+                    <SelectTrigger id="subject-upload"><SelectValue placeholder="--select--" /></SelectTrigger>
+                    <SelectContent>
+                       {subjects.map((subject) => (
+                        <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="title-upload">Título</Label>
+                <Input id="title-upload" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="comment-upload">Comentario</Label>
+                <Textarea id="comment-upload" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="file-upload" className="text-sm text-muted-foreground">
+                  Subir archivo (tamaño máximo 200 MB)
+                </Label>
+                <div className="flex items-center gap-2">
+                    <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
+                    <Button asChild variant="outline" className="shrink-0">
+                      <Label htmlFor="file-upload" className="cursor-pointer font-normal">Seleccionar archivo</Label>
+                    </Button>
+                    <span className="text-sm text-muted-foreground truncate">{fileName}</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Subir
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <Separator />
