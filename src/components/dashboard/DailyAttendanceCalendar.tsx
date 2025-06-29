@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -26,10 +27,11 @@ export function DailyAttendanceCalendar({ className }: { className?: string }) {
     justificado: { label: "Justificado", color: "hsl(var(--chart-4))" },
   } satisfies ChartConfig;
 
-  // In a real app, you'd fetch or filter data based on selectedDate.
-  const chartData: AttendanceData[] = mockAttendanceStats.map(stat => ({
+  // By letting TypeScript infer the type of chartData, it retains the specific
+  // literal union type for 'status', which makes the object access below type-safe.
+  const chartData = mockAttendanceStats.map(stat => ({
     ...stat,
-    status: stat.status as keyof typeof chartConfig, // Ensure status matches ChartConfig keys
+    status: stat.status,
   }));
 
   const totalStudents = React.useMemo(() => {
