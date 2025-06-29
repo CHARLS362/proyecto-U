@@ -1,22 +1,110 @@
 
-import { PageTitle } from "@/components/common/PageTitle";
-import { NotebookText } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+'use client';
+
+import { 
+  NotebookText, 
+  UploadCloud, 
+  Search, 
+  Eye, 
+  Download, 
+  Edit, 
+  Trash2 
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 
 export default function GradesPage() {
+  const assignments = [
+    {
+      id: 1,
+      title: 'Tarea de hindi',
+      date: '19 de junio de 2024',
+      status: 'Hazlo a tiempo',
+      statusColor: 'text-green-600 dark:text-green-400',
+      file: { name: 'tarea.png', size: '7 KB' }
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      <PageTitle title="Gestión de Notas" subtitle="Registre y consulte las notas de los estudiantes." icon={NotebookText} />
-      <Card className="shadow-lg animate-fade-in">
-        <CardHeader>
-          <CardTitle>Registro de Notas</CardTitle>
-          <CardDescription>Visualice y administre las notas por curso y estudiante.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">El contenido de la gestión de notas se mostrará aquí.</p>
-          {/* TODO: Add grade management interface */}
-        </CardContent>
-      </Card>
+      <div className="flex justify-between items-center animate-fade-in">
+        <div className="flex items-center gap-3">
+          <NotebookText className="h-7 w-7 text-muted-foreground" />
+          <h1 className="text-2xl font-semibold text-foreground">Notas</h1>
+        </div>
+        <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
+          <UploadCloud className="mr-2 h-4 w-4" />
+          Cargar Notas
+        </Button>
+      </div>
+      
+      <Separator />
+
+      <div className="space-y-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="flex items-end gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="class">Clase</Label>
+            <Select defaultValue="12-comercio">
+              <SelectTrigger id="class" className="w-[240px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                <SelectItem value="10-arte">10 (Arte)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button>
+            <Search className="mr-2 h-4 w-4" />
+            Encontrar
+          </Button>
+        </div>
+
+        <Separator />
+
+        <div className="space-y-4">
+          {assignments.map((assignment) => (
+            <Card key={assignment.id} className="bg-muted/30 shadow-sm w-full max-w-md overflow-hidden">
+              <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-lg">{assignment.title}</CardTitle>
+                <CardDescription>{assignment.date}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 pt-0 pb-2">
+                <span className={`text-sm font-semibold ${assignment.statusColor}`}>
+                  {assignment.status}
+                </span>
+              </CardContent>
+              <CardFooter className="p-2 flex justify-between items-center border-t bg-card">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Button variant="ghost" size="icon" className="h-7 w-7"><Eye className="h-4 w-4"/></Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7"><Download className="h-4 w-4"/></Button>
+                  <span>{assignment.file.size} ({assignment.file.name.split('.').pop()})</span>
+                </div>
+                <div className="flex items-center">
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700">
+                    <Edit className="h-4 w-4"/>
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80">
+                    <Trash2 className="h-4 w-4"/>
+                  </Button>
+                </div>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+        
+        <Separator />
+        
+        <div className="flex justify-end items-center gap-2 pt-4">
+            <Button variant="outline" size="sm">anterior</Button>
+            <Button variant="default" size="sm">1</Button>
+            <Button variant="outline" size="sm">próximo</Button>
+        </div>
+      </div>
     </div>
   );
 }
