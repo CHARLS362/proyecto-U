@@ -3,11 +3,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { Button } from "../components/ui/button";
 import { ArrowRight, ListChecks, Star, Target, TrendingUp, UserCheck, Sparkles } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { LandingShell } from "@/components/layout/LandingShell";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../components/ui/carousel";
+import { LandingShell } from "../components/layout/LandingShell";
 import React, { useState, useEffect, useCallback } from "react";
 import Autoplay from "embla-carousel-autoplay";
 import type { EmblaApiType } from 'embla-carousel-react';

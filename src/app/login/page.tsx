@@ -1,6 +1,4 @@
-
-'use client';
-
+  'use client';
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -8,24 +6,54 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const router = useRouter();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('Login attempt with:', { email, password });
-    router.push('/dashboard');
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo: email, contrasena: password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setNotification({ type: 'success', message: '¡Inicio de sesión exitoso!' });
+        setTimeout(() => {
+          setNotification(null);
+          router.push('/dashboard');
+        }, 1500);
+      } else {
+        setNotification({ type: 'error', message: data.error || 'Error al iniciar sesión' });
+      }
+    } catch (error) {
+      setNotification({ type: 'error', message: 'No se pudo conectar con el servidor.' });
+    }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative">
-       <Link href="/" className="absolute top-4 left-4 md:top-8 md:left-8 flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
+      {notification && (
+        <div
+          className={`fixed top-6 left-1/2 z-50 px-6 py-3 rounded shadow-lg text-base font-medium
+            ${notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}
+          style={{ transform: 'translateX(-50%)' }}
+        >
+          {notification.message}
+        </div>
+      )}
+
+      <Link href="/" className="absolute top-4 left-4 md:top-8 md:left-8 flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Volver al inicio
       </Link>
