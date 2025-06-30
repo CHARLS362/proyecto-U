@@ -1,4 +1,7 @@
 
+'use client';
+
+import { useState } from 'react';
 import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,9 +17,18 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 
-// Mock data for teachers, placed here for simplicity
-const mockTeachers = [
+const initialTeachers = [
   {
     id: "T1749005331",
     name: "Arnold apd",
@@ -35,6 +47,30 @@ const mockTeachers = [
 ];
 
 export default function TeachersPage() {
+  const [teachers, setTeachers] = useState(initialTeachers);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
+  const [newTeacherName, setNewTeacherName] = useState('');
+
+  const handleAddTeacher = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newTeacherName.trim()) {
+      const newTeacher = {
+        id: `T${Date.now()}`,
+        name: newTeacherName,
+        avatarUrl: "https://placehold.co/40x40.png",
+      };
+      setTeachers(prev => [...prev, newTeacher]);
+      console.log("Nuevo docente agregado (simulación):", newTeacher);
+      setNewTeacherName('');
+      setIsAddTeacherOpen(false);
+    }
+  };
+  
+  const filteredTeachers = teachers.filter(teacher => 
+    teacher.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in">
@@ -61,17 +97,50 @@ export default function TeachersPage() {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                <Button
-                  variant="outline"
-                  className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-primary/50"
-                >
-                  <div className="bg-green-100 dark:bg-green-500/20 p-5 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-500/30 transition-colors">
-                    <UserPlus className="h-10 w-10 text-green-600 dark:text-green-400" />
-                  </div>
-                  <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                    Agregar Maestro
-                  </span>
-                </Button>
+                <Dialog open={isAddTeacherOpen} onOpenChange={setIsAddTeacherOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-primary/50"
+                    >
+                      <div className="bg-green-100 dark:bg-green-500/20 p-5 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-500/30 transition-colors">
+                        <UserPlus className="h-10 w-10 text-green-600 dark:text-green-400" />
+                      </div>
+                      <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                        Agregar Maestro
+                      </span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Agregar Nuevo Maestro</DialogTitle>
+                      <DialogDescription>
+                        Complete el nombre del nuevo maestro. El ID se generará automáticamente.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleAddTeacher}>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                          <Label htmlFor="name" className="text-right">
+                            Nombre
+                          </Label>
+                          <Input
+                            id="name"
+                            value={newTeacherName}
+                            onChange={(e) => setNewTeacherName(e.target.value)}
+                            className="col-span-3"
+                            placeholder="Ej: Juan Pérez"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button type="button" variant="outline" onClick={() => setIsAddTeacherOpen(false)}>Cancelar</Button>
+                        <Button type="submit">Guardar Maestro</Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
 
                 <Button
                   variant="outline"
@@ -96,11 +165,14 @@ export default function TeachersPage() {
                 <ListOrdered className="h-6 w-6 text-primary" />
                 <CardTitle className="text-xl">Lista de profesores</CardTitle>
               </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Input placeholder="Buscar" className="bg-card w-full sm:w-auto" />
-                <Button variant="outline" size="icon" className="bg-green-600 hover:bg-green-700 text-white">
-                  <SearchIcon className="h-4 w-4" />
-                </Button>
+              <div className="relative w-full sm:w-auto sm:max-w-xs">
+                <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  placeholder="Buscar por nombre..." 
+                  className="bg-card w-full pl-9"
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -114,7 +186,7 @@ export default function TeachersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {mockTeachers.map((teacher, index) => (
+                  {filteredTeachers.map((teacher, index) => (
                     <TableRow key={teacher.id}>
                       <TableCell>{index + 1}.</TableCell>
                       <TableCell>{teacher.id}</TableCell>
@@ -139,13 +211,13 @@ export default function TeachersPage() {
                   ))}
                 </TableBody>
               </Table>
-              {mockTeachers.length === 0 && (
+              {filteredTeachers.length === 0 && (
                 <p className="p-6 text-center text-muted-foreground">
-                  No hay profesores para mostrar.
+                  No se encontraron profesores.
                 </p>
               )}
             </CardContent>
-            {mockTeachers.length > 0 && (
+            {filteredTeachers.length > 0 && (
                 <CardFooter className="flex justify-end items-center gap-2 pt-4">
                     <Button variant="outline" size="sm">anterior</Button>
                     <Button variant="outline" size="sm" className="bg-primary/10 text-primary border-primary">1</Button>

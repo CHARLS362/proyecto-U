@@ -2,7 +2,7 @@
 import { PageTitle } from "@/components/common/PageTitle";
 import { mockCourses } from "@/lib/mockData";
 import type { Course } from "@/lib/mockData";
-import { BookOpenText, PlusCircle, Users, CalendarDays, Percent, MoreVertical } from "lucide-react";
+import { BookOpenText, PlusCircle, MoreVertical } from "lucide-react";
 import Link from "next/link";
 import {
   Table,
@@ -11,13 +11,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption,
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -25,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function CoursesPage() {
   const courses = mockCourses;
@@ -129,6 +128,3 @@ export default function CoursesPage() {
     </div>
   );
 }
-
-// Temporary dependencies until pages are fully built
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

@@ -2,8 +2,7 @@
 import { PageTitle } from "@/components/common/PageTitle";
 import { mockStudents, mockCourses } from "@/lib/mockData";
 import type { Student } from "@/lib/mockData";
-import { User, Mail, Phone, MapPin, CalendarDays, ShieldCheck, Users, Edit, Trash2 } from "lucide-react";
-import Image from "next/image";
+import { User, Mail, Phone, MapPin, CalendarDays, ShieldCheck, Edit, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,14 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 
 async function getStudent(id: string): Promise<Student | undefined> {
   return mockStudents.find(s => s.id === id);
