@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
+import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -28,11 +28,6 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 const initialTeachers = [
   {
@@ -65,7 +60,7 @@ export default function TeachersPage() {
   const [teacherSection, setTeacherSection] = useState('');
   const [relatedSubject, setRelatedSubject] = useState('');
   const [gender, setGender] = useState('');
-  const [dob, setDob] = useState<Date | undefined>();
+  const [dob, setDob] = useState('');
   
   // State for step 2
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -83,7 +78,7 @@ export default function TeachersPage() {
     setTeacherSection('');
     setRelatedSubject('');
     setGender('');
-    setDob(undefined);
+    setDob('');
     setPhoneNumber('');
     setEmail('');
     setAddress('');
@@ -166,8 +161,8 @@ export default function TeachersPage() {
                           <div className="grid gap-2">
                             <Label htmlFor="name">Nombre completo</Label>
                             <div className="grid grid-cols-2 gap-4">
-                              <Input id="first-name" placeholder="papu" value={firstName} onChange={e => setFirstName(e.target.value)} />
-                              <Input id="last-name" placeholder="mamani" value={lastName} onChange={e => setLastName(e.target.value)} />
+                              <Input id="first-name" placeholder="Nombres" value={firstName} onChange={e => setFirstName(e.target.value)} />
+                              <Input id="last-name" placeholder="Apellidos" value={lastName} onChange={e => setLastName(e.target.value)} />
                             </div>
                           </div>
                           <div className="grid gap-2">
@@ -193,12 +188,12 @@ export default function TeachersPage() {
                           </div>
                           <div className="grid gap-2">
                              <Label htmlFor="related-subject">Tema relacionado</Label>
-                             <Input id="related-subject" placeholder="sexologia" value={relatedSubject} onChange={e => setRelatedSubject(e.target.value)} />
+                             <Input id="related-subject" placeholder="Ej: Matemáticas" value={relatedSubject} onChange={e => setRelatedSubject(e.target.value)} />
                           </div>
                            <div className="grid gap-2">
                              <Label htmlFor="gender">Género</Label>
                              <Select onValueChange={setGender} value={gender}>
-                                <SelectTrigger id="gender"><SelectValue placeholder="Masculino"/></SelectTrigger>
+                                <SelectTrigger id="gender"><SelectValue placeholder="Seleccionar género"/></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="masculino">Masculino</SelectItem>
                                     <SelectItem value="femenino">Femenino</SelectItem>
@@ -208,33 +203,13 @@ export default function TeachersPage() {
                           </div>
                            <div className="grid gap-2">
                             <Label htmlFor="dob">Fecha de nacimiento</Label>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  id="dob"
-                                  variant={"outline"}
-                                  className={cn(
-                                    "w-full justify-start text-left font-normal",
-                                    !dob && "text-muted-foreground"
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-4 w-4" />
-                                  {dob ? format(dob, "dd/MM/yyyy") : <span>dd/mm/aaaa</span>}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0">
-                                <Calendar 
-                                  mode="single"
-                                  selected={dob}
-                                  onSelect={setDob}
-                                  initialFocus
-                                  locale={es}
-                                  captionLayout="dropdown-buttons"
-                                  fromYear={1960}
-                                  toYear={new Date().getFullYear() - 18}
-                                />
-                              </PopoverContent>
-                            </Popover>
+                             <Input
+                              id="dob"
+                              type="date"
+                              value={dob}
+                              onChange={(e) => setDob(e.target.value)}
+                              className="bg-card"
+                            />
                           </div>
                         </div>
                         <DialogFooter>
@@ -256,23 +231,23 @@ export default function TeachersPage() {
                             <div className="space-y-4 py-4">
                                 <div className="grid gap-2">
                                     <Label htmlFor="phone">Número de celular</Label>
-                                    <Input id="phone" type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required />
+                                    <Input id="phone" type="tel" placeholder="987 654 321" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="email">Correo electrónico</Label>
-                                    <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                                    <Input id="email" type="email" placeholder="docente@ejemplo.com" value={email} onChange={e => setEmail(e.target.value)} required />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="address">Dirección</Label>
-                                    <Input id="address" value={address} onChange={e => setAddress(e.target.value)} />
+                                    <Input id="address" placeholder="Av. Principal 123, Ciudad" value={address} onChange={e => setAddress(e.target.value)} />
                                 </div>
                                  <div className="grid gap-2">
                                     <Label htmlFor="ref-contact">Contacto de referencia</Label>
-                                    <Input id="ref-contact" value={refContact} onChange={e => setRefContact(e.target.value)} />
+                                    <Input id="ref-contact" placeholder="987 654 322" value={refContact} onChange={e => setRefContact(e.target.value)} />
                                 </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="ref-relationship">Parentesco</Label>
-                                    <Input id="ref-relationship" value={refRelationship} onChange={e => setRefRelationship(e.target.value)} />
+                                    <Input id="ref-relationship" placeholder="Ej: Esposa" value={refRelationship} onChange={e => setRefRelationship(e.target.value)} />
                                 </div>
                             </div>
                             <DialogFooter>
