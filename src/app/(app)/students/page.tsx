@@ -73,14 +73,19 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { cn } from '@/lib/utils';
+import { buttonVariants } from '@/components/ui/button';
 
 
 const studentFormSchema = z.object({
   // Paso 1
-  studentName: z.string().min(2, "El nombre del estudiante es obligatorio."),
+  studentFirstName: z.string().min(2, "El nombre es obligatorio."),
+  studentLastName: z.string().min(2, "El apellido es obligatorio."),
   guardianName: z.string().min(2, "El nombre del apoderado es obligatorio."),
   studentDob: z.string().min(1, "La fecha de nacimiento es obligatoria."),
   studentGender: z.string({ required_error: "Por favor, seleccione un género." }),
+  studentClass: z.string({ required_error: "Por favor, seleccione una clase." }),
+  studentSection: z.string({ required_error: "Por favor, seleccione una sección." }),
   studentPhoto: z.any().optional(),
 
   // Paso 2
@@ -97,13 +102,17 @@ const studentFormSchema = z.object({
   guardianDob: z.string().min(1, "La fecha de nacimiento del apoderado es obligatoria."),
 });
 
+
 type StudentFormValues = z.infer<typeof studentFormSchema>;
 
 const defaultValues: Partial<StudentFormValues> = {
-  studentName: "",
+  studentFirstName: "",
+  studentLastName: "",
   guardianName: "",
   studentDob: "",
   studentGender: "",
+  studentClass: "",
+  studentSection: "",
   studentPhone: "",
   studentEmail: "",
   studentAddress: "",
@@ -125,6 +134,7 @@ export default function StudentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoFileName, setPhotoFileName] = useState('Ningún archivo seleccionado');
 
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
@@ -138,6 +148,7 @@ export default function StudentsPage() {
       form.reset();
       setStep(1);
       setPhotoPreview(null);
+      setPhotoFileName('Ningún archivo seleccionado');
     }
   }
 
@@ -148,15 +159,20 @@ export default function StudentsPage() {
       reader.onloadend = () => {
         setPhotoPreview(reader.result as string);
         form.setValue("studentPhoto", file);
+        setPhotoFileName(file.name);
       };
       reader.readAsDataURL(file);
+    } else {
+        setPhotoPreview(null);
+        form.setValue("studentPhoto", undefined);
+        setPhotoFileName('Ningún archivo seleccionado');
     }
   };
   
   const nextStep = async () => {
     let fieldsToValidate: (keyof StudentFormValues)[] = [];
     if (step === 1) {
-      fieldsToValidate = ['studentName', 'guardianName', 'studentDob', 'studentGender'];
+      fieldsToValidate = ['studentFirstName', 'studentLastName', 'guardianName', 'studentDob', 'studentGender', 'studentClass', 'studentSection'];
     } else if (step === 2) {
       fieldsToValidate = ['studentPhone', 'studentEmail', 'studentAddress', 'studentDepartment', 'studentCity'];
     }
@@ -181,7 +197,7 @@ export default function StudentsPage() {
     console.log("Datos del nuevo estudiante:", data);
     toast({
       title: "Estudiante Agregado (Simulación)",
-      description: `El estudiante ${data.studentName} ha sido registrado exitosamente.`,
+      description: `El estudiante ${data.studentFirstName} ${data.studentLastName} ha sido registrado exitosamente.`,
     });
     handleModalChange(false);
   }
@@ -472,106 +488,127 @@ export default function StudentsPage() {
     </div>
 
     <Dialog open={isModalOpen} onOpenChange={handleModalChange}>
-        <DialogContent className="sm:max-w-4xl">
+        <DialogContent className="sm:max-w-xl">
            <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <DialogHeader>
-                <DialogTitle>Formulario de Registro de Estudiante</DialogTitle>
+                <DialogTitle>Detalles del estudiante</DialogTitle>
                 <DialogDescription>{getStepTitle(step)}</DialogDescription>
                 <Progress value={(step / 3) * 100} className="w-full mt-2" />
               </DialogHeader>
 
-              <div className="py-6 space-y-8 max-h-[70vh] overflow-y-auto pr-6">
+              <div className="py-6 space-y-4 max-h-[70vh] overflow-y-auto pr-6">
                 {step === 1 && (
-                    <div className="space-y-8 animate-fade-in">
-                        <FormField
-                          control={form.control}
-                          name="studentName"
-                          render={({ field }) => (
+                  <div className="space-y-4 animate-fade-in">
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="studentFirstName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nombre completo</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Nombre de pila" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="studentLastName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-transparent select-none">Apellido</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Apellido" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField control={form.control} name="guardianName" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Nombre del padre</FormLabel>
+                            <FormControl><Input {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="studentDob" render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Nombre Completo del Estudiante</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ej: Juan Almendro Pérez" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="guardianName"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Nombre del Padre o Apoderado</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Ej: Roberto Almendro" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                           <FormField
-                            control={form.control}
-                            name="studentDob"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Fecha de Nacimiento</FormLabel>
-                                <FormControl>
-                                  <Input type="date" {...field} />
-                                </FormControl>
+                                <FormLabel>Fecha de nacimiento</FormLabel>
+                                <FormControl><Input type="date" placeholder="dd/mm/aaaa" {...field} /></FormControl>
                                 <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                           <FormField
-                              control={form.control}
-                              name="studentGender"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Género</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Seleccione un género" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="studentGender" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Género</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="--seleccionar--" /></SelectTrigger></FormControl>
+                                    <SelectContent>
                                         <SelectItem value="masculino">Masculino</SelectItem>
                                         <SelectItem value="femenino">Femenino</SelectItem>
                                         <SelectItem value="otro">Otro</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                        </div>
-                         <FormField
-                            control={form.control}
-                            name="studentPhoto"
-                            render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Foto del Estudiante</FormLabel>
-                                <div className="flex items-center gap-4">
-                                    <Avatar className="h-24 w-24 border">
-                                        <AvatarImage src={photoPreview || undefined} alt="Vista previa de foto" data-ai-hint="student photo" />
-                                        <AvatarFallback><Camera className="h-8 w-8 text-muted-foreground" /></AvatarFallback>
-                                    </Avatar>
-                                    <FormControl>
-                                        <Button asChild variant="outline">
-                                            <label htmlFor="photo-upload-modal" className="cursor-pointer">
-                                                Subir Foto
-                                                <Input id="photo-upload-modal" type="file" className="sr-only" accept="image/*" onChange={handlePhotoChange} />
-                                            </label>
-                                        </Button>
-                                    </FormControl>
-                                </div>
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
-                            )}
-                        />
+                        )} />
                     </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField control={form.control} name="studentClass" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Clase</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="---seleccionar---" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="studentSection" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Sección</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="--seleccionar--" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="A">A</SelectItem>
+                                        <SelectItem value="B">B</SelectItem>
+                                        <SelectItem value="C">C</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </div>
+
+                    <FormField control={form.control} name="studentPhoto" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Foto</FormLabel>
+                             <div className="flex items-center gap-2">
+                                <FormControl>
+                                    <Label htmlFor="photo-upload-modal" className={cn(buttonVariants({ variant: "outline" }), "cursor-pointer font-normal")}>
+                                        Seleccionar archivo
+                                        <Input id="photo-upload-modal" type="file" className="sr-only" accept="image/*" onChange={handlePhotoChange} />
+                                    </Label>
+                                </FormControl>
+                                <span className="text-sm text-muted-foreground truncate">{photoFileName}</span>
+                            </div>
+                            <FormMessage />
+                             {photoPreview && <Avatar className="mt-4 h-24 w-24"><AvatarImage src={photoPreview} alt="Vista previa de foto" /></Avatar>}
+                        </FormItem>
+                    )} />
+                  </div>
                 )}
                 {step === 2 && (
                     <div className="space-y-8 animate-fade-in">
@@ -714,8 +751,10 @@ export default function StudentsPage() {
                   )}
                   <div className="flex-grow" />
                   {step < 3 ? (
-                       <Button type="button" onClick={nextStep}>
-                          Siguiente <ChevronRight className="ml-2 h-4 w-4" />
+                       <Button type="button" onClick={nextStep} className="bg-blue-600 hover:bg-blue-700">
+                          próximo 
+                          <ChevronRight className="ml-1 h-4 w-4" />
+                          <ChevronRight className="-ml-3 h-4 w-4" />
                       </Button>
                   ) : (
                       <Button type="submit">
