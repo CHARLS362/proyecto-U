@@ -24,36 +24,90 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const initialTeachers = [
+interface Teacher {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  class?: string;
+  section?: string;
+  relatedSubject?: string;
+  gender?: string;
+  dob?: string;
+  phoneNumber?: string;
+  email?: string;
+  address?: string;
+  refContact?: string;
+  refRelationship?: string;
+}
+
+
+const initialTeachers: Teacher[] = [
   {
     id: "T1749005331",
-    name: "Arnold apd",
+    firstName: "Arnold",
+    lastName: "Apd",
     avatarUrl: "https://placehold.co/40x40.png",
+    email: "arnold.apd@example.com",
+    phoneNumber: "111-222-3333",
+    address: "Calle Falsa 123, Ciudad",
+    dob: "1985-05-20",
+    gender: "masculino",
+    class: "12-comercio",
+    section: "A",
+    relatedSubject: "Física",
+    refContact: "555-123-4567",
+    refRelationship: "Esposa"
   },
   {
     id: "T1749005332",
-    name: "Beatriz Castillo",
+    firstName: "Beatriz",
+    lastName: "Castillo",
     avatarUrl: "https://placehold.co/40x40.png",
+    email: "beatriz.castillo@example.com",
+    phoneNumber: "222-333-4444",
+    address: "Avenida Siempreviva 742, Ciudad",
+    dob: "1990-11-15",
+    gender: "femenino",
+    class: "11-ciencia",
+    section: "B",
+    relatedSubject: "Química",
+    refContact: "555-234-5678",
+    refRelationship: "Hermano"
   },
   {
     id: "T1749005333",
-    name: "Carlos Dávila",
+    firstName: "Carlos",
+    lastName: "Dávila",
     avatarUrl: "https://placehold.co/40x40.png",
+    email: "carlos.davila@example.com",
+    phoneNumber: "333-444-5555",
+    address: "Boulevard de los Sueños Rotos 45, Ciudad",
+    dob: "1982-03-30",
+    gender: "masculino",
+    class: "10-arte",
+    section: "C",
+    relatedSubject: "Arte",
+    refContact: "555-345-6789",
+    refRelationship: "Padre"
   },
 ];
 
 export default function TeachersPage() {
   const [teachers, setTeachers] = useState(initialTeachers);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
   
-  // State for the multi-step form
+  // Modal and form state
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [currentTeacherId, setCurrentTeacherId] = useState<string | null>(null);
   const [formStep, setFormStep] = useState(1);
+  
+  // Form fields state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [teacherClass, setTeacherClass] = useState('');
@@ -61,14 +115,11 @@ export default function TeachersPage() {
   const [relatedSubject, setRelatedSubject] = useState('');
   const [gender, setGender] = useState('');
   const [dob, setDob] = useState('');
-  
-  // State for step 2
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [refContact, setRefContact] = useState('');
   const [refRelationship, setRefRelationship] = useState('');
-
 
   const resetForm = () => {
     setFormStep(1);
@@ -84,32 +135,88 @@ export default function TeachersPage() {
     setAddress('');
     setRefContact('');
     setRefRelationship('');
-  }
-
-  const handleAddTeacher = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newTeacher = {
-      id: `T${Date.now()}`,
-      name: `${firstName} ${lastName}`,
-      avatarUrl: "https://placehold.co/40x40.png",
-      // Add other fields here from state
-    };
-    setTeachers(prev => [...prev, newTeacher]);
-    console.log("Nuevo docente agregado (simulación):", newTeacher);
-    setIsAddTeacherOpen(false);
-    resetForm();
+    setCurrentTeacherId(null);
   };
   
-  const filteredTeachers = teachers.filter(teacher => 
-    teacher.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleDialogChange = (open: boolean) => {
-    setIsAddTeacherOpen(open);
+  const handleModalChange = (open: boolean) => {
+    setIsModalOpen(open);
     if (!open) {
       resetForm();
     }
   }
+
+  const handleOpenAddModal = () => {
+    resetForm();
+    setModalMode('add');
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (teacher: Teacher) => {
+    resetForm();
+    setModalMode('edit');
+    setCurrentTeacherId(teacher.id);
+
+    // Populate form state from teacher data
+    setFirstName(teacher.firstName);
+    setLastName(teacher.lastName);
+    setTeacherClass(teacher.class || '');
+    setTeacherSection(teacher.section || '');
+    setRelatedSubject(teacher.relatedSubject || '');
+    setGender(teacher.gender || '');
+    setDob(teacher.dob || '');
+    setPhoneNumber(teacher.phoneNumber || '');
+    setEmail(teacher.email || '');
+    setAddress(teacher.address || '');
+    setRefContact(teacher.refContact || '');
+    setRefRelationship(teacher.refRelationship || '');
+
+    setFormStep(1);
+    setIsModalOpen(true);
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const teacherDataPayload = {
+      firstName,
+      lastName,
+      avatarUrl: "https://placehold.co/40x40.png",
+      class: teacherClass,
+      section: teacherSection,
+      relatedSubject,
+      gender,
+      dob,
+      phoneNumber,
+      email,
+      address,
+      refContact,
+      refRelationship
+    };
+
+    if (modalMode === 'add') {
+      const newTeacher: Teacher = {
+        id: `T${Date.now()}`,
+        ...teacherDataPayload
+      };
+      setTeachers(prev => [...prev, newTeacher]);
+      console.log("Nuevo docente agregado (simulación):", newTeacher);
+    } else if (currentTeacherId) {
+       setTeachers(prev => 
+            prev.map(t => 
+                t.id === currentTeacherId 
+                ? { ...t, ...teacherDataPayload } 
+                : t
+            )
+        );
+      console.log("Docente actualizado (simulación):", { id: currentTeacherId, ...teacherDataPayload });
+    }
+    
+    handleModalChange(false);
+  };
+
+  const filteredTeachers = teachers.filter(teacher => 
+    `${teacher.firstName} ${teacher.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -137,128 +244,18 @@ export default function TeachersPage() {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                <Dialog open={isAddTeacherOpen} onOpenChange={handleDialogChange}>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-primary/50"
-                    >
-                      <div className="bg-green-100 dark:bg-green-500/20 p-5 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-500/30 transition-colors">
-                        <UserPlus className="h-10 w-10 text-green-600 dark:text-green-400" />
-                      </div>
-                      <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
-                        Agregar Maestro
-                      </span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-lg">
-                    {formStep === 1 && (
-                      <>
-                        <DialogHeader>
-                          <DialogTitle>Detalles del profesor</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                          <div className="grid gap-2">
-                            <Label htmlFor="name">Nombre completo</Label>
-                            <div className="grid grid-cols-2 gap-4">
-                              <Input id="first-name" placeholder="Nombres" value={firstName} onChange={e => setFirstName(e.target.value)} />
-                              <Input id="last-name" placeholder="Apellidos" value={lastName} onChange={e => setLastName(e.target.value)} />
-                            </div>
-                          </div>
-                          <div className="grid gap-2">
-                            <Label>Detalles del profesor de la clase</Label>
-                             <div className="grid grid-cols-2 gap-4">
-                                <Select onValueChange={setTeacherClass} value={teacherClass}>
-                                    <SelectTrigger><SelectValue placeholder="Seleccionar Clase"/></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <Select onValueChange={setTeacherSection} value={teacherSection}>
-                                    <SelectTrigger><SelectValue placeholder="Sección"/></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="A">A</SelectItem>
-                                        <SelectItem value="B">B</SelectItem>
-                                        <SelectItem value="C">C</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                             </div>
-                          </div>
-                          <div className="grid gap-2">
-                             <Label htmlFor="related-subject">Tema relacionado</Label>
-                             <Input id="related-subject" placeholder="Ej: Matemáticas" value={relatedSubject} onChange={e => setRelatedSubject(e.target.value)} />
-                          </div>
-                           <div className="grid gap-2">
-                             <Label htmlFor="gender">Género</Label>
-                             <Select onValueChange={setGender} value={gender}>
-                                <SelectTrigger id="gender"><SelectValue placeholder="Seleccionar género"/></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="masculino">Masculino</SelectItem>
-                                    <SelectItem value="femenino">Femenino</SelectItem>
-                                    <SelectItem value="otro">Otro</SelectItem>
-                                </SelectContent>
-                             </Select>
-                          </div>
-                           <div className="grid gap-2">
-                            <Label htmlFor="dob">Fecha de nacimiento</Label>
-                             <Input
-                              id="dob"
-                              type="date"
-                              value={dob}
-                              onChange={(e) => setDob(e.target.value)}
-                              className="bg-card"
-                            />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button onClick={() => setFormStep(2)}>
-                            Próximo <ChevronRight className="ml-2 h-4 w-4" />
-                          </Button>
-                        </DialogFooter>
-                      </>
-                    )}
-                     {formStep === 2 && (
-                       <>
-                        <DialogHeader>
-                          <DialogTitle>Detalles de Contacto y Acceso</DialogTitle>
-                          <DialogDescription>
-                            Esta información será utilizada para las credenciales de acceso del docente.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handleAddTeacher}>
-                            <div className="space-y-4 py-4">
-                                <div className="grid gap-2">
-                                    <Label htmlFor="phone">Número de celular</Label>
-                                    <Input id="phone" type="tel" placeholder="987 654 321" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="email">Correo electrónico</Label>
-                                    <Input id="email" type="email" placeholder="docente@ejemplo.com" value={email} onChange={e => setEmail(e.target.value)} required />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="address">Dirección</Label>
-                                    <Input id="address" placeholder="Av. Principal 123, Ciudad" value={address} onChange={e => setAddress(e.target.value)} />
-                                </div>
-                                 <div className="grid gap-2">
-                                    <Label htmlFor="ref-contact">Contacto de referencia</Label>
-                                    <Input id="ref-contact" placeholder="987 654 322" value={refContact} onChange={e => setRefContact(e.target.value)} />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label htmlFor="ref-relationship">Parentesco</Label>
-                                    <Input id="ref-relationship" placeholder="Ej: Esposa" value={refRelationship} onChange={e => setRefRelationship(e.target.value)} />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setFormStep(1)}>Atrás</Button>
-                                <Button type="submit">Guardar Maestro</Button>
-                            </DialogFooter>
-                        </form>
-                       </>
-                    )}
-                  </DialogContent>
-                </Dialog>
+                <Button
+                  variant="outline"
+                  onClick={handleOpenAddModal}
+                  className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-primary/50"
+                >
+                  <div className="bg-green-100 dark:bg-green-500/20 p-5 rounded-xl group-hover:bg-green-200 dark:group-hover:bg-green-500/30 transition-colors">
+                    <UserPlus className="h-10 w-10 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                    Agregar Maestro
+                  </span>
+                </Button>
 
                 <Button
                   variant="outline"
@@ -311,14 +308,14 @@ export default function TeachersPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={teacher.avatarUrl} alt={teacher.name} data-ai-hint="teacher avatar" />
-                            <AvatarFallback>{teacher.name.substring(0, 1)}</AvatarFallback>
+                            <AvatarImage src={teacher.avatarUrl} alt={`${teacher.firstName} ${teacher.lastName}`} data-ai-hint="teacher avatar" />
+                            <AvatarFallback>{teacher.firstName.substring(0, 1)}{teacher.lastName.substring(0, 1)}</AvatarFallback>
                           </Avatar>
-                          {teacher.name}
+                          {`${teacher.firstName} ${teacher.lastName}`}
                         </div>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button variant="outline" size="sm" className="bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600">
+                        <Button variant="outline" size="sm" className="bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" onClick={() => handleOpenEditModal(teacher)}>
                           <Edit className="mr-1 h-3 w-3" /> Editar
                         </Button>
                         <Button variant="destructive" size="sm">
@@ -458,6 +455,120 @@ export default function TeachersPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isModalOpen} onOpenChange={handleModalChange}>
+        <DialogContent className="sm:max-w-lg">
+          {formStep === 1 && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{modalMode === 'add' ? 'Detalles del profesor' : 'Editar Detalles del Profesor'}</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">Nombre completo</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input id="first-name" placeholder="Nombres" value={firstName} onChange={e => setFirstName(e.target.value)} required />
+                    <Input id="last-name" placeholder="Apellidos" value={lastName} onChange={e => setLastName(e.target.value)} required />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Detalles del profesor de la clase</Label>
+                   <div className="grid grid-cols-2 gap-4">
+                      <Select onValueChange={setTeacherClass} value={teacherClass}>
+                          <SelectTrigger><SelectValue placeholder="Seleccionar Clase"/></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                              <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                              <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                          </SelectContent>
+                      </Select>
+                      <Select onValueChange={setTeacherSection} value={teacherSection}>
+                          <SelectTrigger><SelectValue placeholder="Sección"/></SelectTrigger>
+                          <SelectContent>
+                              <SelectItem value="A">A</SelectItem>
+                              <SelectItem value="B">B</SelectItem>
+                              <SelectItem value="C">C</SelectItem>
+                          </SelectContent>
+                      </Select>
+                   </div>
+                </div>
+                <div className="grid gap-2">
+                   <Label htmlFor="related-subject">Tema relacionado</Label>
+                   <Input id="related-subject" placeholder="Ej: Matemáticas" value={relatedSubject} onChange={e => setRelatedSubject(e.target.value)} />
+                </div>
+                 <div className="grid gap-2">
+                   <Label htmlFor="gender">Género</Label>
+                   <Select onValueChange={setGender} value={gender}>
+                      <SelectTrigger id="gender"><SelectValue placeholder="Seleccionar género"/></SelectTrigger>
+                      <SelectContent>
+                          <SelectItem value="masculino">Masculino</SelectItem>
+                          <SelectItem value="femenino">Femenino</SelectItem>
+                          <SelectItem value="otro">Otro</SelectItem>
+                      </SelectContent>
+                   </Select>
+                </div>
+                 <div className="grid gap-2">
+                  <Label htmlFor="dob">Fecha de nacimiento</Label>
+                   <Input
+                    id="dob"
+                    type="date"
+                    value={dob}
+                    onChange={(e) => setDob(e.target.value)}
+                    className="bg-card"
+                    placeholder="YYYY-MM-DD"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={() => setFormStep(2)}>
+                  Próximo <ChevronRight className="ml-2 h-4 w-4" />
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+           {formStep === 2 && (
+             <>
+              <DialogHeader>
+                <DialogTitle>Detalles de Contacto y Acceso</DialogTitle>
+                <DialogDescription>
+                  Esta información será utilizada para las credenciales de acceso del docente.
+                </DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleSubmit}>
+                  <div className="space-y-4 py-4">
+                      <div className="grid gap-2">
+                          <Label htmlFor="phone">Número de celular</Label>
+                          <Input id="phone" type="tel" placeholder="Ej: 987654321" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required />
+                      </div>
+                      <div className="grid gap-2">
+                          <Label htmlFor="email">Correo electrónico</Label>
+                          <Input id="email" type="email" placeholder="Ej: docente@ejemplo.com" value={email} onChange={e => setEmail(e.target.value)} required />
+                      </div>
+                      <div className="grid gap-2">
+                          <Label htmlFor="address">Dirección</Label>
+                          <Input id="address" placeholder="Ej: Av. Principal 123, Ciudad" value={address} onChange={e => setAddress(e.target.value)} />
+                      </div>
+                       <div className="grid gap-2">
+                          <Label htmlFor="ref-contact">Contacto de referencia</Label>
+                          <Input id="ref-contact" placeholder="Ej: 987654322" value={refContact} onChange={e => setRefContact(e.target.value)} />
+                      </div>
+                      <div className="grid gap-2">
+                          <Label htmlFor="ref-relationship">Parentesco</Label>
+                          <Input id="ref-relationship" placeholder="Ej: Esposa, Hermano, etc." value={refRelationship} onChange={e => setRefRelationship(e.target.value)} />
+                      </div>
+                  </div>
+                  <DialogFooter>
+                      <Button type="button" variant="outline" onClick={() => setFormStep(1)}>Atrás</Button>
+                      <Button type="submit">
+                        {modalMode === 'add' ? 'Guardar Maestro' : 'Guardar Cambios'}
+                      </Button>
+                  </DialogFooter>
+              </form>
+             </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
