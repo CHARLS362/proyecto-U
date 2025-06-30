@@ -272,15 +272,6 @@ export default function TeachersPage() {
 
   return (
     <div className="space-y-6">
-      {notification && (
-        <div
-          className={`fixed top-6 left-1/2 z-50 px-6 py-3 rounded shadow-lg text-base font-medium
-            ${notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}
-          style={{ transform: 'translateX(-50%)' }}
-        >
-          {notification.message}
-        </div>
-      )}
       <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in">
         Maestro
       </h1>
