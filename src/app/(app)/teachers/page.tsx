@@ -70,6 +70,7 @@ export default function TeachersPage() {
   // State for step 2
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
   const [refContact, setRefContact] = useState('');
   const [refRelationship, setRefRelationship] = useState('');
 
@@ -85,6 +86,7 @@ export default function TeachersPage() {
     setDob(undefined);
     setPhoneNumber('');
     setEmail('');
+    setAddress('');
     setRefContact('');
     setRefRelationship('');
   }
@@ -221,7 +223,16 @@ export default function TeachersPage() {
                                 </Button>
                               </PopoverTrigger>
                               <PopoverContent className="w-auto p-0">
-                                <Calendar mode="single" selected={dob} onSelect={setDob} initialFocus locale={es} />
+                                <Calendar 
+                                  mode="single"
+                                  selected={dob}
+                                  onSelect={setDob}
+                                  initialFocus
+                                  locale={es}
+                                  captionLayout="dropdown-buttons"
+                                  fromYear={1960}
+                                  toYear={new Date().getFullYear() - 18}
+                                />
                               </PopoverContent>
                             </Popover>
                           </div>
@@ -250,6 +261,10 @@ export default function TeachersPage() {
                                 <div className="grid gap-2">
                                     <Label htmlFor="email">Correo electrónico</Label>
                                     <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="address">Dirección</Label>
+                                    <Input id="address" value={address} onChange={e => setAddress(e.target.value)} />
                                 </div>
                                  <div className="grid gap-2">
                                     <Label htmlFor="ref-contact">Contacto de referencia</Label>
@@ -471,5 +486,3 @@ export default function TeachersPage() {
     </div>
   );
 }
-
-    
