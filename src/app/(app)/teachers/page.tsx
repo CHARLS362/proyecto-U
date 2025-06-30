@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog } from "lucide-react";
+import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, Calendar as CalendarIcon, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,6 +27,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 const initialTeachers = [
   {
@@ -50,26 +56,63 @@ export default function TeachersPage() {
   const [teachers, setTeachers] = useState(initialTeachers);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
-  const [newTeacherName, setNewTeacherName] = useState('');
+  
+  // State for the multi-step form
+  const [formStep, setFormStep] = useState(1);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [teacherClass, setTeacherClass] = useState('');
+  const [teacherSection, setTeacherSection] = useState('');
+  const [relatedSubject, setRelatedSubject] = useState('');
+  const [gender, setGender] = useState('');
+  const [dob, setDob] = useState<Date | undefined>();
+  
+  // State for step 2
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
+  const [refContact, setRefContact] = useState('');
+  const [refRelationship, setRefRelationship] = useState('');
+
+
+  const resetForm = () => {
+    setFormStep(1);
+    setFirstName('');
+    setLastName('');
+    setTeacherClass('');
+    setTeacherSection('');
+    setRelatedSubject('');
+    setGender('');
+    setDob(undefined);
+    setPhoneNumber('');
+    setEmail('');
+    setRefContact('');
+    setRefRelationship('');
+  }
 
   const handleAddTeacher = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newTeacherName.trim()) {
-      const newTeacher = {
-        id: `T${Date.now()}`,
-        name: newTeacherName,
-        avatarUrl: "https://placehold.co/40x40.png",
-      };
-      setTeachers(prev => [...prev, newTeacher]);
-      console.log("Nuevo docente agregado (simulación):", newTeacher);
-      setNewTeacherName('');
-      setIsAddTeacherOpen(false);
-    }
+    const newTeacher = {
+      id: `T${Date.now()}`,
+      name: `${firstName} ${lastName}`,
+      avatarUrl: "https://placehold.co/40x40.png",
+      // Add other fields here from state
+    };
+    setTeachers(prev => [...prev, newTeacher]);
+    console.log("Nuevo docente agregado (simulación):", newTeacher);
+    setIsAddTeacherOpen(false);
+    resetForm();
   };
   
   const filteredTeachers = teachers.filter(teacher => 
     teacher.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleDialogChange = (open: boolean) => {
+    setIsAddTeacherOpen(open);
+    if (!open) {
+      resetForm();
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -97,7 +140,7 @@ export default function TeachersPage() {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                <Dialog open={isAddTeacherOpen} onOpenChange={setIsAddTeacherOpen}>
+                <Dialog open={isAddTeacherOpen} onOpenChange={handleDialogChange}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
@@ -111,34 +154,119 @@ export default function TeachersPage() {
                       </span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle>Agregar Nuevo Maestro</DialogTitle>
-                      <DialogDescription>
-                        Complete el nombre del nuevo maestro. El ID se generará automáticamente.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <form onSubmit={handleAddTeacher}>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="name" className="text-right">
-                            Nombre
-                          </Label>
-                          <Input
-                            id="name"
-                            value={newTeacherName}
-                            onChange={(e) => setNewTeacherName(e.target.value)}
-                            className="col-span-3"
-                            placeholder="Ej: Juan Pérez"
-                            required
-                          />
+                  <DialogContent className="sm:max-w-lg">
+                    {formStep === 1 && (
+                      <>
+                        <DialogHeader>
+                          <DialogTitle>Detalles del profesor</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="grid gap-2">
+                            <Label htmlFor="name">Nombre completo</Label>
+                            <div className="grid grid-cols-2 gap-4">
+                              <Input id="first-name" placeholder="papu" value={firstName} onChange={e => setFirstName(e.target.value)} />
+                              <Input id="last-name" placeholder="mamani" value={lastName} onChange={e => setLastName(e.target.value)} />
+                            </div>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label>Detalles del profesor de la clase</Label>
+                             <div className="grid grid-cols-2 gap-4">
+                                <Select onValueChange={setTeacherClass} value={teacherClass}>
+                                    <SelectTrigger><SelectValue placeholder="Seleccionar Clase"/></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <Select onValueChange={setTeacherSection} value={teacherSection}>
+                                    <SelectTrigger><SelectValue placeholder="Sección"/></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="A">A</SelectItem>
+                                        <SelectItem value="B">B</SelectItem>
+                                        <SelectItem value="C">C</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                             </div>
+                          </div>
+                          <div className="grid gap-2">
+                             <Label htmlFor="related-subject">Tema relacionado</Label>
+                             <Input id="related-subject" placeholder="sexologia" value={relatedSubject} onChange={e => setRelatedSubject(e.target.value)} />
+                          </div>
+                           <div className="grid gap-2">
+                             <Label htmlFor="gender">Género</Label>
+                             <Select onValueChange={setGender} value={gender}>
+                                <SelectTrigger id="gender"><SelectValue placeholder="Masculino"/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="masculino">Masculino</SelectItem>
+                                    <SelectItem value="femenino">Femenino</SelectItem>
+                                    <SelectItem value="otro">Otro</SelectItem>
+                                </SelectContent>
+                             </Select>
+                          </div>
+                           <div className="grid gap-2">
+                            <Label htmlFor="dob">Fecha de nacimiento</Label>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id="dob"
+                                  variant={"outline"}
+                                  className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !dob && "text-muted-foreground"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-2 h-4 w-4" />
+                                  {dob ? format(dob, "dd/MM/yyyy") : <span>dd/mm/aaaa</span>}
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0">
+                                <Calendar mode="single" selected={dob} onSelect={setDob} initialFocus locale={es} />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
                         </div>
-                      </div>
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setIsAddTeacherOpen(false)}>Cancelar</Button>
-                        <Button type="submit">Guardar Maestro</Button>
-                      </DialogFooter>
-                    </form>
+                        <DialogFooter>
+                          <Button onClick={() => setFormStep(2)}>
+                            Próximo <ChevronRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </DialogFooter>
+                      </>
+                    )}
+                     {formStep === 2 && (
+                       <>
+                        <DialogHeader>
+                          <DialogTitle>Detalles de Contacto y Acceso</DialogTitle>
+                          <DialogDescription>
+                            Esta información será utilizada para las credenciales de acceso del docente.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleAddTeacher}>
+                            <div className="space-y-4 py-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="phone">Número de celular</Label>
+                                    <Input id="phone" type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="email">Correo electrónico</Label>
+                                    <Input id="email" type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                                </div>
+                                 <div className="grid gap-2">
+                                    <Label htmlFor="ref-contact">Contacto de referencia</Label>
+                                    <Input id="ref-contact" value={refContact} onChange={e => setRefContact(e.target.value)} />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="ref-relationship">Parentesco</Label>
+                                    <Input id="ref-relationship" value={refRelationship} onChange={e => setRefRelationship(e.target.value)} />
+                                </div>
+                            </div>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={() => setFormStep(1)}>Atrás</Button>
+                                <Button type="submit">Guardar Maestro</Button>
+                            </DialogFooter>
+                        </form>
+                       </>
+                    )}
                   </DialogContent>
                 </Dialog>
 
@@ -343,3 +471,5 @@ export default function TeachersPage() {
     </div>
   );
 }
+
+    
