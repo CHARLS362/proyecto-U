@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +16,8 @@ import {
   ListOrdered,
   MessageSquare,
   Send,
+  Camera,
+  ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -49,11 +52,149 @@ import {
 } from "@/components/ui/select";
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
+
+const studentFormSchema = z.object({
+  // Paso 1
+  studentName: z.string().min(2, "El nombre del estudiante es obligatorio."),
+  guardianName: z.string().min(2, "El nombre del apoderado es obligatorio."),
+  studentDob: z.string().min(1, "La fecha de nacimiento es obligatoria."),
+  studentGender: z.string({ required_error: "Por favor, seleccione un género." }),
+  studentPhoto: z.any().optional(),
+
+  // Paso 2
+  studentPhone: z.string().min(7, "El número de teléfono debe tener al menos 7 dígitos."),
+  studentEmail: z.string().email("Correo electrónico inválido."),
+  studentAddress: z.string().min(5, "La dirección es obligatoria."),
+  studentDepartment: z.string().min(2, "El departamento es obligatorio."),
+  studentCity: z.string().min(2, "La ciudad es obligatoria."),
+  
+  // Paso 3
+  guardianPhone: z.string().min(7, "El teléfono del apoderado debe tener al menos 7 dígitos."),
+  guardianEmail: z.string().email("Correo electrónico del apoderado inválido."),
+  guardianAddress: z.string().min(5, "La dirección del apoderado es obligatoria."),
+  guardianDob: z.string().min(1, "La fecha de nacimiento del apoderado es obligatoria."),
+});
+
+type StudentFormValues = z.infer<typeof studentFormSchema>;
+
+const defaultValues: Partial<StudentFormValues> = {
+  studentName: "",
+  guardianName: "",
+  studentDob: "",
+  studentGender: "",
+  studentPhone: "",
+  studentEmail: "",
+  studentAddress: "",
+  studentDepartment: "",
+  studentCity: "",
+  guardianPhone: "",
+  guardianEmail: "",
+  guardianAddress: "",
+  guardianDob: "",
+};
+
 
 export default function StudentsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [students] = useState<Student[]>(mockStudents);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [step, setStep] = useState(1);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+  const form = useForm<StudentFormValues>({
+    resolver: zodResolver(studentFormSchema),
+    defaultValues,
+    mode: "onChange",
+  });
+  
+  const handleModalChange = (open: boolean) => {
+    setIsModalOpen(open);
+    if (!open) {
+      form.reset();
+      setStep(1);
+      setPhotoPreview(null);
+    }
+  }
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+        form.setValue("studentPhoto", file);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const nextStep = async () => {
+    let fieldsToValidate: (keyof StudentFormValues)[] = [];
+    if (step === 1) {
+      fieldsToValidate = ['studentName', 'guardianName', 'studentDob', 'studentGender'];
+    } else if (step === 2) {
+      fieldsToValidate = ['studentPhone', 'studentEmail', 'studentAddress', 'studentDepartment', 'studentCity'];
+    }
+    
+    const isValid = await form.trigger(fieldsToValidate);
+    if(isValid) {
+        setStep(s => s + 1);
+    } else {
+       toast({
+         variant: 'destructive',
+         title: 'Campos Incompletos',
+         description: 'Por favor, rellene todos los campos requeridos antes de continuar.',
+       });
+    }
+  };
+
+  const prevStep = () => {
+    setStep(s => s - 1);
+  };
+
+  function onSubmit(data: StudentFormValues) {
+    console.log("Datos del nuevo estudiante:", data);
+    toast({
+      title: "Estudiante Agregado (Simulación)",
+      description: `El estudiante ${data.studentName} ha sido registrado exitosamente.`,
+    });
+    handleModalChange(false);
+  }
+  
+  const getStepTitle = (currentStep: number) => {
+    switch (currentStep) {
+        case 1: return "Paso 1 de 3 - Datos Personales del Estudiante";
+        case 2: return "Paso 2 de 3 - Datos de Contacto del Estudiante";
+        case 3: return "Paso 3 de 3 - Datos del Apoderado";
+        default: return "Formulario de Registro";
+    }
+  }
+
 
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -61,6 +202,7 @@ export default function StudentsPage() {
   );
 
   return (
+    <>
     <div className="space-y-6">
       <PageTitle title="Gestión de Estudiantes" subtitle="Agregue, vea o edite la información de los estudiantes." icon={Users} />
 
@@ -87,7 +229,7 @@ export default function StudentsPage() {
                 <Button
                   variant="outline"
                   className="h-auto p-4 flex items-center justify-start space-x-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border bg-card hover:bg-muted/50 text-foreground"
-                  onClick={() => router.push('/students/new')}
+                  onClick={() => setIsModalOpen(true)}
                 >
                   <div className="bg-green-100 dark:bg-green-900/40 p-4 rounded-lg group-hover:bg-green-200 dark:group-hover:bg-green-900/60 transition-colors">
                     <UserPlus className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -328,5 +470,265 @@ export default function StudentsPage() {
         </TabsContent>
       </Tabs>
     </div>
+
+    <Dialog open={isModalOpen} onOpenChange={handleModalChange}>
+        <DialogContent className="sm:max-w-4xl">
+           <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <DialogHeader>
+                <DialogTitle>Formulario de Registro de Estudiante</DialogTitle>
+                <DialogDescription>{getStepTitle(step)}</DialogDescription>
+                <Progress value={(step / 3) * 100} className="w-full mt-2" />
+              </DialogHeader>
+
+              <div className="py-6 space-y-8 max-h-[70vh] overflow-y-auto pr-6">
+                {step === 1 && (
+                    <div className="space-y-8 animate-fade-in">
+                        <FormField
+                          control={form.control}
+                          name="studentName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nombre Completo del Estudiante</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ej: Juan Almendro Pérez" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="guardianName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nombre del Padre o Apoderado</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ej: Roberto Almendro" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           <FormField
+                            control={form.control}
+                            name="studentDob"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Fecha de Nacimiento</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                           <FormField
+                              control={form.control}
+                              name="studentGender"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Género</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Seleccione un género" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="masculino">Masculino</SelectItem>
+                                        <SelectItem value="femenino">Femenino</SelectItem>
+                                        <SelectItem value="otro">Otro</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                        </div>
+                         <FormField
+                            control={form.control}
+                            name="studentPhoto"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Foto del Estudiante</FormLabel>
+                                <div className="flex items-center gap-4">
+                                    <Avatar className="h-24 w-24 border">
+                                        <AvatarImage src={photoPreview || undefined} alt="Vista previa de foto" data-ai-hint="student photo" />
+                                        <AvatarFallback><Camera className="h-8 w-8 text-muted-foreground" /></AvatarFallback>
+                                    </Avatar>
+                                    <FormControl>
+                                        <Button asChild variant="outline">
+                                            <label htmlFor="photo-upload-modal" className="cursor-pointer">
+                                                Subir Foto
+                                                <Input id="photo-upload-modal" type="file" className="sr-only" accept="image/*" onChange={handlePhotoChange} />
+                                            </label>
+                                        </Button>
+                                    </FormControl>
+                                </div>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                    </div>
+                )}
+                {step === 2 && (
+                    <div className="space-y-8 animate-fade-in">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <FormField
+                          control={form.control}
+                          name="studentPhone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Número de Celular</FormLabel>
+                              <FormControl>
+                                <Input type="tel" placeholder="Ej: 987654321" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                         <FormField
+                          control={form.control}
+                          name="studentEmail"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Correo Electrónico</FormLabel>
+                              <FormControl>
+                                <Input type="email" placeholder="estudiante@ejemplo.com" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name="studentAddress"
+                        render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Dirección</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Ej: Av. Los Girasoles 123" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                            </FormItem>
+                        )}
+                      />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                         <FormField
+                          control={form.control}
+                          name="studentDepartment"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Departamento</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ej: Lima" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                         <FormField
+                          control={form.control}
+                          name="studentCity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Ciudad</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Ej: Miraflores" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                )}
+                {step === 3 && (
+                     <div className="space-y-8 animate-fade-in">
+                        <h3 className="text-lg font-medium text-foreground">Datos del Apoderado: {form.getValues("guardianName")}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                           <FormField
+                            control={form.control}
+                            name="guardianPhone"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Celular del Apoderado</FormLabel>
+                                <FormControl>
+                                  <Input type="tel" placeholder="Ej: 912345678" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                           <FormField
+                            control={form.control}
+                            name="guardianEmail"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Correo del Apoderado</FormLabel>
+                                <FormControl>
+                                  <Input type="email" placeholder="apoderado@ejemplo.com" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="guardianAddress"
+                          render={({ field }) => (
+                              <FormItem>
+                              <FormLabel>Dirección del Apoderado</FormLabel>
+                              <FormControl>
+                                  <Input placeholder="Ej: Calle Las Begonias 456" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                              </FormItem>
+                          )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="guardianDob"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Fecha de Nacimiento del Apoderado</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                     </div>
+                )}
+              </div>
+              <DialogFooter className="pt-4 border-t">
+                  {step > 1 && (
+                      <Button type="button" variant="outline" onClick={prevStep}>
+                          Anterior
+                      </Button>
+                  )}
+                  <div className="flex-grow" />
+                  {step < 3 ? (
+                       <Button type="button" onClick={nextStep}>
+                          Siguiente <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                  ) : (
+                      <Button type="submit">
+                          Guardar Estudiante
+                      </Button>
+                  )}
+              </DialogFooter>
+              </form>
+            </Form>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
+
+    
