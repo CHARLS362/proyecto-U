@@ -128,10 +128,12 @@ const defaultValues: Partial<StudentFormValues> = {
 export default function StudentsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [students] = useState<Student[]>(mockStudents);
+  const [students, setStudents] = useState<Student[]>(mockStudents);
   const [searchTerm, setSearchTerm] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [currentStudentId, setCurrentStudentId] = useState<string | null>(null);
   const [step, setStep] = useState(1);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFileName, setPhotoFileName] = useState('Ningún archivo seleccionado');
@@ -149,8 +151,45 @@ export default function StudentsPage() {
       setStep(1);
       setPhotoPreview(null);
       setPhotoFileName('Ningún archivo seleccionado');
+      setModalMode('add');
+      setCurrentStudentId(null);
     }
   }
+
+  const handleOpenAddModal = () => {
+    handleModalChange(false); // Reset form before opening
+    setModalMode('add');
+    setIsModalOpen(true);
+  };
+  
+  const handleOpenEditModal = (student: Student) => {
+    handleModalChange(false); // Reset form before opening
+    setModalMode('edit');
+    setCurrentStudentId(student.id);
+
+    const [firstName, ...lastNameParts] = student.name.split(' ');
+    const lastName = lastNameParts.join(' ');
+    
+    // Populate form with student data
+    form.setValue('studentFirstName', firstName);
+    form.setValue('studentLastName', lastName);
+    form.setValue('guardianName', student.guardianName || '');
+    form.setValue('studentPhone', student.phone);
+    form.setValue('studentEmail', student.email);
+    form.setValue('studentAddress', student.address);
+    form.setValue('guardianPhone', student.guardianContact || '');
+
+    // Set other fields that might not be in the base Student object
+    // This assumes that other fields like DOB, gender etc. would be fetched from a full student record in a real app
+    // For now, they will be empty or can be filled by the user
+    // form.setValue('studentDob', student.dob || ''); // Example if dob existed
+    
+    setPhotoPreview(student.avatarUrl);
+    setPhotoFileName(student.avatarUrl.split('/').pop() || 'photo.png');
+    
+    setIsModalOpen(true);
+  };
+
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -194,11 +233,25 @@ export default function StudentsPage() {
   };
 
   function onSubmit(data: StudentFormValues) {
-    console.log("Datos del nuevo estudiante:", data);
-    toast({
-      title: "Estudiante Agregado (Simulación)",
-      description: `El estudiante ${data.studentFirstName} ${data.studentLastName} ha sido registrado exitosamente.`,
-    });
+    if (modalMode === 'add') {
+        const newStudentName = `${data.studentFirstName} ${data.studentLastName}`;
+        console.log("Datos del nuevo estudiante:", data);
+        toast({
+            title: "Estudiante Agregado (Simulación)",
+            description: `El estudiante ${newStudentName} ha sido registrado exitosamente.`,
+        });
+        // In a real app, you would add the new student to the state:
+        // setStudents(prev => [...prev, newStudentData]);
+    } else {
+        const updatedStudentName = `${data.studentFirstName} ${data.studentLastName}`;
+        console.log("Datos del estudiante actualizados:", { id: currentStudentId, ...data });
+        toast({
+            title: "Estudiante Actualizado (Simulación)",
+            description: `Los datos de ${updatedStudentName} han sido actualizados.`,
+        });
+         // In a real app, you would update the student in the state:
+        // setStudents(prev => prev.map(s => s.id === currentStudentId ? { ...s, ...updatedData } : s));
+    }
     handleModalChange(false);
   }
   
@@ -245,7 +298,7 @@ export default function StudentsPage() {
                 <Button
                   variant="outline"
                   className="h-auto p-4 flex items-center justify-start space-x-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border bg-card hover:bg-muted/50 text-foreground"
-                  onClick={() => setIsModalOpen(true)}
+                  onClick={handleOpenAddModal}
                 >
                   <div className="bg-green-100 dark:bg-green-900/40 p-4 rounded-lg group-hover:bg-green-200 dark:group-hover:bg-green-900/60 transition-colors">
                     <UserPlus className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -360,7 +413,7 @@ export default function StudentsPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white">
+                        <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" onClick={() => handleOpenEditModal(student)}>
                           <Edit className="mr-1 h-3 w-3" /> Editar
                         </Button>
                         <Button variant="destructive" size="sm">
@@ -492,7 +545,7 @@ export default function StudentsPage() {
            <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <DialogHeader>
-                <DialogTitle>Detalles del estudiante</DialogTitle>
+                <DialogTitle>{modalMode === 'add' ? 'Detalles del estudiante' : 'Editar Estudiante'}</DialogTitle>
                 <DialogDescription>{getStepTitle(step)}</DialogDescription>
                 <Progress value={(step / 3) * 100} className="w-full mt-2" />
               </DialogHeader>
@@ -758,7 +811,7 @@ export default function StudentsPage() {
                       </Button>
                   ) : (
                       <Button type="submit">
-                          Guardar Estudiante
+                          {modalMode === 'add' ? 'Guardar Estudiante' : 'Guardar Cambios'}
                       </Button>
                   )}
               </DialogFooter>
@@ -769,5 +822,3 @@ export default function StudentsPage() {
     </>
   );
 }
-
-    
