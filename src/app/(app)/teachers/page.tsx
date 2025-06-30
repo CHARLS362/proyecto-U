@@ -27,12 +27,16 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
 
 interface Teacher {
   id: string;
   firstName: string;
   lastName: string;
   avatarUrl: string;
+  status: 'Activo' | 'Inactivo';
   class?: string;
   section?: string;
   relatedSubject?: string;
@@ -61,7 +65,8 @@ const initialTeachers: Teacher[] = [
     section: "A",
     relatedSubject: "Física",
     refContact: "555-123-4567",
-    refRelationship: "Esposa"
+    refRelationship: "Esposa",
+    status: 'Activo',
   },
   {
     id: "T1749005332",
@@ -77,7 +82,8 @@ const initialTeachers: Teacher[] = [
     section: "B",
     relatedSubject: "Química",
     refContact: "555-234-5678",
-    refRelationship: "Hermano"
+    refRelationship: "Hermano",
+    status: 'Activo',
   },
   {
     id: "T1749005333",
@@ -93,7 +99,8 @@ const initialTeachers: Teacher[] = [
     section: "C",
     relatedSubject: "Arte",
     refContact: "555-345-6789",
-    refRelationship: "Padre"
+    refRelationship: "Padre",
+    status: 'Activo',
   },
 ];
 
@@ -120,6 +127,12 @@ export default function TeachersPage() {
   const [address, setAddress] = useState('');
   const [refContact, setRefContact] = useState('');
   const [refRelationship, setRefRelationship] = useState('');
+
+  // State for status management modal
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [selectedTeacherForStatus, setSelectedTeacherForStatus] = useState<string | null>(null);
+  const [newStatus, setNewStatus] = useState<'Activo' | 'Inactivo'>('Activo');
+
 
   const resetForm = () => {
     setFormStep(1);
@@ -196,6 +209,7 @@ export default function TeachersPage() {
     if (modalMode === 'add') {
       const newTeacher: Teacher = {
         id: `T${Date.now()}`,
+        status: 'Activo',
         ...teacherDataPayload
       };
       setTeachers(prev => [...prev, newTeacher]);
@@ -213,6 +227,28 @@ export default function TeachersPage() {
     
     handleModalChange(false);
   };
+
+  const handleSelectTeacherForStatus = (teacherId: string) => {
+    const teacher = teachers.find(t => t.id === teacherId);
+    if (teacher) {
+        setSelectedTeacherForStatus(teacher.id);
+        setNewStatus(teacher.status);
+    }
+  };
+
+  const handleStatusUpdate = () => {
+    if (!selectedTeacherForStatus) return;
+    setTeachers(prevTeachers =>
+      prevTeachers.map(teacher =>
+        teacher.id === selectedTeacherForStatus
+          ? { ...teacher, status: newStatus }
+          : teacher
+      )
+    );
+    setIsStatusModalOpen(false);
+    setSelectedTeacherForStatus(null);
+  };
+
 
   const filteredTeachers = teachers.filter(teacher => 
     `${teacher.firstName} ${teacher.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
@@ -259,6 +295,7 @@ export default function TeachersPage() {
 
                 <Button
                   variant="outline"
+                  onClick={() => setIsStatusModalOpen(true)}
                   className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-purple-500/50"
                 >
                   <div className="bg-purple-100 dark:bg-purple-500/20 p-5 rounded-xl group-hover:bg-purple-200 dark:group-hover:bg-purple-500/30 transition-colors">
@@ -297,6 +334,7 @@ export default function TeachersPage() {
                     <TableHead className="w-[50px]">#</TableHead>
                     <TableHead>Identificación del profesor</TableHead>
                     <TableHead>Nombre</TableHead>
+                    <TableHead>Estado</TableHead>
                     <TableHead className="text-right">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -313,6 +351,11 @@ export default function TeachersPage() {
                           </Avatar>
                           {`${teacher.firstName} ${teacher.lastName}`}
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={teacher.status === 'Activo' ? 'secondary' : 'destructive'} className={cn(teacher.status === 'Activo' && 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300')}>
+                          {teacher.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button variant="outline" size="sm" className="bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" onClick={() => handleOpenEditModal(teacher)}>
@@ -568,7 +611,52 @@ export default function TeachersPage() {
           )}
         </DialogContent>
       </Dialog>
+      
+      <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Gestionar Estado del Docente</DialogTitle>
+            <DialogDescription>
+              Seleccione un docente para cambiar su estado de 'Activo' a 'Inactivo' o viceversa.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="teacher-status-select">Docente</Label>
+              <Select onValueChange={handleSelectTeacherForStatus} value={selectedTeacherForStatus || ''}>
+                <SelectTrigger id="teacher-status-select">
+                  <SelectValue placeholder="Seleccionar un docente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teachers.map(teacher => (
+                    <SelectItem key={teacher.id} value={teacher.id}>
+                      {teacher.firstName} {teacher.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {selectedTeacherForStatus && (
+              <div className="grid gap-2">
+                <Label htmlFor="status-select">Estado</Label>
+                <Select onValueChange={(value) => setNewStatus(value as 'Activo' | 'Inactivo')} value={newStatus}>
+                  <SelectTrigger id="status-select">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Activo">Activo</SelectItem>
+                    <SelectItem value="Inactivo">Inactivo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsStatusModalOpen(false)}>Cancelar</Button>
+            <Button onClick={handleStatusUpdate} disabled={!selectedTeacherForStatus}>Guardar Cambios</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
