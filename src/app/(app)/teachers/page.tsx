@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, ChevronRight } from "lucide-react";
+import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, ChevronRight, ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,6 +29,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 interface Teacher {
@@ -132,6 +134,8 @@ export default function TeachersPage() {
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [selectedTeacherForStatus, setSelectedTeacherForStatus] = useState<string | null>(null);
   const [newStatus, setNewStatus] = useState<'Activo' | 'Inactivo'>('Activo');
+  const [statusSearchTerm, setStatusSearchTerm] = useState('');
+  const [isTeacherListOpen, setIsTeacherListOpen] = useState(false);
 
 
   const resetForm = () => {
@@ -157,6 +161,14 @@ export default function TeachersPage() {
       resetForm();
     }
   }
+  
+  const handleStatusModalChange = (open: boolean) => {
+      setIsStatusModalOpen(open);
+      if (!open) {
+          setSelectedTeacherForStatus(null);
+          setStatusSearchTerm('');
+      }
+  };
 
   const handleOpenAddModal = () => {
     resetForm();
@@ -245,13 +257,17 @@ export default function TeachersPage() {
           : teacher
       )
     );
-    setIsStatusModalOpen(false);
-    setSelectedTeacherForStatus(null);
+    handleStatusModalChange(false);
   };
 
 
   const filteredTeachers = teachers.filter(teacher => 
     `${teacher.firstName} ${teacher.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedTeacherForStatusObject = teachers.find(t => t.id === selectedTeacherForStatus);
+  const filteredTeachersForStatusModal = teachers.filter(t => 
+    `${t.firstName} ${t.lastName}`.toLowerCase().includes(statusSearchTerm.toLowerCase())
   );
 
   return (
@@ -295,7 +311,7 @@ export default function TeachersPage() {
 
                 <Button
                   variant="outline"
-                  onClick={() => setIsStatusModalOpen(true)}
+                  onClick={() => handleStatusModalChange(true)}
                   className="h-auto p-6 flex flex-col items-center justify-center space-y-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border hover:border-purple-500/50"
                 >
                   <div className="bg-purple-100 dark:bg-purple-500/20 p-5 rounded-xl group-hover:bg-purple-200 dark:group-hover:bg-purple-500/30 transition-colors">
@@ -612,29 +628,72 @@ export default function TeachersPage() {
         </DialogContent>
       </Dialog>
       
-      <Dialog open={isStatusModalOpen} onOpenChange={setIsStatusModalOpen}>
+      <Dialog open={isStatusModalOpen} onOpenChange={handleStatusModalChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Gestionar Estado del Docente</DialogTitle>
             <DialogDescription>
-              Seleccione un docente para cambiar su estado de 'Activo' a 'Inactivo' o viceversa.
+              Busque un docente para cambiar su estado de 'Activo' a 'Inactivo' o viceversa.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="teacher-status-select">Docente</Label>
-              <Select onValueChange={handleSelectTeacherForStatus} value={selectedTeacherForStatus || ''}>
-                <SelectTrigger id="teacher-status-select">
-                  <SelectValue placeholder="Seleccionar un docente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {teachers.map(teacher => (
-                    <SelectItem key={teacher.id} value={teacher.id}>
-                      {teacher.firstName} {teacher.lastName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Popover open={isTeacherListOpen} onOpenChange={setIsTeacherListOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    id="teacher-status-select"
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={isTeacherListOpen}
+                    className="w-full justify-between"
+                  >
+                    {selectedTeacherForStatusObject
+                        ? `${selectedTeacherForStatusObject.firstName} ${selectedTeacherForStatusObject.lastName}`
+                        : "Buscar un docente..."}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                  <div className='p-2'>
+                    <Input
+                        placeholder="Buscar docente..."
+                        value={statusSearchTerm}
+                        onChange={(e) => setStatusSearchTerm(e.target.value)}
+                        className="w-full"
+                    />
+                  </div>
+                  <ScrollArea className="h-[200px]">
+                    <div className="p-1">
+                      {filteredTeachersForStatusModal.length > 0 ? (
+                        filteredTeachersForStatusModal.map((teacher) => (
+                          <Button
+                              key={teacher.id}
+                              variant="ghost"
+                              className="w-full justify-start font-normal"
+                              onClick={() => {
+                                  handleSelectTeacherForStatus(teacher.id);
+                                  setIsTeacherListOpen(false);
+                              }}
+                          >
+                            <Check
+                                className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedTeacherForStatus === teacher.id ? "opacity-100" : "opacity-0"
+                                )}
+                            />
+                            {teacher.firstName} {teacher.lastName}
+                          </Button>
+                        ))
+                      ) : (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          No se encontraron docentes.
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </PopoverContent>
+              </Popover>
             </div>
             {selectedTeacherForStatus && (
               <div className="grid gap-2">
@@ -652,7 +711,7 @@ export default function TeachersPage() {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsStatusModalOpen(false)}>Cancelar</Button>
+            <Button variant="outline" onClick={() => handleStatusModalChange(false)}>Cancelar</Button>
             <Button onClick={handleStatusUpdate} disabled={!selectedTeacherForStatus}>Guardar Cambios</Button>
           </DialogFooter>
         </DialogContent>
