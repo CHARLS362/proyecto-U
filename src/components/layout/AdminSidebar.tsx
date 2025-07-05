@@ -25,7 +25,6 @@ import {
   Bus, 
   Settings,
   LogOut,
-  Palette,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -45,7 +44,6 @@ const navItems = [
 ];
 
 const bottomNavItems = [
-    { href: '/admin/style-guide', label: 'Guía de Estilos', icon: Palette },
     { href: '/admin/settings', label: 'Configuraciones', icon: Settings },
 ]
 
