@@ -77,7 +77,6 @@ export default function EnrollmentPage() {
     setIsEnrolled(false);
     const enrolledCourseIds = new Set(student.courses.map(c => c.id));
     setSelectedCourses(enrolledCourseIds);
-    setSearchResults([]);
   };
   
   const resetSelection = () => {
@@ -215,34 +214,7 @@ export default function EnrollmentPage() {
         </CardContent>
       </Card>
       
-      {searchResults.length > 0 && !selectedStudent && (
-        <Card className="shadow-lg animate-fade-in">
-          <CardHeader>
-            <CardTitle>Resultados de la Búsqueda</CardTitle>
-            <CardDescription>
-              Se encontraron {searchResults.length} estudiantes. Seleccione uno para continuar.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 max-h-60 overflow-y-auto">
-            <div className="border-t">
-              {searchResults.map(student => (
-                <div key={student.id} onClick={() => handleSelectStudent(student)} className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer border-b last:border-b-0">
-                  <Avatar>
-                    <AvatarImage src={student.avatarUrl} data-ai-hint="student avatar"/>
-                    <AvatarFallback>{student.name.slice(0,2)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{student.name}</p>
-                    <p className="text-sm text-muted-foreground">{student.id} - {student.gradeLevel}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {selectedStudent && (
+      {selectedStudent ? (
         <Card className="shadow-lg animate-fade-in">
           <CardHeader>
             <CardTitle>Cursos para {selectedStudent.name}</CardTitle>
@@ -292,7 +264,33 @@ export default function EnrollmentPage() {
             )}
           </CardFooter>
         </Card>
-      )}
+      ) : searchResults.length > 0 ? (
+        <Card className="shadow-lg animate-fade-in">
+          <CardHeader>
+            <CardTitle>Resultados de la Búsqueda</CardTitle>
+            <CardDescription>
+              Se encontraron {searchResults.length} estudiantes. Seleccione uno para continuar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0 max-h-60 overflow-y-auto">
+            <div className="border-t">
+              {searchResults.map(student => (
+                <div key={student.id} onClick={() => handleSelectStudent(student)} className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer border-b last:border-b-0">
+                  <Avatar>
+                    <AvatarImage src={student.avatarUrl} data-ai-hint="student avatar"/>
+                    <AvatarFallback>{student.name.slice(0,2)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{student.name}</p>
+                    <p className="text-sm text-muted-foreground">{student.id} - {student.gradeLevel}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
+
     </div>
   );
 }
