@@ -13,7 +13,9 @@ import {
   Save, 
   ArrowLeft,
   Search,
-  Database
+  Database,
+  Printer,
+  FileDown
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -45,10 +47,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
+import { mockGradesReport, type GradesReport } from "@/lib/mockData";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default function QualificationsPage() {
+  const { toast } = useToast();
   const [isEnteringGrades, setIsEnteringGrades] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const [selectedClass, setSelectedClass] = useState('');
+  const [selectedSection, setSelectedSection] = useState('A');
+  const [selectedSession, setSelectedSession] = useState('2024-25');
+  const [reportData, setReportData] = useState<GradesReport | null>(null);
+
 
   const subjects = [
     { id: 1, name: "Hindi" },
@@ -61,10 +74,63 @@ export default function QualificationsPage() {
   const handleContinue = () => {
     setIsDialogOpen(false);
     setIsEnteringGrades(true);
+    toast({ title: "Información Cargada", description: "Ahora ingrese las notas de los estudiantes." });
   };
 
   const handleBack = () => {
     setIsEnteringGrades(false);
+  };
+
+  const handleSearchReport = () => {
+    if (!selectedClass) {
+        toast({
+            title: "Filtro Incompleto",
+            description: "Por favor, seleccione una clase para generar el reporte.",
+            variant: "destructive"
+        });
+        return;
+    }
+    // Simulate fetching data based on filters
+    const report = mockGradesReport[selectedClass];
+    setReportData(report || null);
+    
+    toast({
+        title: "Reporte Generado",
+        description: report ? `Mostrando reporte para la clase ${report.className}.` : "No se encontraron datos para la selección."
+    });
+  };
+
+  const handleExportPDF = () => {
+    if (!reportData) {
+      toast({
+        title: "No hay datos para exportar",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const doc = new jsPDF();
+    const tableHead = [["#", "Estudiante", ...reportData.subjects]];
+    const tableBody = reportData.grades.map((grade, index) => [
+      index + 1,
+      grade.studentName,
+      ...grade.scores.map(score => score?.toString() ?? 'N/A')
+    ]);
+
+    doc.setFontSize(18);
+    doc.text(`Reporte de Calificaciones - ${reportData.className}`, 14, 22);
+    doc.setFontSize(11);
+    doc.text(`Sesión: ${selectedSession} | Sección: ${selectedSection}`, 14, 28);
+    
+    (doc as any).autoTable({
+      head: tableHead,
+      body: tableBody,
+      startY: 35,
+      theme: 'grid',
+      headStyles: { fillColor: [33, 150, 243] }
+    });
+
+    doc.save(`reporte_${reportData.className.replace(/\s/g, '_')}.pdf`);
   };
   
   const UploadDialog = () => (
@@ -81,9 +147,7 @@ export default function QualificationsPage() {
           <div className="grid gap-2">
             <Label htmlFor="class-select">Clase</Label>
             <Select defaultValue="12-comercio">
-              <SelectTrigger id="class-select">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger id="class-select"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
                 <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
@@ -94,9 +158,7 @@ export default function QualificationsPage() {
           <div className="grid gap-2">
             <Label htmlFor="section-select">Seccion</Label>
               <Select defaultValue="A">
-              <SelectTrigger id="section-select">
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger id="section-select"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="A">A</SelectItem>
                 <SelectItem value="B">B</SelectItem>
@@ -118,9 +180,7 @@ export default function QualificationsPage() {
           <div className="grid gap-2">
             <Label htmlFor="subject-select">Sujeto</Label>
             <Select>
-              <SelectTrigger id="subject-select">
-                <SelectValue placeholder="--select--" />
-              </SelectTrigger>
+              <SelectTrigger id="subject-select"><SelectValue placeholder="--select--" /></SelectTrigger>
               <SelectContent>
                 {subjects.map((subject) => (
                   <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
@@ -141,10 +201,10 @@ export default function QualificationsPage() {
     <div className="space-y-6">
       <PageTitle title="Calificaciones" icon={Award} />
       
-      <Tabs defaultValue="subir-calificaciones" className="w-full animate-fade-in">
+      <Tabs defaultValue="ver-calificaciones" className="w-full animate-fade-in">
         <TabsList className="grid w-full grid-cols-2 sm:max-w-xs">
           <TabsTrigger value="subir-calificaciones">Subir calificaciones</TabsTrigger>
-          <TabsTrigger value="ver-calificaciones">Ver calificaciones</TabsTrigger>
+          <TabsTrigger value="ver-calificaciones">Reporte de Calificaciones</TabsTrigger>
         </TabsList>
 
         <TabsContent value="subir-calificaciones" className="mt-6">
@@ -175,55 +235,43 @@ export default function QualificationsPage() {
                   </Dialog>
                 </div>
               </CardContent>
-              <Separator />
-              <CardFooter className="p-3">
-                {/* Empty footer for spacing */}
-              </CardFooter>
             </Card>
           ) : (
             <Card className="shadow-lg animate-fade-in">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle className="text-lg">Subir calificaciones</CardTitle>
+                  <CardTitle className="text-lg">Ingresar Notas</CardTitle>
                 </div>
-                <Button variant="ghost" size="icon">
-                  <Filter className="h-4 w-4" />
+                <Button variant="outline" onClick={handleBack}>
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Atrás
                 </Button>
               </CardHeader>
               <Separator />
               <CardContent className="pt-6">
                 <div className="flex justify-between items-center mb-6">
-                  <div className="flex items-center gap-2">
-                    <List className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="font-semibold text-foreground">Clase 12c A</h3>
-                  </div>
-                  <Button variant="outline" onClick={handleBack}>
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Atrás
-                  </Button>
+                  <h3 className="font-semibold text-foreground">Clase 12c A - Examen Final de Comercio</h3>
                 </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>#</TableHead>
-                      <TableHead>Número de rollo</TableHead>
                       <TableHead>Nombre</TableHead>
                       <TableHead className="text-center">Puntuación total</TableHead>
-                      <TableHead className="text-center">No</TableHead>
+                      <TableHead className="text-center">Nota Obtenida</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     <TableRow>
                       <TableCell className="font-medium">1.</TableCell>
-                      <TableCell>S1718791292</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9">
-                            <AvatarImage src="https://placehold.co/40x40.png" alt="Estudiante kumar" data-ai-hint="robot avatar" />
-                            <AvatarFallback>EK</AvatarFallback>
+                            <AvatarImage src="https://placehold.co/40x40.png" alt="Estudiante" data-ai-hint="student avatar" />
+                            <AvatarFallback>AP</AvatarFallback>
                           </Avatar>
-                          <span className="font-medium text-foreground">Estudiante kumar</span>
+                          <span className="font-medium text-foreground">Ana Pérez</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-center">20</TableCell>
@@ -235,9 +283,9 @@ export default function QualificationsPage() {
                 </Table>
               </CardContent>
               <CardFooter className="flex justify-end pt-4 mt-4 border-t">
-                <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold">
+                <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold" onClick={() => toast({ title: "Notas Guardadas", description: "Las calificaciones han sido registradas."})}>
                   <Save className="mr-2 h-4 w-4" />
-                  Ahorrar
+                  Guardar Notas
                 </Button>
               </CardFooter>
             </Card>
@@ -250,30 +298,26 @@ export default function QualificationsPage() {
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <FileText className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle className="text-lg">Información</CardTitle>
+                  <CardTitle className="text-lg">Filtros del Reporte</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
                   <div className="grid gap-2">
                     <Label htmlFor="view-class">Clase</Label>
-                    <Select defaultValue="11-comercio">
-                      <SelectTrigger id="view-class">
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Select value={selectedClass} onValueChange={setSelectedClass}>
+                      <SelectTrigger id="view-class"><SelectValue placeholder="-- Seleccionar --"/></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                        <SelectItem value="11-comercio">11 (Comercio)</SelectItem>
+                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
                         <SelectItem value="10-arte">10 (Arte)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="view-section">Sección</Label>
-                    <Select defaultValue="A">
-                      <SelectTrigger id="view-section">
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Select value={selectedSection} onValueChange={setSelectedSection}>
+                      <SelectTrigger id="view-section"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="A">A</SelectItem>
                         <SelectItem value="B">B</SelectItem>
@@ -283,10 +327,8 @@ export default function QualificationsPage() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="view-session">Sesión</Label>
-                    <Select defaultValue="2025-26">
-                      <SelectTrigger id="view-session">
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Select value={selectedSession} onValueChange={setSelectedSession}>
+                      <SelectTrigger id="view-session"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="2025-26">2025-26</SelectItem>
                         <SelectItem value="2024-25">2024-25</SelectItem>
@@ -294,32 +336,66 @@ export default function QualificationsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button className="w-full md:w-auto">
+                  <Button className="w-full md:w-auto" onClick={handleSearchReport}>
                     <Search className="mr-2 h-4 w-4" />
-                    Encontrar
+                    Generar Reporte
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
-            <Separator />
+            {reportData && (
+              <Card className="shadow-lg animate-fade-in">
+                <CardHeader className="flex flex-row justify-between items-center">
+                  <div>
+                    <CardTitle className="text-lg">Reporte: {reportData.className}</CardTitle>
+                    <p className="text-sm text-muted-foreground">Mostrando {reportData.grades.length} estudiantes.</p>
+                  </div>
+                  <Button onClick={handleExportPDF}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Exportar a PDF
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[50px]">#</TableHead>
+                        <TableHead>Estudiante</TableHead>
+                        {reportData.subjects.map(subject => (
+                          <TableHead key={subject} className="text-center">{subject}</TableHead>
+                        ))}
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {reportData.grades.map((grade, index) => (
+                        <TableRow key={grade.studentId}>
+                          <TableCell>{index + 1}</TableCell>
+                          <TableCell className="font-medium">{grade.studentName}</TableCell>
+                          {grade.scores.map((score, scoreIndex) => (
+                            <TableCell key={scoreIndex} className={`text-center font-medium ${score !== null && score < 11 ? 'text-destructive' : ''}`}>
+                              {score ?? '--'}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
 
-            <Card className="shadow-lg">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle className="text-lg">Exámenes</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-16 text-center">
+            {!reportData && (
+              <Card className="shadow-lg">
+                <CardContent className="flex flex-col items-center justify-center py-16 text-center">
                   <div className="p-4 bg-accent/20 rounded-full mb-4">
                     <Database className="h-12 w-12 text-accent" />
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">Sin registro</h3>
-                </div>
-              </CardContent>
-            </Card>
+                  <h3 className="text-lg font-semibold text-foreground">Sin reporte para mostrar</h3>
+                  <p className="text-sm text-muted-foreground">Seleccione los filtros y genere un reporte.</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
       </Tabs>

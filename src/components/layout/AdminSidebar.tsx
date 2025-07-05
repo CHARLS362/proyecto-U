@@ -25,6 +25,7 @@ import {
   Bus, 
   Settings,
   LogOut,
+  BookOpenText,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -33,6 +34,7 @@ const navItems = [
   { href: '/admin/dashboard', label: 'Panel', icon: LayoutGrid },
   { href: '/admin/teachers', label: 'Docentes', icon: Users },
   { href: '/admin/students', label: 'Gestión de Estudiantes', icon: GraduationCap },
+  { href: '/admin/courses', label: 'Cursos', icon: BookOpenText },
   { href: '/admin/subjects', label: 'Temas', icon: BookCopy },
   { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },
   { href: '/admin/news', label: 'Tabla de noticias', icon: Newspaper },
@@ -51,6 +53,9 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
+    // Exact match for dashboard
+    if (href.endsWith('dashboard')) return pathname === href;
+    // Starts with for other sections to handle sub-pages like /new or /[id]
     return pathname.startsWith(href);
   };
 

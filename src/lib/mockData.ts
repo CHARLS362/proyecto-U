@@ -135,6 +135,36 @@ export interface StudentLeaveRequest {
     dateRange: string;
 }
 
+export interface Teacher {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string;
+  status: 'Activo' | 'Inactivo';
+  class?: string;
+  section?: string;
+  relatedSubject?: string;
+  gender?: string;
+  dob?: string;
+  phoneNumber?: string;
+  email?: string;
+  address?: string;
+  refContact?: string;
+  refRelationship?: string;
+}
+
+export interface GradeScore {
+    studentId: string;
+    studentName: string;
+    scores: (number | null)[];
+}
+
+export interface GradesReport {
+    className: string;
+    subjects: string[];
+    grades: GradeScore[];
+}
+
 export const mockStudents: Student[] = [
   {
     id: "S001",
@@ -221,6 +251,60 @@ export const mockStudents: Student[] = [
   },
 ];
 
+export const mockTeachers: Teacher[] = [
+  {
+    id: "T1749005331",
+    firstName: "Eduardo",
+    lastName: "López",
+    avatarUrl: "https://placehold.co/40x40.png",
+    email: "eduardo.lopez@example.com",
+    phoneNumber: "987654321",
+    address: "Calle Falsa 123, Ciudad",
+    dob: "1985-05-20",
+    gender: "masculino",
+    class: "12-comercio",
+    section: "A",
+    relatedSubject: "Matemáticas",
+    refContact: "912345678",
+    refRelationship: "Esposa",
+    status: 'Activo',
+  },
+  {
+    id: "T1749005332",
+    firstName: "Isabel",
+    lastName: "Vargas",
+    avatarUrl: "https://placehold.co/40x40.png",
+    email: "isabel.vargas@example.com",
+    phoneNumber: "987654322",
+    address: "Avenida Siempreviva 742, Ciudad",
+    dob: "1990-11-15",
+    gender: "femenino",
+    class: "11-ciencia",
+    section: "B",
+    relatedSubject: "Humanidades",
+    refContact: "912345677",
+    refRelationship: "Hermano",
+    status: 'Activo',
+  },
+  {
+    id: "T1749005333",
+    firstName: "Ricardo",
+    lastName: "Montes",
+    avatarUrl: "https://placehold.co/40x40.png",
+    email: "ricardo.montes@example.com",
+    phoneNumber: "987654323",
+    address: "Boulevard de los Sueños Rotos 45, Ciudad",
+    dob: "1982-03-30",
+    gender: "masculino",
+    class: "10-arte",
+    section: "C",
+    relatedSubject: "Ciencias de la Computación",
+    refContact: "912345676",
+    refRelationship: "Padre",
+    status: 'Inactivo',
+  },
+];
+
 export const mockCourses: Course[] = [
   {
     id: "C001",
@@ -229,7 +313,7 @@ export const mockCourses: Course[] = [
     description: "Curso avanzado sobre cálculo y álgebra lineal.",
     schedule: "Lun, Mié, Vie 10:00-11:30",
     instructor: "Dr. Eduardo López",
-    instructorId: "T1749005331", // Added instructorId
+    instructorId: "T1749005331", 
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 25,
     capacity: 30,
@@ -261,7 +345,7 @@ export const mockCourses: Course[] = [
     description: "Introducción a los conceptos fundamentales de la programación.",
     schedule: "Lun, Vie 14:00-15:30",
     instructor: "Ing. Ricardo Montes",
-    instructorId: "T1749005331", // Added instructorId
+    instructorId: "T1749005333",
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 30,
     capacity: 30,
@@ -277,7 +361,7 @@ export const mockCourses: Course[] = [
     description: "Estudio de la estructura, propiedades, composición, reacciones y preparación de compuestos que contienen carbono.",
     schedule: "Mar, Jue 11:00-12:30",
     instructor: "Dra. Laura Fuentes",
-    instructorId: "T1749005333",
+    instructorId: "T1749005332",
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 22,
     capacity: 25,
@@ -450,3 +534,30 @@ export const mockStudentLeaveRequests: StudentLeaveRequest[] = [
         dateRange: '11 de Junio, 2024 - 12 de Junio, 2024'
     }
 ];
+
+export const mockGradesReport: { [key: string]: GradesReport } = {
+  "10-arte": {
+    className: "10 (Arte)",
+    subjects: ["H. del Arte", "Música", "Dibujo"],
+    grades: [
+      { studentId: "S001", studentName: "Ana Pérez", scores: [18, 15, 17] },
+      { studentId: "S004", studentName: "David Jiménez", scores: [16, 17, 16] },
+    ]
+  },
+  "11-ciencia": {
+    className: "11 (Ciencia)",
+    subjects: ["Programación", "Química", "Física"],
+    grades: [
+      { studentId: "S002", studentName: "Luis García", scores: [17, 14, 16] },
+      { studentId: "S005", studentName: "Laura Martínez", scores: [19, 18, 17] },
+    ]
+  },
+  "12-comercio": {
+    className: "12 (Comercio)",
+    subjects: ["Matemáticas", "Contabilidad", "Economía"],
+    grades: [
+      { studentId: "S003", studentName: "Sofía Rodríguez", scores: [15, 12, 14] },
+      { studentId: "S006", studentName: "Javier Gómez", scores: [13, 11, 10] },
+    ]
+  }
+};

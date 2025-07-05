@@ -31,83 +31,13 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { mockTeachers, type Teacher } from '@/lib/mockData';
+import { useToast } from '@/hooks/use-toast';
 
-
-interface Teacher {
-  id: string;
-  firstName: string;
-  lastName: string;
-  avatarUrl: string;
-  status: 'Activo' | 'Inactivo';
-  class?: string;
-  section?: string;
-  relatedSubject?: string;
-  gender?: string;
-  dob?: string;
-  phoneNumber?: string;
-  email?: string;
-  address?: string;
-  refContact?: string;
-  refRelationship?: string;
-}
-
-
-const initialTeachers: Teacher[] = [
-  {
-    id: "T1749005331",
-    firstName: "Arnold",
-    lastName: "Apd",
-    avatarUrl: "https://placehold.co/40x40.png",
-    email: "arnold.apd@example.com",
-    phoneNumber: "987654321",
-    address: "Calle Falsa 123, Ciudad",
-    dob: "1985-05-20",
-    gender: "masculino",
-    class: "12-comercio",
-    section: "A",
-    relatedSubject: "Física",
-    refContact: "912345678",
-    refRelationship: "Esposa",
-    status: 'Activo',
-  },
-  {
-    id: "T1749005332",
-    firstName: "Beatriz",
-    lastName: "Castillo",
-    avatarUrl: "https://placehold.co/40x40.png",
-    email: "beatriz.castillo@example.com",
-    phoneNumber: "987654322",
-    address: "Avenida Siempreviva 742, Ciudad",
-    dob: "1990-11-15",
-    gender: "femenino",
-    class: "11-ciencia",
-    section: "B",
-    relatedSubject: "Química",
-    refContact: "912345677",
-    refRelationship: "Hermano",
-    status: 'Activo',
-  },
-  {
-    id: "T1749005333",
-    firstName: "Carlos",
-    lastName: "Dávila",
-    avatarUrl: "https://placehold.co/40x40.png",
-    email: "carlos.davila@example.com",
-    phoneNumber: "987654323",
-    address: "Boulevard de los Sueños Rotos 45, Ciudad",
-    dob: "1982-03-30",
-    gender: "masculino",
-    class: "10-arte",
-    section: "C",
-    relatedSubject: "Arte",
-    refContact: "912345676",
-    refRelationship: "Padre",
-    status: 'Activo',
-  },
-];
 
 export default function TeachersPage() {
-  const [teachers, setTeachers] = useState(initialTeachers);
+  const { toast } = useToast();
+  const [teachers, setTeachers] = useState(mockTeachers);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Modal and form state
@@ -225,7 +155,7 @@ export default function TeachersPage() {
         ...teacherDataPayload
       };
       setTeachers(prev => [...prev, newTeacher]);
-      console.log("Nuevo docente agregado (simulación):", newTeacher);
+      toast({ title: "Docente Agregado", description: `Se ha registrado a ${firstName} ${lastName}.`, variant: "success"});
     } else if (currentTeacherId) {
        setTeachers(prev => 
             prev.map(t => 
@@ -234,7 +164,7 @@ export default function TeachersPage() {
                 : t
             )
         );
-      console.log("Docente actualizado (simulación):", { id: currentTeacherId, ...teacherDataPayload });
+      toast({ title: "Docente Actualizado", description: `Se han guardado los cambios para ${firstName} ${lastName}.` });
     }
     
     handleModalChange(false);
@@ -257,6 +187,8 @@ export default function TeachersPage() {
           : teacher
       )
     );
+    const updatedTeacher = teachers.find(t => t.id === selectedTeacherForStatus);
+    toast({ title: "Estado Actualizado", description: `El estado de ${updatedTeacher?.firstName} ha sido cambiado a ${newStatus}.` });
     handleStatusModalChange(false);
   };
 
@@ -377,7 +309,7 @@ export default function TeachersPage() {
                         <Button variant="outline" size="sm" className="bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" onClick={() => handleOpenEditModal(teacher)}>
                           <Edit className="mr-1 h-3 w-3" /> Editar
                         </Button>
-                        <Button variant="destructive" size="sm">
+                        <Button variant="destructive" size="sm" onClick={() => toast({ title: `Eliminar ${teacher.firstName}`, description: "Funcionalidad de eliminación próximamente.", variant: "destructive"})}>
                           <Trash2 className="mr-1 h-3 w-3" /> Borrar
                         </Button>
                       </TableCell>
@@ -411,7 +343,7 @@ export default function TeachersPage() {
               <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <SimpleMetricCard
                   title="Total de profesores"
-                  value="1"
+                  value={teachers.length}
                   icon={UsersRound}
                   iconBgClass="bg-blue-100 dark:bg-blue-500/30"
                   iconColorClass="text-blue-500 dark:text-blue-300"
