@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import {
   BookOpenText,
   NotebookText,
@@ -46,7 +45,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast";
 
-export default function CourseDetailPage({ params }: { params: { id: string } }) {
+export default function CourseDetailPage() {
+  const params = useParams<{ id: string }>();
   const { toast } = useToast();
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
   const [isUploading, setIsUploading] = useState(false);
