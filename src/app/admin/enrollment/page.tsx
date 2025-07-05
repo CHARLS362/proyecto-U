@@ -24,6 +24,14 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
+// This is required for jspdf-autotable to work with jsPDF's TypeScript types
+declare module 'jspdf' {
+    interface jsPDF {
+      autoTable: (options: any) => jsPDF;
+      lastAutoTable: { finalY: number };
+    }
+}
+
 export default function EnrollmentPage() {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
@@ -133,7 +141,7 @@ export default function EnrollmentPage() {
     doc.setFontSize(14);
     doc.text("Cursos Matriculados", 14, 90);
 
-    (doc as any).autoTable({
+    doc.autoTable({
         startY: 95,
         head: [['#', 'Código', 'Nombre del Curso', 'Docente']],
         body: enrolledCoursesDetails.map((course, index) => [
@@ -147,7 +155,7 @@ export default function EnrollmentPage() {
         margin: { left: 14, right: 14 }
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY || 150;
+    const finalY = doc.lastAutoTable.finalY || 150;
     doc.text("_________________________                 _________________________ ", doc.internal.pageSize.getWidth() / 2, finalY + 30, { align: 'center' });
     doc.text("Firma del Apoderado                   Firma de Administración", doc.internal.pageSize.getWidth() / 2, finalY + 35, { align: 'center' });
 
@@ -174,15 +182,26 @@ export default function EnrollmentPage() {
               disabled={!!selectedStudent}
             />
             <Button onClick={handleSearch} disabled={isSearching || !!selectedStudent}>
-              {isSearching ? <Loader2 className="animate-spin" /> : <Search className="mr-2" />}
+              {isSearching ? <Loader2 className="animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
               Buscar
             </Button>
             {selectedStudent && (
                 <Button variant="outline" onClick={resetSelection}>Limpiar</Button>
             )}
           </div>
-          {searchResults.length > 0 && (
-            <div className="mt-4 border rounded-md max-h-60 overflow-y-auto">
+        </CardContent>
+      </Card>
+      
+      {searchResults.length > 0 && (
+        <Card className="shadow-lg animate-fade-in">
+          <CardHeader>
+            <CardTitle>Resultados de la Búsqueda</CardTitle>
+            <CardDescription>
+              Se encontraron {searchResults.length} estudiantes. Seleccione uno para continuar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0 max-h-60 overflow-y-auto">
+            <div className="border-t">
               {searchResults.map(student => (
                 <div key={student.id} onClick={() => handleSelectStudent(student)} className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer border-b last:border-b-0">
                   <Avatar>
@@ -196,9 +215,9 @@ export default function EnrollmentPage() {
                 </div>
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {selectedStudent && (
         <Card className="shadow-lg animate-fade-in">
@@ -228,12 +247,12 @@ export default function EnrollmentPage() {
           </CardContent>
           <CardFooter className="flex justify-end gap-2">
             <Button onClick={handleSaveEnrollment}>
-                <Save className="mr-2" />
+                <Save className="mr-2 h-4 w-4" />
                 Guardar Matrícula
             </Button>
             {isEnrolled && (
               <Button variant="outline" onClick={handlePrint}>
-                <Printer className="mr-2" />
+                <Printer className="mr-2 h-4 w-4" />
                 Imprimir Ficha
               </Button>
             )}
