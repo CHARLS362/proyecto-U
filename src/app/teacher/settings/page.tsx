@@ -1,6 +1,6 @@
-
 'use client';
 
+import { useState } from 'react';
 import {
   BadgeInfo,
   BookText,
@@ -17,9 +17,19 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const InfoItem = ({
   icon: Icon,
@@ -40,6 +50,15 @@ const InfoItem = ({
 );
 
 export default function TeacherSettingsPage() {
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handlePasswordChange = () => {
+    // Lógica para conectar al backend aquí
+    console.log({ currentPassword, newPassword, confirmPassword });
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       <header className="flex justify-between items-center">
@@ -70,10 +89,52 @@ export default function TeacherSettingsPage() {
               </p>
             </CardContent>
           </Card>
-          <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] hover:shadow-[0_6px_20px_0_rgb(0,118,255,23%)]">
-            <KeyRound className="mr-2 h-4 w-4" />
-            Cambiar la contraseña
-          </Button>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-[0_4px_14px_0_rgb(0,118,255,39%)] hover:shadow-[0_6px_20px_0_rgb(0,118,255,23%)]">
+                <KeyRound className="mr-2 h-4 w-4" />
+                Cambiar la contraseña
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Cambiar la contraseña</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="current-password">Contraseña actual</Label>
+                  <Input
+                    id="current-password"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="new-password">Nueva contraseña</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="confirm-password">confirmar Contraseña</Label>
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handlePasswordChange} className="bg-blue-600 hover:bg-blue-700 text-white">Ahorrar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="lg:col-span-2">
