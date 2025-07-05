@@ -271,6 +271,13 @@ export const mockAttendanceStats: AttendanceStat[] = [
   { status: "justificado", students: 2, fill: "hsl(var(--chart-4))" },
 ];
 
+export const mockStudentAttendanceStats: AttendanceStat[] = [
+  { status: "presente", students: 150, fill: "hsl(var(--chart-1))" },
+  { status: "ausente", students: 8, fill: "hsl(var(--chart-2))" },
+  { status: "tarde", students: 4, fill: "hsl(var(--chart-3))" },
+  { status: "justificado", students: 2, fill: "hsl(var(--chart-4))" },
+];
+
 export const mockRecentActivities: RecentActivity[] = [
   { id: "RA001", icon: "UserPlus", description: "Nuevo estudiante 'Carlos Luna' registrado.", timestamp: "Hace 5 minutos" },
   { id: "RA002", icon: "ClipboardEdit", description: "Notas actualizadas para 'Matemáticas Avanzadas'.", timestamp: "Hace 30 minutos" },

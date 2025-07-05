@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -14,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { StudentAttendanceChart } from '@/components/dashboard/StudentAttendanceChart';
 
 // Assuming we have the student's ID, e.g., 'S001' for Ana Pérez
 const student = mockStudents.find(s => s.id === 'S001');
@@ -156,6 +156,11 @@ export default function StudentDashboardPage() {
                     </CardContent>
                 </Card>
             </section>
+            
+            <section className="grid grid-cols-1">
+                <StudentAttendanceChart />
+            </section>
+
         </div>
     );
 }
