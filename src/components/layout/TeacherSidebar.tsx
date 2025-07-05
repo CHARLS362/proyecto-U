@@ -22,6 +22,7 @@ import {
   Award,
   Settings,
   LogOut,
+  Hourglass,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -33,6 +34,7 @@ const navItems = [
   { href: '/teacher/grades', label: 'Notas', icon: NotebookText },
   { href: '/teacher/qualifications', label: 'Calificaciones', icon: Award },
   { href: '/teacher/schedule', label: 'Mi Horario', icon: CalendarClock },
+  { href: '/teacher/leave', label: 'Licencia', icon: Hourglass },
   { href: '/teacher/news', label: 'Avisos', icon: Newspaper },
   { href: '/teacher/curriculum', label: 'Programa de estudios', icon: LibraryBig },
 ];
