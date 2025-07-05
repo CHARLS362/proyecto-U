@@ -18,6 +18,7 @@ import {
   NotebookText, 
   CalendarClock,
   Newspaper,
+  LibraryBig,
   Settings,
   LogOut,
 } from 'lucide-react';
@@ -31,6 +32,7 @@ const navItems = [
   { href: '/teacher/grades', label: 'Calificaciones', icon: NotebookText },
   { href: '/teacher/schedule', label: 'Mi Horario', icon: CalendarClock },
   { href: '/teacher/news', label: 'Avisos', icon: Newspaper },
+  { href: '/teacher/curriculum', label: 'Programa de estudios', icon: LibraryBig },
 ];
 
 export function TeacherSidebar() {
