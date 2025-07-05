@@ -188,7 +188,6 @@ export default function TeacherStudentsPage() {
                 <TableHead>Identificación de estudiante</TableHead>
                 <TableHead>Nombre</TableHead>
                 <TableHead>Apoderado</TableHead>
-                <TableHead className="text-right">Acción</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -207,18 +206,11 @@ export default function TeacherStudentsPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{student.guardianName}</TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={`/admin/students/${student.id}`}>
-                           <Eye className="mr-1 h-3 w-3" /> Ver Perfil
-                        </Link>
-                      </Button>
-                    </TableCell>
                   </TableRow>
                 ))
               ) : (
                  <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
                         No se encontraron estudiantes con los filtros actuales.
                     </TableCell>
                 </TableRow>
