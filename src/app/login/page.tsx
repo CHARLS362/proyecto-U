@@ -20,7 +20,12 @@ export default function LoginPage() {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log('Login attempt with:', { email, password });
-    router.push('/dashboard');
+
+    if (email === 'juan.docente@sofiaeduca.com' && password === 'teacherpass') {
+      router.push('/teacher/dashboard');
+    } else {
+      router.push('/dashboard');
+    }
   };
 
   return (
