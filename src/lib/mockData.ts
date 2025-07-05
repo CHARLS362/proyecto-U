@@ -107,6 +107,20 @@ export interface CourseAnnouncement {
   date: string; // YYYY-MM-DD
 }
 
+export interface GradeEntry {
+  courseName: string;
+  courseCode: string;
+  credits: number;
+  finalGrade: number;
+};
+
+export interface BimesterGrades {
+  bimester: number;
+  grades: GradeEntry[];
+  average: number;
+};
+
+
 export const mockStudents: Student[] = [
   {
     id: "S001",
@@ -119,6 +133,8 @@ export const mockStudents: Student[] = [
     courses: [
       { id: "C001", name: "Matemáticas Avanzadas", progress: 75 },
       { id: "C002", name: "Historia del Arte", progress: 60 },
+      { id: "C003", name: "Programación Básica", progress: 88 },
+      { id: "C004", name: "Química Orgánica", progress: 55 },
     ],
     enrollmentDate: "2023-09-01",
     address: "Calle Falsa 123, Ciudad",
@@ -358,4 +374,26 @@ export const mockCourseAnnouncements: CourseAnnouncement[] = [
     content: "Recuerden que nuestra visita al museo es este sábado. Punto de encuentro en la entrada principal a las 10 AM.",
     date: "2024-07-22"
   },
+];
+
+export const mockStudentGrades: BimesterGrades[] = [
+    {
+        bimester: 1,
+        grades: [
+            { courseName: "Matemáticas Avanzadas", courseCode: "MAT301", credits: 4, finalGrade: 15 },
+            { courseName: "Historia del Arte", courseCode: "ART101", credits: 3, finalGrade: 18 },
+            { courseName: "Programación Básica", courseCode: "CS101", credits: 4, finalGrade: 16 },
+        ],
+        average: 16.18,
+    },
+    {
+        bimester: 2,
+        grades: [
+            { courseName: "Matemáticas Avanzadas", courseCode: "MAT301", credits: 4, finalGrade: 14 },
+            { courseName: "Historia del Arte", courseCode: "ART101", credits: 3, finalGrade: 16 },
+            { courseName: "Programación Básica", courseCode: "CS101", credits: 4, finalGrade: 13 },
+            { courseName: "Química Orgánica", courseCode: "QUM202", credits: 4, finalGrade: 10 },
+        ],
+        average: 13.33,
+    }
 ];
