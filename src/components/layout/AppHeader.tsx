@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import Link from 'next/link';
 import * as React from "react";
+import { ThemeToggle } from '../common/ThemeToggle';
 
 const getPathBreadcrumbs = (pathname: string) => {
   const segments = pathname.split('/').filter(Boolean);
@@ -46,19 +47,31 @@ const getPathBreadcrumbs = (pathname: string) => {
     leave: 'Licencia',
     'style-guide': 'Guía de Estilos',
   };
+  
+  const breadcrumbs = [];
+  if (segments.length > 1) {
+      breadcrumbs.push({ href: dashboardPath, label: 'Panel' });
+  }
 
-  const breadcrumbs = [{ href: dashboardPath, label: 'Panel' }];
   const pathSegments = segments.slice(1);
 
   pathSegments.forEach((segment, index) => {
-    // Don't add a 'dashboard' breadcrumb as it's already the root 'Panel'
-    if (segment.toLowerCase() === 'dashboard') {
-        return;
+    if (segment.toLowerCase() === 'dashboard' && index === 0) {
+      if (breadcrumbs.length === 0) {
+        breadcrumbs.push({ href: dashboardPath, label: 'Panel' });
+      }
+      return;
     }
     const href = `/${role}/${pathSegments.slice(0, index + 1).join('/')}`;
     const label = labelMapping[segment.toLowerCase()] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-    breadcrumbs.push({ href, label });
+    if (!breadcrumbs.find(b => b.href === href)) {
+        breadcrumbs.push({ href, label });
+    }
   });
+
+  if (breadcrumbs.length === 0 && segments.length === 1) {
+    breadcrumbs.push({ href: dashboardPath, label: 'Panel' });
+  }
 
   return breadcrumbs;
 };
@@ -78,7 +91,7 @@ export function AppHeader() {
         <Breadcrumb>
           <BreadcrumbList>
             {breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={crumb.href}>
+              <React.Fragment key={`${crumb.href}-${index}`}>
                 <BreadcrumbItem>
                   {index === breadcrumbs.length - 1 ? (
                     <BreadcrumbPage className="font-medium">{crumb.label}</BreadcrumbPage>
@@ -104,7 +117,8 @@ export function AppHeader() {
           className="w-full rounded-lg bg-card pl-8 md:w-[200px] lg:w-[320px]"
         />
       </div>
-      <Button variant="outline" size="icon" className="ml-auto shrink-0 md:ml-0">
+      <ThemeToggle />
+      <Button variant="outline" size="icon" className="shrink-0">
         <Bell className="h-5 w-5" />
         <span className="sr-only">Notificaciones</span>
       </Button>
