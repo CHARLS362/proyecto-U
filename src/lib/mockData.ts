@@ -87,6 +87,25 @@ export interface RecentActivity {
   timestamp: string; // e.g., "Hace 5 minutos", "Hace 2 horas"
 }
 
+export interface Assignment {
+  id: string;
+  courseId: string;
+  title: string;
+  description: string;
+  dueDate: string; // YYYY-MM-DD
+  status: 'Pendiente' | 'Entregado' | 'Calificado';
+  grade?: number;
+  submittedFile?: string;
+  feedback?: string;
+}
+
+export interface CourseAnnouncement {
+  id: string;
+  courseId: string;
+  title: string;
+  content: string;
+  date: string; // YYYY-MM-DD
+}
 
 export const mockStudents: Student[] = [
   {
@@ -284,4 +303,59 @@ export const mockRecentActivities: RecentActivity[] = [
   { id: "RA003", icon: "CalendarPlus", description: "Nuevo evento 'Feria de Ciencias' añadido al calendario.", timestamp: "Hace 1 hora" },
   { id: "RA004", icon: "Megaphone", description: "Publicado nuevo aviso: 'Reunión General de Docentes'.", timestamp: "Hace 2 horas" },
   { id: "RA005", icon: "FileText", description: "Se subió el reporte de 'Asistencia Mensual'.", timestamp: "Hace 4 horas" },
+];
+
+export const mockAssignments: Assignment[] = [
+  { 
+    id: "AS001", 
+    courseId: "C001", 
+    title: "Ensayo sobre el Teorema Fundamental del Cálculo", 
+    description: "Escribir un ensayo de 5 páginas sobre la importancia y aplicaciones del Teorema Fundamental del Cálculo.",
+    dueDate: "2024-08-15",
+    status: "Pendiente"
+  },
+  { 
+    id: "AS002", 
+    courseId: "C001", 
+    title: "Resolución de Problemas de Integrales",
+    description: "Resolver la lista de problemas adjunta.",
+    dueDate: "2024-07-30",
+    status: "Calificado",
+    grade: 18,
+    submittedFile: "integrales_resueltas.pdf",
+    feedback: "Excelente trabajo. Presta más atención al problema 7."
+  },
+  { 
+    id: "AS003", 
+    courseId: "C002", 
+    title: "Análisis del Arte Barroco",
+    description: "Analizar 3 obras del periodo barroco y comparar sus características.",
+    dueDate: "2024-08-10",
+    status: "Entregado",
+    submittedFile: "analisis_barroco.docx"
+  },
+];
+
+export const mockCourseAnnouncements: CourseAnnouncement[] = [
+  {
+    id: "CA001",
+    courseId: "C001",
+    title: "Cambio de fecha para el Examen Parcial",
+    content: "Hola a todos, la fecha del examen parcial se ha movido del 15 de Agosto al 22 de Agosto. Por favor, tomen nota.",
+    date: "2024-07-20"
+  },
+   {
+    id: "CA002",
+    courseId: "C001",
+    title: "Clase de repaso adicional",
+    content: "Tendremos una sesión de repaso opcional este viernes a las 4 PM en el aula 305.",
+    date: "2024-07-18"
+  },
+  {
+    id: "CA003",
+    courseId: "C002",
+    title: "Visita al Museo de Arte",
+    content: "Recuerden que nuestra visita al museo es este sábado. Punto de encuentro en la entrada principal a las 10 AM.",
+    date: "2024-07-22"
+  },
 ];
