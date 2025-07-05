@@ -66,6 +66,8 @@ export interface Notice {
   date: string; // YYYY-MM-DD or ISO string
   sender: string;
   status: "urgente" | "informativo" | "normal" | "warning"; // For status indicator color
+  body?: string;
+  file?: { name: string, size: string, type: string };
 }
 
 export interface Reminder {
@@ -286,11 +288,11 @@ export const mockEvents: SchoolEvent[] = [
 ];
 
 export const mockNotices: Notice[] = [
-  { id: "N001", title: "AVISO DE VACACIONES", date: "2025-06-10", sender: "TÚ", status: "urgente" },
-  { id: "N002", title: "SUSPENCIÓN DE CLASES", date: "2025-05-31", sender: "REMOTO", status: "informativo" },
-  { id: "N003", title: "EXAMEN DE PRIMERA UNIDAD", date: "2025-05-31", sender: "REMOTO", status: "informativo" },
-  { id: "N004", title: "Aviso de vacaciones", date: "2024-06-19", sender: "TÚ", status: "warning" },
-  { id: "N005", title: "Título 2", date: "2024-06-19", sender: "TÚ", status: "normal" },
+    { id: "N001", title: "AVISO DE VACACIONES", date: "2025-06-10", sender: "Administración", status: "urgente", body: "Las vacaciones de medio año comenzarán el 15 de julio. Disfruten su descanso.", file: { name: "calendario_vacaciones.pdf", size: "120 KB", type: "pdf"} },
+    { id: "N002", title: "SUSPENCIÓN DE CLASES", date: "2025-05-31", sender: "Administración", status: "informativo", body: "Debido a fumigación, las clases se suspenderán el día 5 de junio." },
+    { id: "N003", title: "EXAMEN DE PRIMERA UNIDAD", date: "2025-05-31", sender: "Dr. Eduardo López", status: "normal", body: "El examen de la primera unidad de Matemáticas Avanzadas será el 12 de junio. ¡A estudiar!", file: { name: "temario.docx", size: "45 KB", type: "docx" } },
+    { id: "N004", title: "Aviso de Simulacro", date: "2024-06-19", sender: "Administración", status: "warning", body: "Habrá un simulacro de sismo el día 25 de junio a las 10:00 AM." },
+    { id: "N005", title: "Campaña de reciclaje", date: "2024-06-19", sender: "Prof. Isabel Vargas", status: "normal", body: "Participen en la campaña de reciclaje de esta semana. Habrá contenedores en el patio." },
 ];
 
 export const mockReminders: Reminder[] = [
