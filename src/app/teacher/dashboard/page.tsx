@@ -1,10 +1,10 @@
 
 import { PageTitle } from "@/components/common/PageTitle";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
-import { Book, Users, CalendarCheck, Clock } from "lucide-react";
+import { mockReminders } from "@/lib/mockData";
+import { Book, Users, CalendarCheck, Clock, StickyNote, Info, Trash2, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 const mockUpcomingClasses = [
@@ -55,7 +55,7 @@ export default function TeacherDashboardPage() {
                 />
             </section>
 
-            <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <Card className="shadow-lg animate-fade-in">
                     <CardHeader>
                         <CardTitle>Clases de Hoy</CardTitle>
@@ -104,6 +104,35 @@ export default function TeacherDashboardPage() {
                             </ul>
                         ) : (
                             <p className="text-center text-muted-foreground py-8">No hay avisos recientes.</p>
+                        )}
+                    </CardContent>
+                </Card>
+
+                <Card className="shadow-lg animate-fade-in">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <StickyNote className="h-5 w-5 text-muted-foreground" />
+                            <CardTitle className="text-lg">Recordatorios</CardTitle>
+                        </div>
+                        <Button variant="ghost" size="icon">
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        {mockReminders.length > 0 ? (
+                        <ul className="space-y-3">
+                            {mockReminders.map((reminder) => (
+                            <li key={reminder.id} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors border-l-4" style={{ borderColor: reminder.color || 'hsl(var(--primary))' }}>
+                                <Info className={`h-5 w-5 flex-shrink-0`} style={{ color: reminder.color || 'hsl(var(--primary))' }} />
+                                <p className="text-sm text-foreground flex-grow">{reminder.text}</p>
+                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </li>
+                            ))}
+                        </ul>
+                        ) : (
+                        <p className="text-sm text-muted-foreground text-center py-10">No hay recordatorios.</p>
                         )}
                     </CardContent>
                 </Card>
