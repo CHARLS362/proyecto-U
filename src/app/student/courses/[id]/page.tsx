@@ -13,7 +13,8 @@ import {
   UploadCloud,
   FileText as FileIcon,
   CheckCircle2,
-  Paperclip
+  Paperclip,
+  FileDown,
 } from 'lucide-react';
 import { PageTitle } from '@/components/common/PageTitle';
 import {
@@ -130,7 +131,7 @@ export default function CourseDetailPage() {
                       <Clock className="h-5 w-5 text-primary"/>
                       <span className="font-medium text-foreground">Horario:</span>
                       <span>{course.schedule}</span>
-                  </div>
+                   </div>
                    <div className="flex items-center gap-3">
                       <CalendarDays className="h-5 w-5 text-primary"/>
                       <span className="font-medium text-foreground">Créditos:</span>
@@ -142,6 +143,20 @@ export default function CourseDetailPage() {
                       <span>{course.department}</span>
                   </div>
               </div>
+              {course.syllabusUrl && (
+                <>
+                  <Separator />
+                  <div>
+                    <h4 className="font-semibold text-foreground mb-3">Plan de Estudio</h4>
+                    <Button asChild>
+                      <Link href={course.syllabusUrl} target="_blank" download>
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Descargar Plan de Estudio
+                      </Link>
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

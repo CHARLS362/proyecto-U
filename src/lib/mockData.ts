@@ -38,6 +38,7 @@ export interface Course {
   capacity: number;
   credits: number;
   department: string;
+  syllabusUrl?: string;
 }
 
 export interface AttendanceRecord {
@@ -229,7 +230,8 @@ export const mockCourses: Course[] = [
     enrolledStudentsCount: 25,
     capacity: 30,
     credits: 4,
-    department: "Matemáticas"
+    department: "Matemáticas",
+    syllabusUrl: "/syllabi/MAT301.pdf",
   },
   {
     id: "C002",
@@ -242,7 +244,8 @@ export const mockCourses: Course[] = [
     enrolledStudentsCount: 18,
     capacity: 25,
     credits: 3,
-    department: "Humanidades"
+    department: "Humanidades",
+    syllabusUrl: "/syllabi/ART101.pdf",
   },
   {
     id: "C003",
@@ -255,7 +258,8 @@ export const mockCourses: Course[] = [
     enrolledStudentsCount: 30,
     capacity: 30,
     credits: 4,
-    department: "Ciencias de la Computación"
+    department: "Ciencias de la Computación",
+    syllabusUrl: "/syllabi/CS101.pdf",
   },
   {
     id: "C004",
@@ -268,7 +272,8 @@ export const mockCourses: Course[] = [
     enrolledStudentsCount: 22,
     capacity: 25,
     credits: 4,
-    department: "Ciencias Naturales"
+    department: "Ciencias Naturales",
+    syllabusUrl: "/syllabi/QUM202.pdf",
   },
 ];
 
