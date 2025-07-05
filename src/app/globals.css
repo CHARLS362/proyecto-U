@@ -40,6 +40,8 @@
 
     --ring: 207 88% 65%; /* A slightly darker shade of primary for rings */
 
+    --radius: 0.75rem;
+
     /* Sidebar specific colors */
     --sidebar-background: 0 0% 100%; /* White */
     --sidebar-foreground: 213 33% 25%; /* Dark Gray/Blue */
@@ -92,6 +94,8 @@
     --warning-foreground: 45 93% 95%;
 
     --ring: 207 88% 60%;
+
+    --radius: 0.75rem;
 
     /* Dark Sidebar specific colors - updated to match image */
     --sidebar-background: 220 13% 10%; /* Very dark gray, almost black */
