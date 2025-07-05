@@ -14,15 +14,19 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import Link from 'next/link';
-import * as React from "react"; // Import React for Fragment
+import * as React from "react";
 
 const getPathBreadcrumbs = (pathname: string) => {
   const segments = pathname.split('/').filter(Boolean);
 
-  if (segments.length === 0) return [{ href: '/', label: 'Inicio' }];
+  if (segments.length === 0) return [];
+  
+  const role = segments[0];
+  const isRolePath = ['admin', 'teacher', 'student'].includes(role);
+  
+  if (!isRolePath) return [];
 
-  const role = segments[0] === 'teacher' || segments[0] === 'student' ? segments[0] : 'admin';
-  const dashboardPath = role === 'admin' ? '/dashboard' : `/${role}/dashboard`;
+  const dashboardPath = `/${role}/dashboard`;
 
   const labelMapping: { [key: string]: string } = {
     dashboard: 'Panel',
@@ -33,36 +37,26 @@ const getPathBreadcrumbs = (pathname: string) => {
     news: 'Avisos',
     calendar: 'Horario',
     curriculum: 'Programa de estudios',
-    grades: 'Calificaciones',
+    grades: 'Notas',
     qualifications: 'Calificaciones',
     'bus-service': 'Servicio de Bus',
     settings: 'Configuración',
     new: 'Nuevo',
-    teacher: 'Docente',
-    student: 'Estudiante',
     courses: 'Mis Cursos',
     leave: 'Licencia',
+    'style-guide': 'Guía de Estilos',
   };
 
-  const breadcrumbs = segments.map((segment, index) => {
-    // Don't create breadcrumbs for the role segment itself
-    if ((segment === 'teacher' || segment === 'student') && index === 0) {
-      return null;
-    }
-    const href = '/' + segments.slice(0, index + 1).join('/');
-    let label = labelMapping[segment.toLowerCase()] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+  const breadcrumbSegments = segments.slice(1);
+
+  const breadcrumbs = breadcrumbSegments.map((segment, index) => {
+    const href = `/${role}/${breadcrumbSegments.slice(0, index + 1).join('/')}`;
+    const label = labelMapping[segment.toLowerCase()] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
     return { href, label };
-  }).filter(Boolean) as { href: string, label: string }[];
+  });
 
-  const isOnDashboard = segments.length === (role === 'admin' ? 1 : 2) && segments[segments.length - 1] === 'dashboard';
-
-  if (!isOnDashboard) {
-     return [{ href: dashboardPath, label: 'Panel' }, ...breadcrumbs];
-  }
-
-  return breadcrumbs;
+  return [{ href: dashboardPath, label: 'Panel' }, ...breadcrumbs];
 };
-
 
 export function AppHeader() {
   const pathname = usePathname();
