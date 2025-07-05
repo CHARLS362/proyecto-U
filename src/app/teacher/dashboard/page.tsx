@@ -1,11 +1,24 @@
+'use client';
 
+import * as React from 'react';
 import { PageTitle } from "@/components/common/PageTitle";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
-import { mockReminders } from "@/lib/mockData";
+import { mockReminders, type Reminder } from "@/lib/mockData";
 import { Book, Users, CalendarCheck, Clock, StickyNote, Info, Trash2, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 const mockUpcomingClasses = [
     { time: '10:00 AM', subject: 'Matemáticas Avanzadas', class: '12 (Comercio)', room: 'Aula 301' },
@@ -20,6 +33,32 @@ const mockRecentNotices = [
 ]
 
 export default function TeacherDashboardPage() {
+    const [reminders, setReminders] = React.useState<Reminder[]>(mockReminders);
+    const [isReminderDialogOpen, setIsReminderDialogOpen] = React.useState(false);
+    const [newReminderText, setNewReminderText] = React.useState('');
+    const [newReminderColor, setNewReminderColor] = React.useState('hsl(var(--primary))');
+
+    const handleAddReminder = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newReminderText.trim()) return;
+
+        const newReminder: Reminder = {
+            id: `R${Date.now()}`,
+            text: newReminderText,
+            color: newReminderColor,
+        };
+        setReminders(prev => [newReminder, ...prev]);
+        setNewReminderText('');
+        setNewReminderColor('hsl(var(--primary))');
+        setIsReminderDialogOpen(false);
+    };
+
+    const handleDeleteReminder = (id: string) => {
+        setReminders(prev => prev.filter(r => r.id !== id));
+    };
+
+    const reminderColors = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--destructive))', 'hsl(var(--chart-3))'];
+
     return (
         <div className="space-y-6 md:space-y-8">
             <PageTitle title="Panel del Docente" subtitle="Bienvenido, Juan Docente" />
@@ -114,19 +153,61 @@ export default function TeacherDashboardPage() {
                             <StickyNote className="h-5 w-5 text-muted-foreground" />
                             <CardTitle className="text-lg">Recordatorios</CardTitle>
                         </div>
-                        <Button variant="ghost" size="icon">
-                            <Plus className="h-4 w-4" />
-                        </Button>
+                        <Dialog open={isReminderDialogOpen} onOpenChange={setIsReminderDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <Plus className="h-4 w-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Agregar Recordatorio</DialogTitle>
+                                    <DialogDescription>Escribe un nuevo recordatorio para no olvidar tus tareas.</DialogDescription>
+                                </DialogHeader>
+                                <form id="add-reminder-form" onSubmit={handleAddReminder} className="space-y-4 py-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="reminder-text">Texto del Recordatorio</Label>
+                                        <Textarea
+                                            id="reminder-text"
+                                            value={newReminderText}
+                                            onChange={(e) => setNewReminderText(e.target.value)}
+                                            placeholder="Ej: Calificar exámenes de 10º grado..."
+                                            required
+                                        />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label>Color de la Etiqueta</Label>
+                                        <div className="flex gap-2">
+                                            {reminderColors.map(color => (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    className={`w-8 h-8 rounded-full border-2 transition-all ${newReminderColor === color ? 'border-primary ring-2 ring-ring ring-offset-2 ring-offset-background' : 'border-transparent'}`}
+                                                    style={{ backgroundColor: color }}
+                                                    onClick={() => setNewReminderColor(color)}
+                                                    aria-label={`Seleccionar color ${color}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                </form>
+                                <DialogFooter>
+                                    <Button type="submit" form="add-reminder-form">
+                                        <Plus className="mr-2 h-4 w-4" /> Agregar
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </CardHeader>
                     <CardContent>
-                        {mockReminders.length > 0 ? (
+                        {reminders.length > 0 ? (
                         <ul className="space-y-3">
-                            {mockReminders.map((reminder) => (
+                            {reminders.map((reminder) => (
                             <li key={reminder.id} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors border-l-4" style={{ borderColor: reminder.color || 'hsl(var(--primary))' }}>
                                 <Info className={`h-5 w-5 flex-shrink-0`} style={{ color: reminder.color || 'hsl(var(--primary))' }} />
                                 <p className="text-sm text-foreground flex-grow">{reminder.text}</p>
-                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                                <Trash2 className="h-4 w-4" />
+                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => handleDeleteReminder(reminder.id)}>
+                                    <Trash2 className="h-4 w-4" />
                                 </Button>
                             </li>
                             ))}

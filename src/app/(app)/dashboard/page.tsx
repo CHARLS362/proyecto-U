@@ -1,7 +1,9 @@
+'use client';
 
+import * as React from 'react';
 import { PageTitle } from "@/components/common/PageTitle";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
-import { mockNotices, mockReminders, mockRecentActivities } from "@/lib/mockData"; // Updated mockData import
+import { mockNotices, mockReminders, mockRecentActivities, type Reminder } from "@/lib/mockData";
 import { 
   Users, Bookmark, Newspaper, StickyNote, Filter, Plus, Info, Trash2, LayoutGrid,
   UserPlus as UserPlusIcon, ClipboardEdit as ClipboardEditIcon, CalendarPlus as CalendarPlusIcon, Megaphone as MegaphoneIcon, FileText as FileTextIcon, MoreHorizontal
@@ -11,10 +13,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { DailyAttendanceCalendar } from "@/components/dashboard/DailyAttendanceCalendar"; // Changed import
+import { DailyAttendanceCalendar } from "@/components/dashboard/DailyAttendanceCalendar";
 import { cn } from "@/lib/utils";
 import type { RecentActivity } from "@/lib/mockData";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // For potential use in recent activities
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 
 const noticeStatusColors: Record<string, string> = {
@@ -42,6 +55,32 @@ const activityIconColor: Record<RecentActivity["icon"], string> = {
 
 
 export default function DashboardPage() {
+  const [reminders, setReminders] = React.useState<Reminder[]>(mockReminders);
+  const [isReminderDialogOpen, setIsReminderDialogOpen] = React.useState(false);
+  const [newReminderText, setNewReminderText] = React.useState('');
+  const [newReminderColor, setNewReminderColor] = React.useState('hsl(var(--primary))');
+
+  const handleAddReminder = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!newReminderText.trim()) return;
+
+      const newReminder: Reminder = {
+          id: `R${Date.now()}`,
+          text: newReminderText,
+          color: newReminderColor,
+      };
+      setReminders(prev => [newReminder, ...prev]);
+      setNewReminderText('');
+      setNewReminderColor('hsl(var(--primary))');
+      setIsReminderDialogOpen(false);
+  };
+
+  const handleDeleteReminder = (id: string) => {
+      setReminders(prev => prev.filter(r => r.id !== id));
+  };
+  
+  const reminderColors = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--destructive))', 'hsl(var(--chart-3))'];
+
   return (
     <div className="space-y-6 md:space-y-8">
       <PageTitle title="Director del panel" subtitle="Analítica" icon={LayoutGrid} />
@@ -116,32 +155,74 @@ export default function DashboardPage() {
         </Card>
 
         <Card className="lg:col-span-2 shadow-lg animate-fade-in">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div className="flex items-center gap-2">
-              <StickyNote className="h-5 w-5 text-muted-foreground" />
-              <CardTitle className="text-lg">Recordatorios</CardTitle>
-            </div>
-            <Button variant="ghost" size="icon">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {mockReminders.length > 0 ? (
-              <ul className="space-y-3">
-                {mockReminders.map((reminder) => (
-                  <li key={reminder.id} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors border-l-4" style={{ borderColor: reminder.color || 'hsl(var(--primary))' }}>
-                    <Info className={`h-5 w-5 flex-shrink-0`} style={{ color: reminder.color || 'hsl(var(--primary))' }} />
-                    <p className="text-sm text-foreground flex-grow">{reminder.text}</p>
-                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-10">No hay recordatorios.</p>
-            )}
-          </CardContent>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <StickyNote className="h-5 w-5 text-muted-foreground" />
+                    <CardTitle className="text-lg">Recordatorios</CardTitle>
+                </div>
+                <Dialog open={isReminderDialogOpen} onOpenChange={setIsReminderDialogOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Agregar Recordatorio</DialogTitle>
+                            <DialogDescription>Escribe un nuevo recordatorio para no olvidar tus tareas.</DialogDescription>
+                        </DialogHeader>
+                        <form id="add-reminder-form-admin" onSubmit={handleAddReminder} className="space-y-4 py-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="reminder-text-admin">Texto del Recordatorio</Label>
+                                <Textarea 
+                                    id="reminder-text-admin" 
+                                    value={newReminderText}
+                                    onChange={(e) => setNewReminderText(e.target.value)}
+                                    placeholder="Ej: Revisar presupuesto trimestral..."
+                                    required 
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Color de la Etiqueta</Label>
+                                <div className="flex gap-2">
+                                    {reminderColors.map(color => (
+                                        <button 
+                                            key={color} 
+                                            type="button" 
+                                            className={`w-8 h-8 rounded-full border-2 transition-all ${newReminderColor === color ? 'border-primary ring-2 ring-ring ring-offset-2 ring-offset-background' : 'border-transparent'}`}
+                                            style={{ backgroundColor: color }}
+                                            onClick={() => setNewReminderColor(color)}
+                                            aria-label={`Seleccionar color ${color}`}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        </form>
+                        <DialogFooter>
+                            <Button type="submit" form="add-reminder-form-admin">
+                                <Plus className="mr-2 h-4 w-4" /> Agregar
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </CardHeader>
+            <CardContent>
+                {reminders.length > 0 ? (
+                <ul className="space-y-3">
+                    {reminders.map((reminder) => (
+                    <li key={reminder.id} className="flex items-center gap-3 p-3 rounded-md hover:bg-muted/50 transition-colors border-l-4" style={{ borderColor: reminder.color || 'hsl(var(--primary))' }}>
+                        <Info className={`h-5 w-5 flex-shrink-0`} style={{ color: reminder.color || 'hsl(var(--primary))' }} />
+                        <p className="text-sm text-foreground flex-grow">{reminder.text}</p>
+                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={() => handleDeleteReminder(reminder.id)}>
+                        <Trash2 className="h-4 w-4" />
+                        </Button>
+                    </li>
+                    ))}
+                </ul>
+                ) : (
+                <p className="text-sm text-muted-foreground text-center py-10">No hay recordatorios.</p>
+                )}
+            </CardContent>
         </Card>
       </section>
 
