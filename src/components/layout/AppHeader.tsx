@@ -47,15 +47,20 @@ const getPathBreadcrumbs = (pathname: string) => {
     'style-guide': 'Guía de Estilos',
   };
 
-  const breadcrumbSegments = segments.slice(1);
+  const breadcrumbs = [{ href: dashboardPath, label: 'Panel' }];
+  const pathSegments = segments.slice(1);
 
-  const breadcrumbs = breadcrumbSegments.map((segment, index) => {
-    const href = `/${role}/${breadcrumbSegments.slice(0, index + 1).join('/')}`;
+  pathSegments.forEach((segment, index) => {
+    // Don't add a 'dashboard' breadcrumb as it's already the root 'Panel'
+    if (segment.toLowerCase() === 'dashboard') {
+        return;
+    }
+    const href = `/${role}/${pathSegments.slice(0, index + 1).join('/')}`;
     const label = labelMapping[segment.toLowerCase()] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
-    return { href, label };
+    breadcrumbs.push({ href, label });
   });
 
-  return [{ href: dashboardPath, label: 'Panel' }, ...breadcrumbs];
+  return breadcrumbs;
 };
 
 export function AppHeader() {
