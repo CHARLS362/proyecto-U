@@ -2,15 +2,28 @@
 export interface Student {
   id: string;
   name: string;
+  firstName: string;
+  lastName: string;
   avatarUrl: string;
   email: string;
   phone: string;
   courses: Array<{ id: string; name: string; progress: number }>;
   enrollmentDate: string;
   address: string;
-  gradeLevel: string;
+  gradeLevel: string; // e.g. "10º Grado"
   guardianName?: string;
   guardianContact?: string;
+  
+  // Fields to match the form
+  dob?: string; // "YYYY-MM-DD"
+  gender?: 'masculino' | 'femenino' | 'otro';
+  classId?: string; // "12-comercio"
+  section?: string; // "A"
+  department?: string;
+  city?: string;
+  guardianEmail?: string;
+  guardianAddress?: string;
+  guardianDob?: string;
 }
 
 export interface Course {
@@ -79,6 +92,8 @@ export const mockStudents: Student[] = [
   {
     id: "S001",
     name: "Ana Pérez",
+    firstName: "Ana",
+    lastName: "Pérez",
     avatarUrl: "https://placehold.co/100x100.png",
     email: "ana.perez@example.com",
     phone: "555-0101",
@@ -91,10 +106,21 @@ export const mockStudents: Student[] = [
     gradeLevel: "10º Grado",
     guardianName: "Carlos Pérez",
     guardianContact: "555-0102",
+    dob: "2008-04-10",
+    gender: "femenino",
+    classId: "10-arte",
+    section: "A",
+    department: "Provincia",
+    city: "Ciudad",
+    guardianEmail: "carlos.perez@example.com",
+    guardianAddress: "Calle Falsa 123, Ciudad",
+    guardianDob: "1980-05-15",
   },
   {
     id: "S002",
     name: "Luis García",
+    firstName: "Luis",
+    lastName: "García",
     avatarUrl: "https://placehold.co/100x100.png",
     email: "luis.garcia@example.com",
     phone: "555-0103",
@@ -105,10 +131,23 @@ export const mockStudents: Student[] = [
     enrollmentDate: "2023-09-01",
     address: "Avenida Siempreviva 742, Ciudad",
     gradeLevel: "11º Grado",
+    guardianName: "María García",
+    guardianContact: "555-0104",
+    dob: "2007-08-22",
+    gender: "masculino",
+    classId: "11-ciencia",
+    section: "B",
+    department: "Provincia",
+    city: "Ciudad",
+    guardianEmail: "maria.garcia@example.com",
+    guardianAddress: "Avenida Siempreviva 742, Ciudad",
+    guardianDob: "1982-10-20",
   },
   {
     id: "S003",
     name: "Sofía Rodríguez",
+    firstName: "Sofía",
+    lastName: "Rodríguez",
     avatarUrl: "https://placehold.co/100x100.png",
     email: "sofia.rodriguez@example.com",
     phone: "555-0104",
@@ -121,6 +160,15 @@ export const mockStudents: Student[] = [
     gradeLevel: "12º Grado",
     guardianName: "Elena Rodríguez",
     guardianContact: "555-0105",
+    dob: "2006-11-05",
+    gender: "femenino",
+    classId: "12-comercio",
+    section: "C",
+    department: "Provincia",
+    city: "Ciudad",
+    guardianEmail: "elena.rodriguez@example.com",
+    guardianAddress: "Boulevard de los Sueños Rotos 45, Ciudad",
+    guardianDob: "1985-01-30",
   },
 ];
 

@@ -61,6 +61,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Form,
   FormControl,
   FormField,
@@ -138,6 +148,9 @@ export default function StudentsPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFileName, setPhotoFileName] = useState('Ningún archivo seleccionado');
 
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
     defaultValues,
@@ -163,31 +176,47 @@ export default function StudentsPage() {
   };
   
   const handleOpenEditModal = (student: Student) => {
-    handleModalChange(false); // Reset form before opening
+    handleModalChange(false);
     setModalMode('edit');
     setCurrentStudentId(student.id);
 
-    const [firstName, ...lastNameParts] = student.name.split(' ');
-    const lastName = lastNameParts.join(' ');
-    
-    // Populate form with student data
-    form.setValue('studentFirstName', firstName);
-    form.setValue('studentLastName', lastName);
+    form.setValue('studentFirstName', student.firstName);
+    form.setValue('studentLastName', student.lastName);
     form.setValue('guardianName', student.guardianName || '');
+    form.setValue('studentDob', student.dob || '');
+    form.setValue('studentGender', student.gender || '');
+    form.setValue('studentClass', student.classId || '');
+    form.setValue('studentSection', student.section || '');
     form.setValue('studentPhone', student.phone);
     form.setValue('studentEmail', student.email);
     form.setValue('studentAddress', student.address);
+    form.setValue('studentDepartment', student.department || '');
+    form.setValue('studentCity', student.city || '');
     form.setValue('guardianPhone', student.guardianContact || '');
-
-    // Set other fields that might not be in the base Student object
-    // This assumes that other fields like DOB, gender etc. would be fetched from a full student record in a real app
-    // For now, they will be empty or can be filled by the user
-    // form.setValue('studentDob', student.dob || ''); // Example if dob existed
+    form.setValue('guardianEmail', student.guardianEmail || '');
+    form.setValue('guardianAddress', student.guardianAddress || '');
+    form.setValue('guardianDob', student.guardianDob || '');
     
     setPhotoPreview(student.avatarUrl);
     setPhotoFileName(student.avatarUrl.split('/').pop() || 'photo.png');
     
     setIsModalOpen(true);
+  };
+  
+  const openDeleteAlert = (student: Student) => {
+    setStudentToDelete(student);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const handleDeleteStudent = () => {
+    if (!studentToDelete) return;
+    setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
+    toast({
+        title: "Estudiante Eliminado",
+        description: `El estudiante ${studentToDelete.name} ha sido eliminado.`,
+    });
+    setIsDeleteAlertOpen(false);
+    setStudentToDelete(null);
   };
 
 
@@ -233,24 +262,75 @@ export default function StudentsPage() {
   };
 
   function onSubmit(data: StudentFormValues) {
+    const classDisplayMapping: { [key: string]: string } = {
+        "12-comercio": "12º Grado (Comercio)",
+        "11-ciencia": "11º Grado (Ciencia)",
+        "10-arte": "10º Grado (Arte)",
+    };
+    const gradeLevel = classDisplayMapping[data.studentClass] || data.studentClass;
+
     if (modalMode === 'add') {
-        const newStudentName = `${data.studentFirstName} ${data.studentLastName}`;
-        console.log("Datos del nuevo estudiante:", data);
+        const newStudent: Student = {
+            id: `S${Date.now().toString().slice(-4)}`,
+            name: `${data.studentFirstName} ${data.studentLastName}`,
+            firstName: data.studentFirstName,
+            lastName: data.studentLastName,
+            avatarUrl: photoPreview || "https://placehold.co/100x100.png",
+            email: data.studentEmail,
+            phone: data.studentPhone,
+            courses: [],
+            enrollmentDate: new Date().toISOString().split('T')[0],
+            address: data.studentAddress,
+            gradeLevel: gradeLevel,
+            guardianName: data.guardianName,
+            guardianContact: data.guardianPhone,
+            dob: data.studentDob,
+            gender: data.studentGender as any,
+            classId: data.studentClass,
+            section: data.studentSection,
+            department: data.studentDepartment,
+            city: data.studentCity,
+            guardianEmail: data.guardianEmail,
+            guardianAddress: data.guardianAddress,
+            guardianDob: data.guardianDob,
+        };
+        setStudents(prev => [newStudent, ...prev]);
         toast({
-            title: "Estudiante Agregado (Simulación)",
-            description: `El estudiante ${newStudentName} ha sido registrado exitosamente.`,
+            title: "Estudiante Agregado",
+            description: `El estudiante ${newStudent.name} ha sido registrado exitosamente.`,
         });
-        // In a real app, you would add the new student to the state:
-        // setStudents(prev => [...prev, newStudentData]);
-    } else {
-        const updatedStudentName = `${data.studentFirstName} ${data.studentLastName}`;
-        console.log("Datos del estudiante actualizados:", { id: currentStudentId, ...data });
+    } else if(currentStudentId) {
+        setStudents(prev => prev.map(s => {
+            if (s.id === currentStudentId) {
+                return {
+                    ...s,
+                    name: `${data.studentFirstName} ${data.studentLastName}`,
+                    firstName: data.studentFirstName,
+                    lastName: data.studentLastName,
+                    avatarUrl: photoPreview || s.avatarUrl,
+                    email: data.studentEmail,
+                    phone: data.studentPhone,
+                    address: data.studentAddress,
+                    gradeLevel: gradeLevel,
+                    guardianName: data.guardianName,
+                    guardianContact: data.guardianPhone,
+                    dob: data.studentDob,
+                    gender: data.studentGender as any,
+                    classId: data.studentClass,
+                    section: data.studentSection,
+                    department: data.studentDepartment,
+                    city: data.studentCity,
+                    guardianEmail: data.guardianEmail,
+                    guardianAddress: data.guardianAddress,
+                    guardianDob: data.guardianDob,
+                };
+            }
+            return s;
+        }));
         toast({
-            title: "Estudiante Actualizado (Simulación)",
-            description: `Los datos de ${updatedStudentName} han sido actualizados.`,
+            title: "Estudiante Actualizado",
+            description: `Los datos de ${data.studentFirstName} ${data.studentLastName} han sido actualizados.`,
         });
-         // In a real app, you would update the student in the state:
-        // setStudents(prev => prev.map(s => s.id === currentStudentId ? { ...s, ...updatedData } : s));
     }
     handleModalChange(false);
   }
@@ -416,7 +496,7 @@ export default function StudentsPage() {
                         <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" onClick={() => handleOpenEditModal(student)}>
                           <Edit className="mr-1 h-3 w-3" /> Editar
                         </Button>
-                        <Button variant="destructive" size="sm">
+                        <Button variant="destructive" size="sm" onClick={() => openDeleteAlert(student)}>
                           <Trash2 className="mr-1 h-3 w-3" /> Borrar
                         </Button>
                       </TableCell>
@@ -819,6 +899,22 @@ export default function StudentsPage() {
             </Form>
         </DialogContent>
     </Dialog>
+    
+    <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+        <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+            Esta acción no se puede deshacer. Esto eliminará permanentemente al estudiante
+            y sus datos de nuestros servidores.
+            </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setStudentToDelete(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteStudent} className={buttonVariants({ variant: "destructive" })}>Continuar</AlertDialogAction>
+        </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
     </>
   );
 }
