@@ -122,6 +122,14 @@ export interface BimesterGrades {
   average: number;
 };
 
+export interface StudentLeaveRequest {
+    id: number;
+    type: string;
+    requestDate: string;
+    status: 'aprobado' | 'rechazado' | 'pendiente';
+    description: string;
+    dateRange: string;
+}
 
 export const mockStudents: Student[] = [
   {
@@ -397,5 +405,32 @@ export const mockStudentGrades: BimesterGrades[] = [
             { courseName: "Química Orgánica", courseCode: "QUM202", credits: 4, finalGrade: 10 },
         ],
         average: 13.33,
+    }
+];
+
+export const mockStudentLeaveRequests: StudentLeaveRequest[] = [
+    {
+        id: 1,
+        type: 'Licencia por enfermedad',
+        requestDate: '20 de Julio, 2024',
+        status: 'aprobado',
+        description: 'Cita médica para chequeo general.',
+        dateRange: '25 de Julio, 2024 - 25 de Julio, 2024'
+    },
+    {
+        id: 2,
+        type: 'Licencia por viaje familiar',
+        requestDate: '15 de Julio, 2024',
+        status: 'pendiente',
+        description: 'Viaje familiar programado con antelación.',
+        dateRange: '1 de Agosto, 2024 - 7 de Agosto, 2024'
+    },
+    {
+        id: 3,
+        type: 'Licencia por enfermedad',
+        requestDate: '10 de Junio, 2024',
+        status: 'rechazado',
+        description: 'Reposo por gripe.',
+        dateRange: '11 de Junio, 2024 - 12 de Junio, 2024'
     }
 ];

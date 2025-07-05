@@ -20,6 +20,7 @@ import {
   Newspaper,
   Settings,
   LogOut,
+  Hourglass,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -30,6 +31,7 @@ const navItems = [
   { href: '/student/schedule', label: 'Horario', icon: CalendarClock },
   { href: '/student/grades', label: 'Calificaciones', icon: Award },
   { href: '/student/attendance', label: 'Asistencia', icon: ClipboardCheck },
+  { href: '/student/leave', label: 'Permisos', icon: Hourglass },
   { href: '/student/news', label: 'Avisos', icon: Newspaper },
 ];
 
