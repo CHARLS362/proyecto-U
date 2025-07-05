@@ -19,39 +19,47 @@ import * as React from "react"; // Import React for Fragment
 const getPathBreadcrumbs = (pathname: string) => {
   const segments = pathname.split('/').filter(Boolean);
 
-  // If it's the root, go to dashboard
-  if (pathname === '/') {
-    return [{ href: '/dashboard', label: 'Panel' }];
-  }
+  if (segments.length === 0) return [{ href: '/', label: 'Inicio' }];
 
-  // Define a mapping for labels to match sidebar
+  const role = segments[0] === 'teacher' || segments[0] === 'student' ? segments[0] : 'admin';
+  const dashboardPath = role === 'admin' ? '/dashboard' : `/${role}/dashboard`;
+
   const labelMapping: { [key: string]: string } = {
     dashboard: 'Panel',
     teachers: 'Docentes',
     students: 'Gestión de Estudiantes',
     subjects: 'Temas',
     attendance: 'Asistencias',
-    news: 'Tabla de noticias',
+    news: 'Avisos',
     calendar: 'Horario',
-    curriculum: 'Programas de estudio',
-    grades: 'Notas',
+    curriculum: 'Programa de estudios',
+    grades: 'Calificaciones',
     qualifications: 'Calificaciones',
     'bus-service': 'Servicio de Bus',
-    settings: 'Configuraciones',
+    settings: 'Configuración',
     new: 'Nuevo',
+    teacher: 'Docente',
+    student: 'Estudiante',
+    courses: 'Mis Cursos',
+    leave: 'Licencia',
   };
 
   const breadcrumbs = segments.map((segment, index) => {
+    // Don't create breadcrumbs for the role segment itself
+    if ((segment === 'teacher' || segment === 'student') && index === 0) {
+      return null;
+    }
     const href = '/' + segments.slice(0, index + 1).join('/');
-    const label = labelMapping[segment.toLowerCase()] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
+    let label = labelMapping[segment.toLowerCase()] || segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, ' ');
     return { href, label };
-  });
+  }).filter(Boolean) as { href: string, label: string }[];
 
-  // If the path isn't the dashboard itself, prepend the dashboard link.
-  if (segments[0] !== 'dashboard') {
-     return [{ href: '/dashboard', label: 'Panel' }, ...breadcrumbs];
+  const isOnDashboard = segments.length === (role === 'admin' ? 1 : 2) && segments[segments.length - 1] === 'dashboard';
+
+  if (!isOnDashboard) {
+     return [{ href: dashboardPath, label: 'Panel' }, ...breadcrumbs];
   }
-  
+
   return breadcrumbs;
 };
 

@@ -23,7 +23,10 @@ export default function LoginPage() {
 
     if (email === 'juan.docente@sofiaeduca.com' && password === 'teacherpass') {
       router.push('/teacher/dashboard');
-    } else {
+    } else if (email === 'ana.perez@example.com' && password === 'studentpass') {
+      router.push('/student/dashboard');
+    }
+     else {
       router.push('/dashboard');
     }
   };
