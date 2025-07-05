@@ -1,8 +1,9 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { PageTitle } from "@/components/common/PageTitle";
 import { mockNotices } from "@/lib/mockData";
-import { Newspaper, User, Building, Download } from "lucide-react";
+import { Newspaper, User, Building, Download, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -10,6 +11,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export default function StudentNewsPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const statusMap: { [key: string]: { label: string, color: string } } = {
     urgente: { label: 'Urgente', color: 'bg-red-500/20 text-red-600 border-red-500/30' },
@@ -29,7 +35,11 @@ export default function StudentNewsPage() {
     <div className="space-y-6">
       <PageTitle title="Tablón de Anuncios" subtitle="Las últimas noticias y avisos de la institución." icon={Newspaper} />
       
-      {mockNotices.length > 0 ? (
+      {!isClient ? (
+        <div className="flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : mockNotices.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
           {mockNotices.map((notice) => (
             <Card key={notice.id} className="flex flex-col shadow-lg hover:shadow-xl transition-shadow duration-300">
