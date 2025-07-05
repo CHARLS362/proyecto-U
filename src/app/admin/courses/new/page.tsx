@@ -21,8 +21,8 @@ const courseFormSchema = z.object({
   code: z.string().min(3, "El código debe tener al menos 3 caracteres."),
   name: z.string().min(3, "El nombre del curso es obligatorio."),
   description: z.string().optional(),
-  instructorId: z.string({ required_error: "Debe seleccionar un instructor." }),
-  classId: z.string({ required_error: "Debe seleccionar una clase." }),
+  instructorId: z.string({ required_error: "Debe seleccionar un instructor." }).min(1, "Debe seleccionar un instructor."),
+  classId: z.string({ required_error: "Debe seleccionar una clase." }).min(1, "Debe seleccionar una clase."),
   department: z.string().min(3, "El departamento es obligatorio."),
   credits: z.coerce.number().min(1, "Los créditos deben ser al menos 1.").max(10, "Los créditos no pueden ser más de 10."),
   capacity: z.coerce.number().min(1, "La capacidad debe ser al menos 1.").max(100, "La capacidad no puede exceder 100."),
@@ -38,8 +38,15 @@ export default function NewCoursePage() {
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
+      code: "",
+      name: "",
+      description: "",
+      instructorId: "",
+      classId: "",
+      department: "",
       credits: 1,
       capacity: 25,
+      schedule: "",
     },
   });
 
@@ -93,7 +100,7 @@ export default function NewCoursePage() {
               <FormField control={form.control} name="description" render={({ field }) => (
                 <FormItem>
                   <FormLabel>Descripción</FormLabel>
-                  <FormControl><Textarea placeholder="Breve descripción del contenido del curso..." {...field} /></FormControl>
+                  <FormControl><Textarea placeholder="Breve descripción del contenido del curso..." {...field} value={field.value ?? ""} /></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
@@ -102,7 +109,7 @@ export default function NewCoursePage() {
                 <FormField control={form.control} name="instructorId" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Instructor</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger></FormControl>
                             <SelectContent>
                                 {mockTeachers.map(teacher => (
@@ -128,7 +135,7 @@ export default function NewCoursePage() {
                  <FormField control={form.control} name="classId" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Clase</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger></FormControl>
                             <SelectContent>
                                 <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
