@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -149,7 +150,7 @@ export default function TeacherSettingsPage() {
                 <InfoItem icon={Mail} label="Correo electrónico" value="profesor@gmail.com" />
                 <InfoItem icon={School} label="Clase" value="12c" />
                 <InfoItem icon={BookText} label="Sección" value="A" />
-                <InfoItem icon={Phone} label="Teléfono" value="7896541230" />
+                <InfoItem icon={Phone} label="Teléfono" value="989654123" />
                 <InfoItem icon={Users} label="Género" value="Masculino" />
                 <InfoItem icon={Home} label="DIRECCIÓN" value="cerca de la casa del administrador" />
             </CardContent>

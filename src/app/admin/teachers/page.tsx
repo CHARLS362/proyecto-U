@@ -59,14 +59,14 @@ const initialTeachers: Teacher[] = [
     lastName: "Apd",
     avatarUrl: "https://placehold.co/40x40.png",
     email: "arnold.apd@example.com",
-    phoneNumber: "111-222-3333",
+    phoneNumber: "987654321",
     address: "Calle Falsa 123, Ciudad",
     dob: "1985-05-20",
     gender: "masculino",
     class: "12-comercio",
     section: "A",
     relatedSubject: "Física",
-    refContact: "555-123-4567",
+    refContact: "912345678",
     refRelationship: "Esposa",
     status: 'Activo',
   },
@@ -76,14 +76,14 @@ const initialTeachers: Teacher[] = [
     lastName: "Castillo",
     avatarUrl: "https://placehold.co/40x40.png",
     email: "beatriz.castillo@example.com",
-    phoneNumber: "222-333-4444",
+    phoneNumber: "987654322",
     address: "Avenida Siempreviva 742, Ciudad",
     dob: "1990-11-15",
     gender: "femenino",
     class: "11-ciencia",
     section: "B",
     relatedSubject: "Química",
-    refContact: "555-234-5678",
+    refContact: "912345677",
     refRelationship: "Hermano",
     status: 'Activo',
   },
@@ -93,14 +93,14 @@ const initialTeachers: Teacher[] = [
     lastName: "Dávila",
     avatarUrl: "https://placehold.co/40x40.png",
     email: "carlos.davila@example.com",
-    phoneNumber: "333-444-5555",
+    phoneNumber: "987654323",
     address: "Boulevard de los Sueños Rotos 45, Ciudad",
     dob: "1982-03-30",
     gender: "masculino",
     class: "10-arte",
     section: "C",
     relatedSubject: "Arte",
-    refContact: "555-345-6789",
+    refContact: "912345676",
     refRelationship: "Padre",
     status: 'Activo',
   },
@@ -597,7 +597,7 @@ export default function TeachersPage() {
                   <div className="space-y-4 py-4">
                       <div className="grid gap-2">
                           <Label htmlFor="phone">Número de celular</Label>
-                          <Input id="phone" type="tel" placeholder="Ej: 987654321" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} required />
+                          <Input id="phone" type="tel" maxLength={9} placeholder="987654321" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value.replace(/\D/g, ''))} required />
                       </div>
                       <div className="grid gap-2">
                           <Label htmlFor="email">Correo electrónico</Label>
@@ -609,7 +609,7 @@ export default function TeachersPage() {
                       </div>
                        <div className="grid gap-2">
                           <Label htmlFor="ref-contact">Contacto de referencia</Label>
-                          <Input id="ref-contact" placeholder="Ej: 987654322" value={refContact} onChange={e => setRefContact(e.target.value)} />
+                          <Input id="ref-contact" type="tel" maxLength={9} placeholder="912345678" value={refContact} onChange={e => setRefContact(e.target.value.replace(/\D/g, ''))} />
                       </div>
                       <div className="grid gap-2">
                           <Label htmlFor="ref-relationship">Parentesco</Label>

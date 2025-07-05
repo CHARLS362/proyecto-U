@@ -99,14 +99,14 @@ const studentFormSchema = z.object({
   studentPhoto: z.any().optional(),
 
   // Paso 2
-  studentPhone: z.string().min(7, "El número de teléfono debe tener al menos 7 dígitos."),
+  studentPhone: z.string().length(9, "El número de celular debe tener 9 dígitos."),
   studentEmail: z.string().email("Correo electrónico inválido."),
   studentAddress: z.string().min(5, "La dirección es obligatoria."),
   studentDepartment: z.string().min(2, "El departamento es obligatorio."),
   studentCity: z.string().min(2, "La ciudad es obligatoria."),
   
   // Paso 3
-  guardianPhone: z.string().min(7, "El teléfono del apoderado debe tener al menos 7 dígitos."),
+  guardianPhone: z.string().length(9, "El celular del apoderado debe tener 9 dígitos."),
   guardianEmail: z.string().email("Correo electrónico del apoderado inválido."),
   guardianAddress: z.string().min(5, "La dirección del apoderado es obligatoria."),
   guardianDob: z.string().min(1, "La fecha de nacimiento del apoderado es obligatoria."),
@@ -592,7 +592,7 @@ export default function StudentsPage() {
                     <h3 className="text-xl font-semibold text-foreground">Estudiante kumar</h3>
                     <div className="text-left text-sm text-muted-foreground mt-4 space-y-2 w-full bg-muted/30 p-4 rounded-lg">
                         <p><span className="font-medium text-foreground/80">Identificación:</span> S1718791292</p>
-                        <p><span className="font-medium text-foreground/80">Teléfono:</span> 7894561230</p>
+                        <p><span className="font-medium text-foreground/80">Teléfono:</span> 987654321</p>
                         <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> 19/06/2024</p>
                     </div>
                 </CardContent>
@@ -753,7 +753,7 @@ export default function StudentsPage() {
                             <FormItem>
                               <FormLabel>Número de Celular</FormLabel>
                               <FormControl>
-                                <Input type="tel" placeholder="Ej: 987654321" {...field} />
+                                <Input type="tel" placeholder="987654321" {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -827,7 +827,7 @@ export default function StudentsPage() {
                               <FormItem>
                                 <FormLabel>Celular del Apoderado</FormLabel>
                                 <FormControl>
-                                  <Input type="tel" placeholder="Ej: 912345678" {...field} />
+                                  <Input type="tel" placeholder="912345678" {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>

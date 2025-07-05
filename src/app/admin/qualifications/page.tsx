@@ -108,11 +108,11 @@ export default function QualificationsPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="total-marks">Calificación</Label>
-            <Input id="total-marks" />
+            <Input id="total-marks" placeholder="20" />
           </div>
           <div className="grid gap-2">
             <Label htmlFor="passing-marks">Calificaciones aprobatorias</Label>
-            <Input id="passing-marks" />
+            <Input id="passing-marks" placeholder="11" />
           </div>
         </div>
           <div className="grid gap-2">
@@ -228,7 +228,7 @@ export default function QualificationsPage() {
                       </TableCell>
                       <TableCell className="text-center">20</TableCell>
                       <TableCell className="text-center">
-                        <Input type="number" defaultValue="11" className="w-24 mx-auto" />
+                        <Input type="number" min="0" max="20" placeholder="--" className="w-24 mx-auto" />
                       </TableCell>
                     </TableRow>
                   </TableBody>

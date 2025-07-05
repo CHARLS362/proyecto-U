@@ -45,7 +45,7 @@ export default function StudentDashboardPage() {
                 />
                 <SimpleMetricCard
                     title="Promedio General"
-                    value="8.5"
+                    value="14.5"
                     icon={Target}
                     iconBgClass="bg-green-100 dark:bg-green-500/30"
                     iconColorClass="text-green-500 dark:text-green-300"
