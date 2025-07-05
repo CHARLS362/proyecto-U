@@ -1,4 +1,5 @@
 
+
 export interface Student {
   id: string;
   name: string;
@@ -33,12 +34,14 @@ export interface Course {
   description: string;
   schedule: string;
   instructor: string;
+  instructorId?: string;
   instructorAvatar?: string;
   enrolledStudentsCount: number;
   capacity: number;
   credits: number;
   department: string;
   syllabusUrl?: string;
+  classId?: string;
 }
 
 export interface AttendanceRecord {
@@ -226,12 +229,14 @@ export const mockCourses: Course[] = [
     description: "Curso avanzado sobre cálculo y álgebra lineal.",
     schedule: "Lun, Mié, Vie 10:00-11:30",
     instructor: "Dr. Eduardo López",
+    instructorId: "T1749005331", // Added instructorId
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 25,
     capacity: 30,
     credits: 4,
     department: "Matemáticas",
     syllabusUrl: "/syllabi/MAT301.pdf",
+    classId: "12-comercio",
   },
   {
     id: "C002",
@@ -240,12 +245,14 @@ export const mockCourses: Course[] = [
     description: "Exploración de los movimientos artísticos a través de la historia.",
     schedule: "Mar, Jue 08:00-09:30",
     instructor: "Prof. Isabel Vargas",
+    instructorId: "T1749005332",
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 18,
     capacity: 25,
     credits: 3,
     department: "Humanidades",
     syllabusUrl: "/syllabi/ART101.pdf",
+    classId: "10-arte",
   },
   {
     id: "C003",
@@ -254,12 +261,14 @@ export const mockCourses: Course[] = [
     description: "Introducción a los conceptos fundamentales de la programación.",
     schedule: "Lun, Vie 14:00-15:30",
     instructor: "Ing. Ricardo Montes",
+    instructorId: "T1749005331", // Added instructorId
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 30,
     capacity: 30,
     credits: 4,
     department: "Ciencias de la Computación",
     syllabusUrl: "/syllabi/CS101.pdf",
+    classId: "11-ciencia",
   },
   {
     id: "C004",
@@ -268,12 +277,14 @@ export const mockCourses: Course[] = [
     description: "Estudio de la estructura, propiedades, composición, reacciones y preparación de compuestos que contienen carbono.",
     schedule: "Mar, Jue 11:00-12:30",
     instructor: "Dra. Laura Fuentes",
+    instructorId: "T1749005333",
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 22,
     capacity: 25,
     credits: 4,
     department: "Ciencias Naturales",
     syllabusUrl: "/syllabi/QUM202.pdf",
+    classId: "11-ciencia",
   },
 ];
 

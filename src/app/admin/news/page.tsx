@@ -23,8 +23,10 @@ import {
   Edit,
   Trash2
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function NewsPage() {
+  const { toast } = useToast();
   const [importance, setImportance] = useState('normal');
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
 
@@ -34,6 +36,23 @@ export default function NewsPage() {
     } else {
       setFileName('Ningún archivo seleccionado');
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    toast({
+      title: "Aviso enviado",
+      description: "El nuevo aviso ha sido publicado y notificado.",
+      variant: "success",
+    });
+    // Here you would reset the form
+  };
+
+  const handleActionClick = (action: string, noticeTitle: string) => {
+    toast({
+      title: `Acción: ${action}`,
+      description: `Se ha ejecutado "${action}" en el aviso "${noticeTitle}".`,
+    });
   };
 
   const notices = [
@@ -92,16 +111,16 @@ export default function NewsPage() {
               </Button>
             </CardHeader>
             <Separator />
-            <form>
+            <form onSubmit={handleSubmit}>
               <CardContent className="pt-6 space-y-6">
                 <div className="grid gap-2">
                   <Label htmlFor="aviso-titulo">Título del aviso</Label>
-                  <Input id="aviso-titulo" placeholder="título del aviso" />
+                  <Input id="aviso-titulo" placeholder="título del aviso" required/>
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="aviso-cuerpo">Cuerpo del aviso</Label>
-                  <Textarea id="aviso-cuerpo" placeholder="Escriba el cuerpo del aviso aquí..." />
+                  <Textarea id="aviso-cuerpo" placeholder="Escriba el cuerpo del aviso aquí..." required/>
                 </div>
 
                 <div className="grid gap-2">
@@ -154,7 +173,7 @@ export default function NewsPage() {
                 <ClipboardList className="h-5 w-5 text-muted-foreground" />
                 <CardTitle className="text-lg">Tablón de anuncios</CardTitle>
               </div>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" onClick={() => toast({ title: "Próximamente", description: "La función para agregar avisos desde aquí estará disponible pronto."})}>
                 <Plus className="h-5 w-5" />
               </Button>
             </CardHeader>
@@ -175,13 +194,13 @@ export default function NewsPage() {
                     <Separator />
                     <CardFooter className="p-2 flex justify-between items-center">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Button variant="ghost" size="icon" className="h-7 w-7"><Eye className="h-4 w-4"/></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7"><Download className="h-4 w-4"/></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleActionClick('Ver', notice.title)}><Eye className="h-4 w-4"/></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleActionClick('Descargar', notice.title)}><Download className="h-4 w-4"/></Button>
                         <span>{`${notice.file.size} (${notice.file.type})`}</span>
                       </div>
                       <div className="flex items-center">
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700"><Edit className="h-4 w-4"/></Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80"><Trash2 className="h-4 w-4"/></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700" onClick={() => handleActionClick('Editar', notice.title)}><Edit className="h-4 w-4"/></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80" onClick={() => handleActionClick('Eliminar', notice.title)}><Trash2 className="h-4 w-4"/></Button>
                       </div>
                     </CardFooter>
                   </Card>
@@ -189,9 +208,9 @@ export default function NewsPage() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-end items-center gap-2 pt-4 border-t">
-                <Button variant="outline" size="sm">anterior</Button>
+                <Button variant="outline" size="sm" onClick={() => toast({description: "Ya estás en la primera página."})}>anterior</Button>
                 <Button variant="default" size="sm">1</Button>
-                <Button variant="outline" size="sm">próximo</Button>
+                <Button variant="outline" size="sm" onClick={() => toast({description: "No hay más páginas."})}>próximo</Button>
             </CardFooter>
           </Card>
         </TabsContent>
