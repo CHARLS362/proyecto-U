@@ -263,9 +263,9 @@ export default function StudentsPage() {
 
   function onSubmit(data: StudentFormValues) {
     const classDisplayMapping: { [key: string]: string } = {
-        "12-comercio": "12º Grado (Comercio)",
-        "11-ciencia": "11º Grado (Ciencia)",
-        "10-arte": "10º Grado (Arte)",
+        "3-sec": "3º de Secundaria",
+        "4-sec": "4º de Secundaria",
+        "5-sec": "5º de Secundaria",
     };
     const gradeLevel = classDisplayMapping[data.studentClass] || data.studentClass;
 
@@ -421,9 +421,9 @@ export default function StudentsPage() {
                       <SelectValue placeholder="Seleccionar Clase" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                      <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                      <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                        <SelectItem value="3-sec">3º de Secundaria</SelectItem>
+                        <SelectItem value="4-sec">4º de Secundaria</SelectItem>
+                        <SelectItem value="5-sec">5º de Secundaria</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -533,14 +533,14 @@ export default function StudentsPage() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div className="grid gap-2">
                   <Label htmlFor="comment-class">Clase</Label>
-                  <Select defaultValue="12-comercio">
+                  <Select defaultValue="5-sec">
                     <SelectTrigger id="comment-class">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                      <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                      <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                      <SelectItem value="3-sec">3º de Secundaria</SelectItem>
+                      <SelectItem value="4-sec">4º de Secundaria</SelectItem>
+                      <SelectItem value="5-sec">5º de Secundaria</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -559,7 +559,7 @@ export default function StudentsPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="comment-student">Alumno</Label>
-                  <Select defaultValue="kumar">
+                  <Select defaultValue="S001">
                     <SelectTrigger id="comment-student">
                       <SelectValue />
                     </SelectTrigger>
@@ -567,7 +567,6 @@ export default function StudentsPage() {
                         <SelectItem value="S001">Ana Pérez</SelectItem>
                         <SelectItem value="S002">Luis García</SelectItem>
                         <SelectItem value="S003">Sofía Rodríguez</SelectItem>
-                        <SelectItem value="kumar">Student kumar</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -586,14 +585,14 @@ export default function StudentsPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col items-center text-center">
                     <Avatar className="h-32 w-32 mb-4 border-2 border-border">
-                        <AvatarImage src="https://placehold.co/128x128.png" alt="Estudiante kumar" data-ai-hint="robot avatar" />
-                        <AvatarFallback>SK</AvatarFallback>
+                        <AvatarImage src="https://placehold.co/128x128.png" alt="Estudiante" data-ai-hint="student avatar" />
+                        <AvatarFallback>AP</AvatarFallback>
                     </Avatar>
-                    <h3 className="text-xl font-semibold text-foreground">Estudiante kumar</h3>
+                    <h3 className="text-xl font-semibold text-foreground">Ana Pérez</h3>
                     <div className="text-left text-sm text-muted-foreground mt-4 space-y-2 w-full bg-muted/30 p-4 rounded-lg">
-                        <p><span className="font-medium text-foreground/80">Identificación:</span> S1718791292</p>
+                        <p><span className="font-medium text-foreground/80">Identificación:</span> S001</p>
                         <p><span className="font-medium text-foreground/80">Teléfono:</span> 987654321</p>
-                        <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> 19/06/2024</p>
+                        <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> 10/04/2008</p>
                     </div>
                 </CardContent>
             </Card>
@@ -701,9 +700,9 @@ export default function StudentsPage() {
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="---seleccionar---" /></SelectTrigger></FormControl>
                                     <SelectContent>
-                                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                                      <SelectItem value="3-sec">3º de Secundaria</SelectItem>
+                                      <SelectItem value="4-sec">4º de Secundaria</SelectItem>
+                                      <SelectItem value="5-sec">5º de Secundaria</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

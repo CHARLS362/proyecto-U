@@ -63,7 +63,6 @@ export default function CoursesPage() {
                 <TableHead>Nombre del Curso</TableHead>
                 <TableHead>Instructor</TableHead>
                 <TableHead>Departamento</TableHead>
-                <TableHead className="text-center">Créditos</TableHead>
                 <TableHead className="text-center">Capacidad</TableHead>
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
@@ -90,7 +89,6 @@ export default function CoursesPage() {
                   <TableCell>
                     <Badge variant="secondary">{course.department}</Badge>
                   </TableCell>
-                  <TableCell className="text-center">{course.credits}</TableCell>
                   <TableCell className="text-center">
                     <div className="flex flex-col items-center">
                       <span>{course.enrolledStudentsCount}/{course.capacity}</span>

@@ -26,6 +26,7 @@ import {
   Settings,
   LogOut,
   BookOpenText,
+  ClipboardEdit,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -34,6 +35,7 @@ const navItems = [
   { href: '/admin/dashboard', label: 'Panel', icon: LayoutGrid },
   { href: '/admin/teachers', label: 'Docentes', icon: Users },
   { href: '/admin/students', label: 'Gestión de Estudiantes', icon: GraduationCap },
+  { href: '/admin/enrollment', label: 'Matrículas', icon: ClipboardEdit },
   { href: '/admin/courses', label: 'Cursos', icon: BookOpenText },
   { href: '/admin/subjects', label: 'Temas', icon: BookCopy },
   { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },

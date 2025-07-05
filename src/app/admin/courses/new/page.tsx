@@ -24,7 +24,6 @@ const courseFormSchema = z.object({
   instructorId: z.string({ required_error: "Debe seleccionar un instructor." }).min(1, "Debe seleccionar un instructor."),
   classId: z.string({ required_error: "Debe seleccionar una clase." }).min(1, "Debe seleccionar una clase."),
   department: z.string().min(3, "El departamento es obligatorio."),
-  credits: z.coerce.number().min(1, "Los créditos deben ser al menos 1.").max(10, "Los créditos no pueden ser más de 10."),
   capacity: z.coerce.number().min(1, "La capacidad debe ser al menos 1.").max(100, "La capacidad no puede exceder 100."),
   schedule: z.string().min(5, "El horario es obligatorio."),
 });
@@ -44,7 +43,6 @@ export default function NewCoursePage() {
       instructorId: "",
       classId: "",
       department: "",
-      credits: 1,
       capacity: 25,
       schedule: "",
     },
@@ -131,25 +129,18 @@ export default function NewCoursePage() {
                 )} />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                  <FormField control={form.control} name="classId" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Clase</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger></FormControl>
                             <SelectContent>
-                                <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                                <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                                <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                                <SelectItem value="3-sec">3º de Secundaria</SelectItem>
+                                <SelectItem value="4-sec">4º de Secundaria</SelectItem>
+                                <SelectItem value="5-sec">5º de Secundaria</SelectItem>
                             </SelectContent>
                         </Select>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="credits" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Créditos</FormLabel>
-                        <FormControl><Input type="number" min="1" {...field} /></FormControl>
                         <FormMessage />
                     </FormItem>
                 )} />

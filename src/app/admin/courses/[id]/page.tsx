@@ -77,11 +77,6 @@ export default async function CourseProfilePage({ params }: { params: { id: stri
                         <span className="font-medium">Horario:</span>
                         <span>{course.schedule}</span>
                     </div>
-                     <div className="flex items-center gap-3">
-                        <CalendarDays className="h-5 w-5 text-primary"/>
-                        <span className="font-medium">Créditos:</span>
-                        <span>{course.credits}</span>
-                    </div>
                     <div className="flex items-center gap-3">
                         <BarChart className="h-5 w-5 text-primary"/>
                         <span className="font-medium">Capacidad:</span>

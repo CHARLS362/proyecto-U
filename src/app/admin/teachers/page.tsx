@@ -468,9 +468,9 @@ export default function TeachersPage() {
                       <Select onValueChange={setTeacherClass} value={teacherClass}>
                           <SelectTrigger><SelectValue placeholder="Seleccionar Clase"/></SelectTrigger>
                           <SelectContent>
-                              <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                              <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                              <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                              <SelectItem value="3-sec">3º de Secundaria</SelectItem>
+                              <SelectItem value="4-sec">4º de Secundaria</SelectItem>
+                              <SelectItem value="5-sec">5º de Secundaria</SelectItem>
                           </SelectContent>
                       </Select>
                       <Select onValueChange={setTeacherSection} value={teacherSection}>

@@ -55,15 +55,15 @@ export default function StudentGradesPage() {
 
       (doc as any).autoTable({
         startY: startY,
-        head: [['Curso', 'Código', 'Créditos', 'Nota Final']],
-        body: bimesterData.grades.map(g => [g.courseName, g.courseCode, g.credits, g.finalGrade]),
+        head: [['Curso', 'Código', 'Nota Final']],
+        body: bimesterData.grades.map(g => [g.courseName, g.courseCode, g.finalGrade]),
         theme: 'grid',
         headStyles: { fillColor: [33, 150, 243] },
       });
       
       startY = (doc as any).lastAutoTable.finalY + 10;
       doc.setFontSize(12);
-      doc.text(`Promedio Ponderado del Bimestre: ${bimesterData.average.toFixed(2)}`, 14, startY);
+      doc.text(`Promedio del Bimestre: ${bimesterData.average.toFixed(2)}`, 14, startY);
       startY += 15;
     });
 
@@ -134,7 +134,6 @@ export default function StudentGradesPage() {
                     <TableRow>
                       <TableHead>Curso</TableHead>
                       <TableHead>Código</TableHead>
-                      <TableHead className="text-center">Créditos</TableHead>
                       <TableHead className="text-center font-bold text-primary">Nota Final</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -143,7 +142,6 @@ export default function StudentGradesPage() {
                        <TableRow key={grade.courseCode}>
                         <TableCell className="font-medium">{grade.courseName}</TableCell>
                         <TableCell className="text-muted-foreground">{grade.courseCode}</TableCell>
-                        <TableCell className="text-center">{grade.credits}</TableCell>
                         <TableCell className={`text-center font-bold text-lg ${grade.finalGrade < 11 ? 'text-destructive' : 'text-foreground'}`}>
                             {grade.finalGrade}
                         </TableCell>
@@ -154,7 +152,7 @@ export default function StudentGradesPage() {
                 <Separator className="my-4" />
                 <div className="text-right">
                     <p className="text-md font-semibold text-foreground">
-                        Promedio Ponderado del Bimestre: <span className="text-primary text-lg">{bimesterData.average.toFixed(2)}</span>
+                        Promedio del Bimestre: <span className="text-primary text-lg">{bimesterData.average.toFixed(2)}</span>
                     </p>
                 </div>
               </CardContent>

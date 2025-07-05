@@ -11,14 +11,14 @@ export interface Student {
   courses: Array<{ id: string; name: string; progress: number }>;
   enrollmentDate: string;
   address: string;
-  gradeLevel: string; // e.g. "10º Grado"
+  gradeLevel: string; // e.g. "3º de Secundaria"
   guardianName?: string;
   guardianContact?: string;
   
   // Fields to match the form
   dob?: string; // "YYYY-MM-DD"
   gender?: 'masculino' | 'femenino' | 'otro';
-  classId?: string; // "12-comercio"
+  classId?: string; // "3-sec"
   section?: string; // "A"
   department?: string;
   city?: string;
@@ -38,7 +38,6 @@ export interface Course {
   instructorAvatar?: string;
   enrolledStudentsCount: number;
   capacity: number;
-  credits: number;
   department: string;
   syllabusUrl?: string;
   classId?: string;
@@ -116,7 +115,6 @@ export interface CourseAnnouncement {
 export interface GradeEntry {
   courseName: string;
   courseCode: string;
-  credits: number;
   finalGrade: number;
 };
 
@@ -175,24 +173,24 @@ export const mockStudents: Student[] = [
     email: "ana.perez@example.com",
     phone: "987654321",
     courses: [
-      { id: "C001", name: "Matemáticas Avanzadas", progress: 75 },
-      { id: "C002", name: "Historia del Arte", progress: 60 },
-      { id: "C003", name: "Programación Básica", progress: 88 },
-      { id: "C004", name: "Química Orgánica", progress: 55 },
+      { id: "C001", name: "Álgebra y Geometría", progress: 75 },
+      { id: "C002", name: "Historia del Perú", progress: 60 },
+      { id: "C003", name: "Computación Básica", progress: 88 },
+      { id: "C004", name: "Química General", progress: 55 },
     ],
-    enrollmentDate: "2023-09-01",
-    address: "Calle Falsa 123, Ciudad",
-    gradeLevel: "10º Grado",
+    enrollmentDate: "2023-03-01",
+    address: "Calle Falsa 123, Miraflores",
+    gradeLevel: "3º de Secundaria",
     guardianName: "Carlos Pérez",
     guardianContact: "912345678",
     dob: "2008-04-10",
     gender: "femenino",
-    classId: "10-arte",
+    classId: "3-sec",
     section: "A",
-    department: "Provincia",
-    city: "Ciudad",
+    department: "Lima",
+    city: "Lima",
     guardianEmail: "carlos.perez@example.com",
-    guardianAddress: "Calle Falsa 123, Ciudad",
+    guardianAddress: "Calle Falsa 123, Miraflores",
     guardianDob: "1980-05-15",
   },
   {
@@ -204,22 +202,22 @@ export const mockStudents: Student[] = [
     email: "luis.garcia@example.com",
     phone: "987654322",
     courses: [
-      { id: "C001", name: "Matemáticas Avanzadas", progress: 85 },
-      { id: "C003", name: "Programación Básica", progress: 90 },
+      { id: "C001", name: "Álgebra y Geometría", progress: 85 },
+      { id: "C003", name: "Computación Básica", progress: 90 },
     ],
-    enrollmentDate: "2023-09-01",
-    address: "Avenida Siempreviva 742, Ciudad",
-    gradeLevel: "11º Grado",
+    enrollmentDate: "2023-03-01",
+    address: "Avenida Siempreviva 742, San Isidro",
+    gradeLevel: "4º de Secundaria",
     guardianName: "María García",
     guardianContact: "912345677",
     dob: "2007-08-22",
     gender: "masculino",
-    classId: "11-ciencia",
+    classId: "4-sec",
     section: "B",
-    department: "Provincia",
-    city: "Ciudad",
+    department: "Lima",
+    city: "Lima",
     guardianEmail: "maria.garcia@example.com",
-    guardianAddress: "Avenida Siempreviva 742, Ciudad",
+    guardianAddress: "Avenida Siempreviva 742, San Isidro",
     guardianDob: "1982-10-20",
   },
   {
@@ -231,22 +229,22 @@ export const mockStudents: Student[] = [
     email: "sofia.rodriguez@example.com",
     phone: "987654323",
     courses: [
-      { id: "C002", name: "Historia del Arte", progress: 70 },
-      { id: "C004", name: "Química Orgánica", progress: 50 },
+      { id: "C002", name: "Historia del Perú", progress: 70 },
+      { id: "C004", name: "Química General", progress: 50 },
     ],
-    enrollmentDate: "2022-09-01",
-    address: "Boulevard de los Sueños Rotos 45, Ciudad",
-    gradeLevel: "12º Grado",
+    enrollmentDate: "2022-03-01",
+    address: "Boulevard de los Sueños Rotos 45, Barranco",
+    gradeLevel: "5º de Secundaria",
     guardianName: "Elena Rodríguez",
     guardianContact: "912345676",
     dob: "2006-11-05",
     gender: "femenino",
-    classId: "12-comercio",
-    section: "C",
-    department: "Provincia",
-    city: "Ciudad",
+    classId: "5-sec",
+    section: "A",
+    department: "Lima",
+    city: "Lima",
     guardianEmail: "elena.rodriguez@example.com",
-    guardianAddress: "Boulevard de los Sueños Rotos 45, Ciudad",
+    guardianAddress: "Boulevard de los Sueños Rotos 45, Barranco",
     guardianDob: "1985-01-30",
   },
 ];
@@ -262,7 +260,7 @@ export const mockTeachers: Teacher[] = [
     address: "Calle Falsa 123, Ciudad",
     dob: "1985-05-20",
     gender: "masculino",
-    class: "12-comercio",
+    class: "5-sec",
     section: "A",
     relatedSubject: "Matemáticas",
     refContact: "912345678",
@@ -279,7 +277,7 @@ export const mockTeachers: Teacher[] = [
     address: "Avenida Siempreviva 742, Ciudad",
     dob: "1990-11-15",
     gender: "femenino",
-    class: "11-ciencia",
+    class: "4-sec",
     section: "B",
     relatedSubject: "Humanidades",
     refContact: "912345677",
@@ -296,7 +294,7 @@ export const mockTeachers: Teacher[] = [
     address: "Boulevard de los Sueños Rotos 45, Ciudad",
     dob: "1982-03-30",
     gender: "masculino",
-    class: "10-arte",
+    class: "3-sec",
     section: "C",
     relatedSubject: "Ciencias de la Computación",
     refContact: "912345676",
@@ -308,76 +306,72 @@ export const mockTeachers: Teacher[] = [
 export const mockCourses: Course[] = [
   {
     id: "C001",
-    code: "MAT301",
-    name: "Matemáticas Avanzadas",
-    description: "Curso avanzado sobre cálculo y álgebra lineal.",
+    code: "MAT501",
+    name: "Álgebra y Geometría",
+    description: "Curso avanzado sobre cálculo y álgebra lineal para el último año.",
     schedule: "Lun, Mié, Vie 10:00-11:30",
     instructor: "Dr. Eduardo López",
     instructorId: "T1749005331", 
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 25,
     capacity: 30,
-    credits: 4,
     department: "Matemáticas",
-    syllabusUrl: "/syllabi/MAT301.pdf",
-    classId: "12-comercio",
+    syllabusUrl: "/syllabi/MAT501.pdf",
+    classId: "5-sec",
   },
   {
     id: "C002",
-    code: "ART101",
-    name: "Historia del Arte",
-    description: "Exploración de los movimientos artísticos a través de la historia.",
+    code: "HIS301",
+    name: "Historia del Perú",
+    description: "Exploración de los hitos históricos de la nación peruana.",
     schedule: "Mar, Jue 08:00-09:30",
     instructor: "Prof. Isabel Vargas",
     instructorId: "T1749005332",
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 18,
     capacity: 25,
-    credits: 3,
     department: "Humanidades",
-    syllabusUrl: "/syllabi/ART101.pdf",
-    classId: "10-arte",
+    syllabusUrl: "/syllabi/HIS301.pdf",
+    classId: "3-sec",
   },
   {
     id: "C003",
-    code: "CS101",
-    name: "Programación Básica",
-    description: "Introducción a los conceptos fundamentales de la programación.",
+    code: "CS401",
+    name: "Computación Básica",
+    description: "Introducción a los conceptos fundamentales de la computación y ofimática.",
     schedule: "Lun, Vie 14:00-15:30",
     instructor: "Ing. Ricardo Montes",
     instructorId: "T1749005333",
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 30,
     capacity: 30,
-    credits: 4,
-    department: "Ciencias de la Computación",
-    syllabusUrl: "/syllabi/CS101.pdf",
-    classId: "11-ciencia",
+    department: "Tecnología",
+    syllabusUrl: "/syllabi/CS401.pdf",
+    classId: "4-sec",
   },
   {
     id: "C004",
-    code: "QUM202",
-    name: "Química Orgánica",
-    description: "Estudio de la estructura, propiedades, composición, reacciones y preparación de compuestos que contienen carbono.",
+    code: "QUM401",
+    name: "Química General",
+    description: "Estudio de la materia, sus propiedades y transformaciones.",
     schedule: "Mar, Jue 11:00-12:30",
-    instructor: "Dra. Laura Fuentes",
+    instructor: "Dra. Isabel Vargas",
     instructorId: "T1749005332",
     instructorAvatar: "https://placehold.co/40x40.png",
     enrolledStudentsCount: 22,
     capacity: 25,
-    credits: 4,
     department: "Ciencias Naturales",
-    syllabusUrl: "/syllabi/QUM202.pdf",
-    classId: "11-ciencia",
+    syllabusUrl: "/syllabi/QUM401.pdf",
+    classId: "4-sec",
   },
 ];
 
 export const mockAttendance: AttendanceRecord[] = [
-  { id: "A001", studentId: "S001", studentName: "Ana Pérez", courseId: "C001", courseName: "Matemáticas Avanzadas", date: "2024-05-01", status: "Presente" },
-  { id: "A002", studentId: "S002", studentName: "Luis García", courseId: "C001", courseName: "Matemáticas Avanzadas", date: "2024-05-01", status: "Presente" },
-  { id: "A003", studentId: "S001", studentName: "Ana Pérez", courseId: "C001", courseName: "Matemáticas Avanzadas", date: "2024-05-03", status: "Ausente" },
-  { id: "A004", studentId: "S003", studentName: "Sofía Rodríguez", courseId: "C002", courseName: "Historia del Arte", date: "2024-05-02", status: "Tarde" },
-  { id: "A005", studentId: "S002", studentName: "Luis García", courseId: "C003", courseName: "Programación Básica", date: "2024-05-03", status: "Presente" },
+  { id: "A001", studentId: "S001", studentName: "Ana Pérez", courseId: "C001", courseName: "Álgebra y Geometría", date: "2024-05-01", status: "Presente" },
+  { id: "A002", studentId: "S002", studentName: "Luis García", courseId: "C001", courseName: "Álgebra y Geometría", date: "2024-05-01", status: "Presente" },
+  { id: "A003", studentId: "S001", studentName: "Ana Pérez", courseId: "C001", courseName: "Álgebra y Geometría", date: "2024-05-03", status: "Ausente" },
+  { id: "A004", studentId: "S003", studentName: "Sofía Rodríguez", courseId: "C002", courseName: "Historia del Perú", date: "2024-05-02", status: "Tarde" },
+  { id: "A005", studentId: "S002", studentName: "Luis García", courseId: "C003", courseName: "Computación Básica", date: "2024-05-03", status: "Presente" },
 ];
 
 const today = new Date();
@@ -425,7 +419,7 @@ export const mockStudentAttendanceStats: AttendanceStat[] = [
 
 export const mockRecentActivities: RecentActivity[] = [
   { id: "RA001", icon: "UserPlus", description: "Nuevo estudiante 'Carlos Luna' registrado.", timestamp: "Hace 5 minutos" },
-  { id: "RA002", icon: "ClipboardEdit", description: "Notas actualizadas para 'Matemáticas Avanzadas'.", timestamp: "Hace 30 minutos" },
+  { id: "RA002", icon: "ClipboardEdit", description: "Notas actualizadas para 'Álgebra y Geometría'.", timestamp: "Hace 30 minutos" },
   { id: "RA003", icon: "CalendarPlus", description: "Nuevo evento 'Feria de Ciencias' añadido al calendario.", timestamp: "Hace 1 hora" },
   { id: "RA004", icon: "Megaphone", description: "Publicado nuevo aviso: 'Reunión General de Docentes'.", timestamp: "Hace 2 horas" },
   { id: "RA005", icon: "FileText", description: "Se subió el reporte de 'Asistencia Mensual'.", timestamp: "Hace 4 horas" },
@@ -490,21 +484,21 @@ export const mockStudentGrades: BimesterGrades[] = [
     {
         bimester: 1,
         grades: [
-            { courseName: "Matemáticas Avanzadas", courseCode: "MAT301", credits: 4, finalGrade: 15 },
-            { courseName: "Historia del Arte", courseCode: "ART101", credits: 3, finalGrade: 18 },
-            { courseName: "Programación Básica", courseCode: "CS101", credits: 4, finalGrade: 16 },
+            { courseName: "Álgebra y Geometría", courseCode: "MAT501", finalGrade: 15 },
+            { courseName: "Historia del Perú", courseCode: "HIS301", finalGrade: 18 },
+            { courseName: "Computación Básica", courseCode: "CS401", finalGrade: 16 },
         ],
-        average: 16.18,
+        average: 16.33,
     },
     {
         bimester: 2,
         grades: [
-            { courseName: "Matemáticas Avanzadas", courseCode: "MAT301", credits: 4, finalGrade: 14 },
-            { courseName: "Historia del Arte", courseCode: "ART101", credits: 3, finalGrade: 16 },
-            { courseName: "Programación Básica", courseCode: "CS101", credits: 4, finalGrade: 13 },
-            { courseName: "Química Orgánica", courseCode: "QUM202", credits: 4, finalGrade: 10 },
+            { courseName: "Álgebra y Geometría", courseCode: "MAT501", finalGrade: 14 },
+            { courseName: "Historia del Perú", courseCode: "HIS301", finalGrade: 16 },
+            { courseName: "Computación Básica", courseCode: "CS401", finalGrade: 13 },
+            { courseName: "Química General", courseCode: "QUM401", finalGrade: 10 },
         ],
-        average: 13.33,
+        average: 13.25,
     }
 ];
 
@@ -536,25 +530,25 @@ export const mockStudentLeaveRequests: StudentLeaveRequest[] = [
 ];
 
 export const mockGradesReport: { [key: string]: GradesReport } = {
-  "10-arte": {
-    className: "10 (Arte)",
-    subjects: ["H. del Arte", "Música", "Dibujo"],
+  "3-sec": {
+    className: "3º de Secundaria",
+    subjects: ["H. del Perú", "Música", "Dibujo"],
     grades: [
       { studentId: "S001", studentName: "Ana Pérez", scores: [18, 15, 17] },
       { studentId: "S004", studentName: "David Jiménez", scores: [16, 17, 16] },
     ]
   },
-  "11-ciencia": {
-    className: "11 (Ciencia)",
-    subjects: ["Programación", "Química", "Física"],
+  "4-sec": {
+    className: "4º de Secundaria",
+    subjects: ["Computación", "Química", "Física"],
     grades: [
       { studentId: "S002", studentName: "Luis García", scores: [17, 14, 16] },
       { studentId: "S005", studentName: "Laura Martínez", scores: [19, 18, 17] },
     ]
   },
-  "12-comercio": {
-    className: "12 (Comercio)",
-    subjects: ["Matemáticas", "Contabilidad", "Economía"],
+  "5-sec": {
+    className: "5º de Secundaria",
+    subjects: ["Álgebra", "Contabilidad", "Economía"],
     grades: [
       { studentId: "S003", studentName: "Sofía Rodríguez", scores: [15, 12, 14] },
       { studentId: "S006", studentName: "Javier Gómez", scores: [13, 11, 10] },

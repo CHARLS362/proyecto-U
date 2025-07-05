@@ -146,12 +146,12 @@ export default function QualificationsPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="class-select">Clase</Label>
-            <Select defaultValue="12-comercio">
+            <Select defaultValue="5-sec">
               <SelectTrigger id="class-select"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                <SelectItem value="3-sec">3º de Secundaria</SelectItem>
+                <SelectItem value="4-sec">4º de Secundaria</SelectItem>
+                <SelectItem value="5-sec">5º de Secundaria</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -308,9 +308,9 @@ export default function QualificationsPage() {
                     <Select value={selectedClass} onValueChange={setSelectedClass}>
                       <SelectTrigger id="view-class"><SelectValue placeholder="-- Seleccionar --"/></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                        <SelectItem value="3-sec">3º de Secundaria</SelectItem>
+                        <SelectItem value="4-sec">4º de Secundaria</SelectItem>
+                        <SelectItem value="5-sec">5º de Secundaria</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

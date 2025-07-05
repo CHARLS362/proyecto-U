@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -133,11 +134,6 @@ export default function CourseDetailPage() {
                       <span>{course.schedule}</span>
                    </div>
                    <div className="flex items-center gap-3">
-                      <CalendarDays className="h-5 w-5 text-primary"/>
-                      <span className="font-medium text-foreground">Créditos:</span>
-                      <span>{course.credits}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
                       <BookOpenText className="h-5 w-5 text-primary"/>
                       <span className="font-medium text-foreground">Departamento:</span>
                       <span>{course.department}</span>
