@@ -1,7 +1,7 @@
-
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { PageTitle } from "@/components/common/PageTitle";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
 import { mockNotices, mockReminders, mockRecentActivities, type Reminder } from "@/lib/mockData";
@@ -134,8 +134,10 @@ export default function DashboardPage() {
               <Button variant="ghost" size="icon">
                 <Filter className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon">
-                <Plus className="h-4 w-4" />
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/admin/news?tab=crear-aviso">
+                  <Plus className="h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </CardHeader>

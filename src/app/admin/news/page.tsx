@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { PageTitle } from "@/components/common/PageTitle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
@@ -26,9 +27,12 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 export default function NewsPage() {
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [importance, setImportance] = useState('normal');
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+
+  const defaultTab = searchParams.get('tab') === 'crear-aviso' ? 'crear-aviso' : 'tablon-de-anuncios';
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -93,7 +97,7 @@ export default function NewsPage() {
     <div className="space-y-6">
       <PageTitle title="Tablón de anuncios" icon={Newspaper} />
       
-      <Tabs defaultValue="tablon-de-anuncios" className="w-full animate-fade-in">
+      <Tabs defaultValue={defaultTab} className="w-full animate-fade-in">
         <TabsList className="grid w-full grid-cols-2 sm:max-w-xs">
           <TabsTrigger value="crear-aviso">Crear aviso</TabsTrigger>
           <TabsTrigger value="tablon-de-anuncios">Tablón de anuncios</TabsTrigger>
