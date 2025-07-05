@@ -65,7 +65,7 @@ export function AppSidebar() {
         <Link href="/" className="flex items-center gap-2 group/logo">
           <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
           <h1 className="text-xl font-semibold text-foreground group-data-[collapsible=icon]:hidden">
-            Panel de Admin
+            Sofía Educa
           </h1>
         </Link>
       </SidebarHeader>
@@ -98,7 +98,7 @@ export function AppSidebar() {
           </Avatar>
           <div className="group-data-[collapsible=icon]:hidden">
             <p className="text-sm font-medium text-foreground">Admin</p>
-            <p className="text-xs text-muted-foreground">admin@academia.nova</p>
+            <p className="text-xs text-muted-foreground">admin@sofiaeduca.com</p>
           </div>
         </div>
         <SidebarMenu className="mt-2">
