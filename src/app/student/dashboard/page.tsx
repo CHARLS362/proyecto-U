@@ -5,7 +5,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { PageTitle } from "@/components/common/PageTitle";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
-import { mockStudents, mockEvents, mockNotices } from "@/lib/mockData";
+import { mockStudents, mockEvents, mockNotices, type SchoolEvent } from "@/lib/mockData";
 import { BookOpen, CalendarClock, Target, Bell } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,21 @@ import { es } from "date-fns/locale";
 
 // Assuming we have the student's ID, e.g., 'S001' for Ana Pérez
 const student = mockStudents.find(s => s.id === 'S001');
+const recentNotices = mockNotices.slice(0, 2);
 
 export default function StudentDashboardPage() {
+    const [upcomingEvents, setUpcomingEvents] = React.useState<SchoolEvent[]>([]);
+    const [isClient, setIsClient] = React.useState(false);
+
+    React.useEffect(() => {
+        // This effect runs only on the client, after the initial render
+        const today = new Date();
+        const filteredEvents = mockEvents.filter(event => event.date >= today).slice(0, 3);
+        setUpcomingEvents(filteredEvents);
+        setIsClient(true);
+    }, []);
+
+
     if (!student) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -27,10 +40,6 @@ export default function StudentDashboardPage() {
         );
     }
     
-    const upcomingEvents = mockEvents.filter(event => event.date >= new Date()).slice(0, 3);
-    const recentNotices = mockNotices.slice(0, 2);
-
-
     return (
         <div className="space-y-6 md:space-y-8">
             <PageTitle title="Panel del Estudiante" subtitle={`¡Bienvenida de nuevo, ${student.firstName}!`} />
@@ -102,7 +111,9 @@ export default function StudentDashboardPage() {
                     <CardContent className="space-y-4">
                         <div>
                              <h4 className="text-sm font-semibold mb-2 text-foreground">Eventos</h4>
-                             {upcomingEvents.length > 0 ? (
+                             {!isClient ? (
+                                <p className="text-xs text-muted-foreground">Cargando eventos...</p>
+                             ) : upcomingEvents.length > 0 ? (
                                 <ul className="space-y-3">
                                     {upcomingEvents.map(event => (
                                         <li key={event.id} className="flex items-center gap-3">
@@ -124,7 +135,9 @@ export default function StudentDashboardPage() {
                         <Separator />
                         <div>
                              <h4 className="text-sm font-semibold mb-2 text-foreground">Avisos Recientes</h4>
-                             {recentNotices.length > 0 ? (
+                             {!isClient ? (
+                                <p className="text-xs text-muted-foreground">Cargando avisos...</p>
+                             ) : recentNotices.length > 0 ? (
                                 <ul className="space-y-3">
                                     {recentNotices.map(notice => (
                                         <li key={notice.id}>
