@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
   CardFooter,
-  CardDescription
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
@@ -21,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, FileText, Filter, ClipboardCheck, Database } from 'lucide-react';
+import { Search, FileText, Filter, ClipboardCheck, Database, Calendar as CalendarIcon } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -32,8 +31,16 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { cn } from '@/lib/utils';
 
 export default function TeacherAttendancePage() {
+  const [date, setDate] = useState<Date | undefined>(new Date());
+
   return (
     <div className="space-y-6">
       <PageTitle title="Asistencia" icon={ClipboardCheck} />
@@ -144,21 +151,110 @@ export default function TeacherAttendancePage() {
           </div>
         </TabsContent>
         <TabsContent value="mostrar-asistencia" className="mt-6">
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle>Mostrar Asistencia</CardTitle>
-              <CardDescription>Ver el historial de asistencia de los estudiantes.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col items-center justify-center py-16 text-center">
-                  <div className="p-4 bg-accent/20 rounded-full mb-4">
-                      <Database className="h-12 w-12 text-accent" />
+          <div className="space-y-6">
+            <Card className="shadow-lg">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle className="text-lg">Información</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                  <div className="grid gap-2">
+                    <Label htmlFor="date-class">Clase</Label>
+                    <Select defaultValue="12-comercio">
+                      <SelectTrigger id="date-class">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
+                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
+                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground">Sin datos</h3>
-                  <p className="text-sm text-muted-foreground">La funcionalidad para mostrar el historial de asistencia se implementará aquí.</p>
-              </div>
-            </CardContent>
-          </Card>
+                  <div className="grid gap-2">
+                    <Label htmlFor="date-section">Sección</Label>
+                    <Select defaultValue="A">
+                      <SelectTrigger id="date-section">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                   <div className="grid gap-2">
+                    <Label htmlFor="date">Fecha</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          id="date"
+                          variant={"outline"}
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {date ? format(date, "dd/MM/yyyy") : <span>Seleccione una fecha</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={date}
+                          onSelect={setDate}
+                          initialFocus
+                          locale={es}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                  <Button className="w-full md:w-auto">
+                    <Search className="mr-2 h-4 w-4" />
+                    Encontrar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Separator />
+            
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <div className="flex items-center gap-3">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
+                        <CardTitle className="text-lg">Hoja de asistencia</CardTitle>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>#</TableHead>
+                                <TableHead>Número de rollo</TableHead>
+                                <TableHead>Nombre</TableHead>
+                                <TableHead>Asistencia</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {/* El estado vacío se muestra a continuación, por lo que no hay filas aquí */}
+                        </TableBody>
+                    </Table>
+                     <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="p-4 bg-accent/20 rounded-full mb-4">
+                            <Database className="h-12 w-12 text-accent" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-foreground">Sin datos</h3>
+                    </div>
+                </CardContent>
+            </Card>
+
+          </div>
         </TabsContent>
       </Tabs>
     </div>
