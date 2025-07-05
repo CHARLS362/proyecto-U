@@ -7,7 +7,7 @@ import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
 import { mockNotices, mockReminders, mockRecentActivities, type Reminder } from "@/lib/mockData";
 import { 
   Users, Bookmark, Newspaper, StickyNote, Filter, Plus, Info, Trash2, LayoutGrid,
-  UserPlus as UserPlusIcon, ClipboardEdit as ClipboardEditIcon, CalendarPlus as CalendarPlusIcon, Megaphone as MegaphoneIcon, FileText as FileTextIcon, MoreHorizontal
+  UserPlus as UserPlusIcon, ClipboardEdit as ClipboardEditIcon, CalendarPlus as CalendarPlusIcon, Megaphone as MegaphoneIcon, FileText as FileTextIcon, MoreHorizontal, Loader2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,6 +60,12 @@ export default function DashboardPage() {
   const [isReminderDialogOpen, setIsReminderDialogOpen] = React.useState(false);
   const [newReminderText, setNewReminderText] = React.useState('');
   const [newReminderColor, setNewReminderColor] = React.useState('hsl(var(--primary))');
+  const [isClient, setIsClient] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const handleAddReminder = (e: React.FormEvent) => {
       e.preventDefault();
@@ -134,7 +140,11 @@ export default function DashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {mockNotices.length > 0 ? (
+            {!isClient ? (
+               <div className="flex justify-center items-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : mockNotices.length > 0 ? (
               <ul className="space-y-3">
                 {mockNotices.map((notice) => (
                   <li key={notice.id} className="flex items-center justify-between p-3 rounded-md hover:bg-muted/50 transition-colors">
