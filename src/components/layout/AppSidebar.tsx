@@ -25,6 +25,7 @@ import {
   Bus, 
   Settings,
   LogOut,
+  Palette,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -43,6 +44,11 @@ const navItems = [
   { href: '/bus-service', label: 'Servicio de Bus', icon: Bus },
 ];
 
+const bottomNavItems = [
+    { href: '/style-guide', label: 'Guía de Estilos', icon: Palette },
+    { href: '/settings', label: 'Configuraciones', icon: Settings },
+]
+
 export function AppSidebar() {
   const pathname = usePathname();
 
@@ -53,8 +59,8 @@ export function AppSidebar() {
         return pathname.startsWith(href);
     }
     // For settings and logout, exact match
-    if (href === '/settings' || href === '/logout') {
-        return pathname === href;
+    if (href === '/settings' || href === '/logout' || href === '/style-guide') {
+        return pathname.startsWith(href);
     }
     return false;
   };
@@ -102,23 +108,24 @@ export function AppSidebar() {
           </div>
         </div>
         <SidebarMenu className="mt-2">
-           <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive('/settings')}
-                  tooltip={{ children: 'Configuraciones', className:"bg-card text-card-foreground border-border shadow-md" }}
-                  className="justify-start"
-                >
-                  <Link href="/settings">
-                    <Settings />
-                    <span className="group-data-[collapsible=icon]:hidden">Configuraciones</span>
-                  </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
+           {bottomNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                    asChild
+                    isActive={isActive(item.href)}
+                    tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
+                    className="justify-start"
+                    >
+                    <Link href={item.href}>
+                        <item.icon />
+                        <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                    </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            ))}
              <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  // variant="destructive" // This variant is not standard in the CVA, custom classes handle destruction look
                   tooltip={{ children: 'Cerrar Sesión', className:"bg-destructive text-destructive-foreground border-border shadow-md" }}
                   className="justify-start group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive hover:bg-destructive/90 hover:text-destructive-foreground"
                 >
