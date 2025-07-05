@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -62,12 +61,14 @@ export default function EnrollmentPage() {
         toast({ title: "Sin resultados", description: "No se encontraron estudiantes." });
       }
       setIsSearching(false);
+      setSelectedStudent(null); // Clear previous selection on new search
     }, 500);
   };
 
   const handleSelectStudent = (student: Student) => {
     setSelectedStudent(student);
-    setSearchResults([]);
+    // By not clearing searchResults, we prevent the component from being removed abruptly.
+    // It will be hidden by the conditional logic in the JSX.
     setSearchTerm(`${student.name} (${student.id})`);
     setIsEnrolled(false);
     // Pre-select courses the student is already enrolled in
@@ -192,7 +193,7 @@ export default function EnrollmentPage() {
         </CardContent>
       </Card>
       
-      {searchResults.length > 0 && (
+      {searchResults.length > 0 && !selectedStudent && (
         <Card className="shadow-lg animate-fade-in">
           <CardHeader>
             <CardTitle>Resultados de la Búsqueda</CardTitle>
