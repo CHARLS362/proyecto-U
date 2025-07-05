@@ -61,7 +61,7 @@ export default function EnrollmentPage() {
       );
       setSearchResults(results);
       if (results.length === 0) {
-        toast({ title: "Sin resultados", description: "No se encontraron estudiantes." });
+        toast({ title: "Sin resultados", description: "No se encontraron estudiantes.", variant: "info" });
       } else {
         toast({ title: "Búsqueda completa", description: `Se encontraron ${results.length} estudiantes.`, variant: "info" });
       }
@@ -73,16 +73,16 @@ export default function EnrollmentPage() {
 
   const handleSelectStudent = (student: Student) => {
     setSelectedStudent(student);
-    setIsEnrolled(false);
+    setIsEnrolled(false); // Reset enrolled status for new selection
     const enrolledCourseIds = new Set(student.courses.map(c => c.id));
     setSelectedCourses(enrolledCourseIds);
   };
   
   const resetSelection = () => {
-      setSelectedStudent(null);
       setSearchTerm('');
-      setIsEnrolled(false);
       setSearchResults([]);
+      setSelectedStudent(null);
+      setIsEnrolled(false);
   }
 
   const availableCourses = useMemo(() => {
@@ -357,7 +357,7 @@ export default function EnrollmentPage() {
                 </div>
             )}
           </CardContent>
-          <CardFooter className="flex justify-end gap-2 border-t pt-4">
+          <CardFooter className="flex justify-start gap-2 border-t pt-4">
             <Button onClick={handleSaveEnrollment} disabled={isSaving || isEnrolled}>
                 {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 {isSaving ? "Guardando..." : "Guardar Matrícula"}
