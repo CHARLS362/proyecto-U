@@ -74,7 +74,7 @@ export default function QualificationsPage() {
   const handleContinue = () => {
     setIsDialogOpen(false);
     setIsEnteringGrades(true);
-    toast({ title: "Información Cargada", description: "Ahora ingrese las notas de los estudiantes." });
+    toast({ title: "Información Cargada", description: "Ahora ingrese las notas de los estudiantes.", variant: "info" });
   };
 
   const handleBack = () => {
@@ -96,7 +96,8 @@ export default function QualificationsPage() {
     
     toast({
         title: "Reporte Generado",
-        description: report ? `Mostrando reporte para la clase ${report.className}.` : "No se encontraron datos para la selección."
+        description: report ? `Mostrando reporte para la clase ${report.className}.` : "No se encontraron datos para la selección.",
+        variant: "info",
     });
   };
 
@@ -283,7 +284,7 @@ export default function QualificationsPage() {
                 </Table>
               </CardContent>
               <CardFooter className="flex justify-end pt-4 mt-4 border-t">
-                <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold" onClick={() => toast({ title: "Notas Guardadas", description: "Las calificaciones han sido registradas."})}>
+                <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold" onClick={() => toast({ title: "Notas Guardadas", description: "Las calificaciones han sido registradas.", variant: 'success'})}>
                   <Save className="mr-2 h-4 w-4" />
                   Guardar Notas
                 </Button>

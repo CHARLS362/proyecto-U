@@ -214,6 +214,7 @@ export default function StudentsPage() {
     toast({
         title: "Estudiante Eliminado",
         description: `El estudiante ${studentToDelete.name} ha sido eliminado.`,
+        variant: "success",
     });
     setIsDeleteAlertOpen(false);
     setStudentToDelete(null);
@@ -298,6 +299,7 @@ export default function StudentsPage() {
         toast({
             title: "Estudiante Agregado",
             description: `El estudiante ${newStudent.name} ha sido registrado exitosamente.`,
+            variant: "success",
         });
     } else if(currentStudentId) {
         setStudents(prev => prev.map(s => {
@@ -330,6 +332,7 @@ export default function StudentsPage() {
         toast({
             title: "Estudiante Actualizado",
             description: `Los datos de ${data.studentFirstName} ${data.studentLastName} han sido actualizados.`,
+            variant: "success",
         });
     }
     handleModalChange(false);
@@ -902,7 +905,7 @@ export default function StudentsPage() {
     <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
         <AlertDialogContent>
         <AlertDialogHeader>
-            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+            <AlertDialogTitle>¿Estás absolutely seguro?</AlertDialogTitle>
             <AlertDialogDescription>
             Esta acción no se puede deshacer. Esto eliminará permanentemente al estudiante
             y sus datos de nuestros servidores.

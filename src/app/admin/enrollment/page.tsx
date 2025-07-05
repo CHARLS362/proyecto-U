@@ -63,7 +63,7 @@ export default function EnrollmentPage() {
       if (results.length === 0) {
         toast({ title: "Sin resultados", description: "No se encontraron estudiantes." });
       } else {
-        toast({ title: "Búsqueda completa", description: `Se encontraron ${results.length} estudiantes.` });
+        toast({ title: "Búsqueda completa", description: `Se encontraron ${results.length} estudiantes.`, variant: "info" });
       }
       setIsSearching(false);
       setSelectedStudent(null);
@@ -73,7 +73,6 @@ export default function EnrollmentPage() {
 
   const handleSelectStudent = (student: Student) => {
     setSelectedStudent(student);
-    setSearchTerm(`${student.name} (${student.id})`);
     setIsEnrolled(false);
     const enrolledCourseIds = new Set(student.courses.map(c => c.id));
     setSelectedCourses(enrolledCourseIds);
@@ -81,10 +80,9 @@ export default function EnrollmentPage() {
   
   const resetSelection = () => {
       setSelectedStudent(null);
-      setSearchResults([]);
       setSearchTerm('');
-      setSelectedCourses(new Set());
       setIsEnrolled(false);
+      setSearchResults([]);
   }
 
   const availableCourses = useMemo(() => {
@@ -138,30 +136,91 @@ export default function EnrollmentPage() {
     
     const doc = new jsPDF();
     const enrolledCoursesDetails = availableCourses.filter(c => selectedCourses.has(c.id));
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 15;
 
-    doc.setFontSize(20);
-    doc.text("Ficha de Matrícula", doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+    // Header
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(40, 52, 71); // dark blue-gray, similar to foreground
+    doc.text("Sofía Educa", margin, 20);
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text("Sistema Integral de Aprendizaje", margin, 26);
     
+    doc.setDrawColor(64, 181, 246); // primary color
+    doc.setLineWidth(1);
+    doc.line(margin, 32, pageW - margin, 32);
+
+    // Document Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(40, 52, 71);
+    doc.text("Ficha de Matrícula", pageW / 2, 45, { align: 'center' });
+    
+    // Date
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Fecha de Emisión: ${new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}`, pageW - margin, 55, { align: 'right' });
+
+    // Student Info Section
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(12);
-    doc.text(`Fecha: ${new Date().toLocaleDateString('es-ES')}`, 14, 30);
+    doc.setTextColor(40, 52, 71);
+    doc.text("1. Datos del Estudiante", margin, 65);
     
-    doc.line(14, 35, doc.internal.pageSize.getWidth() - 14, 35);
+    const studentInfo = [
+      ["Nombre Completo:", selectedStudent.name],
+      ["ID de Estudiante:", selectedStudent.id],
+      ["Grado y Sección:", `${selectedStudent.gradeLevel} - Sección ${selectedStudent.section}`],
+      ["Fecha de Nacimiento:", new Date(selectedStudent.dob || '').toLocaleDateString('es-ES')],
+    ];
     
-    doc.setFontSize(14);
-    doc.text("Datos del Estudiante", 14, 45);
-    doc.setFontSize(11);
-    doc.text(`Nombre: ${selectedStudent.name}`, 16, 52);
-    doc.text(`ID: ${selectedStudent.id}`, 16, 59);
-    doc.text(`Grado: ${selectedStudent.gradeLevel}`, 16, 66);
-    doc.text(`Apoderado: ${selectedStudent.guardianName || 'N/A'}`, 16, 73);
+    doc.autoTable({
+        startY: 70,
+        body: studentInfo,
+        theme: 'plain',
+        styles: { cellPadding: 1.5, fontSize: 10, halign: 'left' },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50, textColor: [40, 52, 71] } },
+        margin: { left: margin },
+    });
 
-    doc.line(14, 80, doc.internal.pageSize.getWidth() - 14, 80);
+    let lastY = doc.lastAutoTable.finalY;
 
-    doc.setFontSize(14);
-    doc.text("Cursos Matriculados", 14, 90);
+    // Guardian Info Section
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(40, 52, 71);
+    doc.text("2. Datos del Apoderado", margin, lastY + 10);
+    
+    const guardianInfo = [
+      ["Nombre del Apoderado:", selectedStudent.guardianName || 'N/A'],
+      ["Contacto del Apoderado:", selectedStudent.guardianContact || 'N/A'],
+    ];
 
     doc.autoTable({
-        startY: 95,
+        startY: lastY + 15,
+        body: guardianInfo,
+        theme: 'plain',
+        styles: { cellPadding: 1.5, fontSize: 10, halign: 'left' },
+        columnStyles: { 0: { fontStyle: 'bold', cellWidth: 50, textColor: [40, 52, 71] } },
+        margin: { left: margin },
+    });
+    
+    lastY = doc.lastAutoTable.finalY;
+
+    // Courses Section
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.setTextColor(40, 52, 71);
+    doc.text("3. Cursos Matriculados", margin, lastY + 15);
+
+    doc.autoTable({
+        startY: lastY + 20,
         head: [['#', 'Código', 'Nombre del Curso', 'Docente']],
         body: enrolledCoursesDetails.map((course, index) => [
             index + 1,
@@ -169,15 +228,37 @@ export default function EnrollmentPage() {
             course.name,
             course.instructor
         ]),
-        theme: 'grid',
-        headStyles: { fillColor: [33, 150, 243] },
-        margin: { left: 14, right: 14 }
+        theme: 'striped',
+        headStyles: { 
+          fillColor: [45, 62, 80], // A darker blue-gray
+          textColor: [255, 255, 255], 
+          fontStyle: 'bold' 
+        },
+        alternateRowStyles: { fillColor: [240, 244, 248] }, // --background HSL
+        margin: { left: margin, right: margin }
     });
 
-    const finalY = doc.lastAutoTable.finalY || 150;
-    doc.text("_________________________                 _________________________ ", doc.internal.pageSize.getWidth() / 2, finalY + 30, { align: 'center' });
-    doc.text("Firma del Apoderado                   Firma de Administración", doc.internal.pageSize.getWidth() / 2, finalY + 35, { align: 'center' });
+    lastY = doc.lastAutoTable.finalY;
 
+    // Signature Area
+    const signatureY = lastY + 30 > pageH - 40 ? pageH - 50 : lastY + 30;
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(150);
+    doc.line(margin + 10, signatureY, margin + 70, signatureY); // Apoderado
+    doc.line(pageW - margin - 70, signatureY, pageW - margin - 10, signatureY); // Admin
+    
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text("Firma del Apoderado", margin + 40, signatureY + 5, { align: 'center' });
+    doc.text("Firma de Administración", pageW - margin - 40, signatureY + 5, { align: 'center' });
+
+    // Footer
+    doc.setLineWidth(0.2);
+    doc.setDrawColor(200);
+    doc.line(margin, pageH - 20, pageW - margin, pageH - 20);
+    doc.setFontSize(8);
+    doc.text(`Documento generado el ${new Date().toLocaleString('es-ES')}`, pageW/2, pageH - 15, { align: 'center' });
+    doc.text("Sofía Educa - Compromiso con la Excelencia", pageW/2, pageH - 10, { align: 'center' });
 
     doc.save(`ficha_matricula_${selectedStudent.id}.pdf`);
   };
@@ -214,7 +295,32 @@ export default function EnrollmentPage() {
         </CardContent>
       </Card>
       
-      {selectedStudent ? (
+      {searchResults.length > 0 && !selectedStudent ? (
+        <Card className="shadow-lg animate-fade-in">
+          <CardHeader>
+            <CardTitle>Resultados de la Búsqueda</CardTitle>
+            <CardDescription>
+              Se encontraron {searchResults.length} estudiantes. Seleccione uno para continuar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0 max-h-60 overflow-y-auto">
+            <div className="border-t">
+              {searchResults.map(student => (
+                <div key={student.id} onClick={() => handleSelectStudent(student)} className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer border-b last:border-b-0">
+                  <Avatar>
+                    <AvatarImage src={student.avatarUrl} data-ai-hint="student avatar"/>
+                    <AvatarFallback>{student.name.slice(0,2)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{student.name}</p>
+                    <p className="text-sm text-muted-foreground">{student.id} - {student.gradeLevel}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ) : selectedStudent ? (
         <Card className="shadow-lg animate-fade-in">
           <CardHeader>
             <CardTitle>Cursos para {selectedStudent.name}</CardTitle>
@@ -263,31 +369,6 @@ export default function EnrollmentPage() {
               </Button>
             )}
           </CardFooter>
-        </Card>
-      ) : searchResults.length > 0 ? (
-        <Card className="shadow-lg animate-fade-in">
-          <CardHeader>
-            <CardTitle>Resultados de la Búsqueda</CardTitle>
-            <CardDescription>
-              Se encontraron {searchResults.length} estudiantes. Seleccione uno para continuar.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0 max-h-60 overflow-y-auto">
-            <div className="border-t">
-              {searchResults.map(student => (
-                <div key={student.id} onClick={() => handleSelectStudent(student)} className="flex items-center gap-3 p-3 hover:bg-muted cursor-pointer border-b last:border-b-0">
-                  <Avatar>
-                    <AvatarImage src={student.avatarUrl} data-ai-hint="student avatar"/>
-                    <AvatarFallback>{student.name.slice(0,2)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{student.name}</p>
-                    <p className="text-sm text-muted-foreground">{student.id} - {student.gradeLevel}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
         </Card>
       ) : null}
 

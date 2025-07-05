@@ -56,6 +56,7 @@ export default function NewsPage() {
     toast({
       title: `Acción: ${action}`,
       description: `Se ha ejecutado "${action}" en el aviso "${noticeTitle}".`,
+      variant: "info",
     });
   };
 

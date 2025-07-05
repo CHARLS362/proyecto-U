@@ -105,6 +105,7 @@ export default function TeacherStudentsPage() {
     toast({
         title: "Búsqueda Realizada",
         description: `Se encontraron ${students.length} estudiantes.`,
+        variant: "info",
     });
   };
 
