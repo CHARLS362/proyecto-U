@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from "react";
@@ -65,21 +66,12 @@ const secondaryGrades = [
 
 
 export default function CurriculumPage() {
-  const [fileName, setFileName] = useState('Ningún archivo seleccionado');
   const [selectedLevel, setSelectedLevel] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   
   const [foundSyllabi, setFoundSyllabi] = useState<typeof mockSyllabi[keyof typeof mockSyllabi] | null>(null);
   const { toast } = useToast();
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setFileName(event.target.files[0].name);
-    } else {
-      setFileName('Ningún archivo seleccionado');
-    }
-  };
 
   const handleSearchSyllabus = () => {
     if (!selectedLevel || !selectedGrade || !selectedSection) {
@@ -99,84 +91,97 @@ export default function CurriculumPage() {
     });
   }
 
-  const UploadDialogContent = () => (
-    <DialogContent className="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>Subir Programa de Estudios</DialogTitle>
-      </DialogHeader>
-      <div className="py-4 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-           <div className="grid gap-2">
-                <Label htmlFor="dialog-level">Nivel</Label>
+  const UploadDialogContent = () => {
+    const [dialogFileName, setDialogFileName] = useState('Ningún archivo seleccionado');
+    const [dialogLevel, setDialogLevel] = useState('');
+
+    const handleDialogFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setDialogFileName(event.target.files[0].name);
+        } else {
+            setDialogFileName('Ningún archivo seleccionado');
+        }
+    };
+
+    return (
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Subir Programa de Estudios</DialogTitle>
+            </DialogHeader>
+            <div className="py-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="dialog-level">Nivel</Label>
+                        <Select onValueChange={setDialogLevel}>
+                            <SelectTrigger id="dialog-level"><SelectValue placeholder="-- Nivel --" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="primaria">Primaria</SelectItem>
+                                <SelectItem value="secundaria">Secundaria</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="dialog-grade">Grado</Label>
+                        <Select disabled={!dialogLevel}>
+                            <SelectTrigger id="dialog-grade"><SelectValue placeholder={!dialogLevel ? "Seleccione nivel" : "-- Grado --"} /></SelectTrigger>
+                            <SelectContent>
+                                {dialogLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={`p-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                                {dialogLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={`s-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="dialog-section">Sección</Label>
+                        <Select>
+                            <SelectTrigger id="dialog-section"><SelectValue placeholder="-- Sección --" /></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="A">A</SelectItem>
+                                <SelectItem value="B">B</SelectItem>
+                                <SelectItem value="C">C</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <div className="grid gap-2">
+                <Label htmlFor="subject-select">Asignatura</Label>
                 <Select>
-                    <SelectTrigger id="dialog-level"><SelectValue placeholder="-- Nivel --" /></SelectTrigger>
+                    <SelectTrigger id="subject-select">
+                    <SelectValue placeholder="-- Seleccionar Asignatura --" />
+                    </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="primaria">Primaria</SelectItem>
-                        <SelectItem value="secundaria">Secundaria</SelectItem>
+                    {subjects.map((subject) => (
+                        <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
+                    ))}
                     </SelectContent>
                 </Select>
+                </div>
+                <div className="grid gap-2">
+                <Label htmlFor="syllabus-file" className="text-sm text-muted-foreground">
+                    Subir archivo PDF (tamaño máximo 20MB)
+                </Label>
+                <div className="flex items-center gap-2">
+                    <Input id="syllabus-file" type="file" className="hidden" onChange={handleDialogFileChange} accept=".pdf" />
+                    <Button asChild variant="outline" className="shrink-0">
+                    <Label htmlFor="syllabus-file" className="cursor-pointer font-normal">Seleccionar archivo</Label>
+                    </Button>
+                    <span className="text-sm text-muted-foreground truncate">{dialogFileName}</span>
+                </div>
+                </div>
             </div>
-             <div className="grid gap-2">
-                <Label htmlFor="dialog-grade">Grado</Label>
-                <Select>
-                    <SelectTrigger id="dialog-grade"><SelectValue placeholder="-- Grado --" /></SelectTrigger>
-                    <SelectContent>
-                      {primaryGrades.map(g => <SelectItem key={`p-${g.value}`} value={`p-${g.value}`}>{g.label}</SelectItem>)}
-                      {secondaryGrades.map(g => <SelectItem key={`s-${g.value}`} value={`s-${g.value}`}>{g.label}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-            </div>
-             <div className="grid gap-2">
-                <Label htmlFor="dialog-section">Sección</Label>
-                <Select>
-                    <SelectTrigger id="dialog-section"><SelectValue placeholder="-- Sección --" /></SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="A">A</SelectItem>
-                        <SelectItem value="B">B</SelectItem>
-                        <SelectItem value="C">C</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="subject-select">Asignatura</Label>
-          <Select>
-            <SelectTrigger id="subject-select">
-              <SelectValue placeholder="-- Seleccionar Asignatura --" />
-            </SelectTrigger>
-            <SelectContent>
-              {subjects.map((subject) => (
-                <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="syllabus-file" className="text-sm text-muted-foreground">
-            Subir archivo PDF (tamaño máximo 20MB)
-          </Label>
-          <div className="flex items-center gap-2">
-            <Input id="syllabus-file" type="file" className="hidden" onChange={handleFileChange} accept=".pdf" />
-            <Button asChild variant="outline" className="shrink-0">
-              <Label htmlFor="syllabus-file" className="cursor-pointer font-normal">Seleccionar archivo</Label>
-            </Button>
-            <span className="text-sm text-muted-foreground truncate">{fileName}</span>
-          </div>
-        </div>
-      </div>
-      <DialogFooter>
-        <Button type="submit" onClick={() => toast({ title: "Simulación exitosa", description: "El programa de estudios ha sido subido."})}>
-          <UploadCloud className="mr-2 h-4 w-4" />
-          Subir Programa
-        </Button>
-      </DialogFooter>
-    </DialogContent>
-  );
+            <DialogFooter>
+                <Button type="submit" onClick={() => toast({ title: "Simulación exitosa", description: "El programa de estudios ha sido subido."})}>
+                <UploadCloud className="mr-2 h-4 w-4" />
+                Subir Programa
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    );
+  };
 
   return (
     <div className="space-y-6">
       <PageTitle title="Programa de estudios" subtitle="Gestione los planes de estudio por nivel, grado y sección." icon={LibraryBig}>
-         <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
+         <Dialog>
             <DialogTrigger asChild>
               <Button>
                 <UploadCloud className="mr-2 h-4 w-4" />
