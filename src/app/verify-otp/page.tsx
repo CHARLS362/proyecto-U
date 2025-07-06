@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { KeyRound, ArrowLeft } from 'lucide-react'; // Using KeyRound for OTP
+import loginImg from '@/recursos/login.png';
 
 export default function VerifyOtpPage() {
   const [otp, setOtp] = useState('');
@@ -82,12 +83,13 @@ export default function VerifyOtpPage() {
 
         <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
           <Image
-            src="https://placehold.co/800x1000.png"
+            src={loginImg}
             alt="Verificar OTP"
             fill
             style={{ objectFit: 'cover' }}
             className="opacity-30"
             data-ai-hint="verification checkmark security"
+            placeholder="blur"
           />
            <div className="relative z-10 text-center text-background drop-shadow-lg">
              <h2 className="text-4xl font-bold mb-2">ÚLTIMO PASO</h2>

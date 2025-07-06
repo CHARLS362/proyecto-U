@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Lock, Eye, EyeOff, ArrowLeft, ShieldCheck } from 'lucide-react';
+import loginImg from '@/recursos/login.png';
 
 export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState('');
@@ -106,12 +107,13 @@ export default function ResetPasswordPage() {
 
         <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
           <Image
-            src="https://placehold.co/800x1000.png"
+            src={loginImg}
             alt="Restablecer contraseña"
             fill
             style={{ objectFit: 'cover' }}
             className="opacity-30"
             data-ai-hint="password security shield"
+            placeholder="blur"
           />
           <div className="relative z-10 text-center text-background drop-shadow-lg">
             <ShieldCheck className="mx-auto h-16 w-16 mb-4"/>

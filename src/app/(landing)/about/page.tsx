@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Target, Users } from 'lucide-react';
-import aboutImg from '@/recursos/acerca-de.jpg';
+import aboutImg from '@/recursos/carousel1.jpg';
 
 export default function AboutPage() {
   return (

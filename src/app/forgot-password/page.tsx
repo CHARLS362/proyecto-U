@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Mail, ArrowLeft } from 'lucide-react';
+import loginImg from '@/recursos/login.png';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -64,12 +65,13 @@ export default function ForgotPasswordPage() {
 
         <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
           <Image
-            src="https://placehold.co/800x1000.png"
+            src={loginImg}
             alt="Recuperar contraseña"
             fill
             style={{ objectFit: 'cover' }}
             className="opacity-30"
             data-ai-hint="security lock key"
+            placeholder="blur"
           />
           <div className="relative z-10 text-center text-background drop-shadow-lg">
              <h2 className="text-4xl font-bold mb-2">¿CONTRASEÑA OLVIDADA?</h2>
