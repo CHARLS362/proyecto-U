@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import loginImg from '@/recursos/login.png';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -18,26 +19,15 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ correo: email, contrasena: password }),
-      });
+    console.log('Login attempt with:', { email, password });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setNotification({ type: 'success', message: '¡Inicio de sesión exitoso!' });
-        setTimeout(() => {
-          setNotification(null);
-          router.push('/dashboard');
-        }, 1500);
-      } else {
-        setNotification({ type: 'error', message: data.error || 'Error al iniciar sesión' });
-      }
-    } catch (error) {
-      setNotification({ type: 'error', message: 'No se pudo conectar con el servidor.' });
+    if (email === 'juan.docente@sofiaeduca.com' && password === 'teacherpass') {
+      router.push('/teacher/dashboard');
+    } else if (email === 'ana.perez@example.com' && password === 'studentpass') {
+      router.push('/student/dashboard');
+    }
+     else {
+      router.push('/admin/dashboard');
     }
   };
 
@@ -117,19 +107,16 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
+        <div className="hidden md:block relative">
           <Image
-            src="https://placehold.co/600x800.png"
+            src={loginImg}
             alt="Bienvenido a Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}
-            className="opacity-30"
+            className="rounded-r-xl"
             data-ai-hint="anime student hero"
+            placeholder="blur"
           />
-          <div className="relative z-10 text-center text-background drop-shadow-lg">
-            <h2 className="text-5xl font-bold mb-2">SOFÍA EDUCA</h2>
-            <p className="text-lg font-light">Sistema Integral de Aprendizaje</p>
-          </div>
         </div>
       </Card>
     </div>

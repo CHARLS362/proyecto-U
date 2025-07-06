@@ -2,13 +2,14 @@
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Target, Users } from 'lucide-react';
+import aboutImg from '@/recursos/carousel1.jpg';
 
 export default function AboutPage() {
   return (
     <div className="py-12 md:py-20 space-y-12">
       <section className="text-center animate-fade-in">
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-          Acerca de <span className="text-primary">Nuestra Institución</span>
+          Acerca de <span className="text-primary">Sofía Educa</span>
         </h1>
         <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
           Somos Sofía Educa, una institución comprometida con la excelencia educativa y el desarrollo integral de nuestros estudiantes. Creemos en el poder de la educación para transformar vidas y construir un futuro mejor.
@@ -28,12 +29,13 @@ export default function AboutPage() {
         </div>
         <div className="relative h-80 md:h-96 rounded-xl shadow-xl overflow-hidden group">
           <Image
-            src="https://placehold.co/800x600.png"
+            src={aboutImg}
             alt="Instalaciones de Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}
             className="transition-transform duration-500 group-hover:scale-105"
             data-ai-hint="school campus modern"
+            placeholder="blur"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/30 to-transparent"></div>
         </div>

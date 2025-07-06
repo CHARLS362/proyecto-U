@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -11,6 +10,12 @@ import { LandingShell } from "../components/layout/LandingShell";
 import React, { useState, useEffect, useCallback } from "react";
 import Autoplay from "embla-carousel-autoplay";
 import type { EmblaApiType } from 'embla-carousel-react';
+
+import portadaImg from "@/recursos/portada.png";
+import carousel1Img from "@/recursos/carousel1.jpg";
+import carousel2Img from "@/recursos/carousel2.jpg";
+import carousel3Img from "@/recursos/carousel3.jpg";
+
 
 const features = [
   {
@@ -52,11 +57,9 @@ const features = [
 ];
 
 const carouselImages = [
-  { src: "https://placehold.co/800x500.png", alt: "Vista del campus escolar", hint: "campus building modern" },
-  { src: "https://placehold.co/800x500.png", alt: "Estudiantes colaborando en un proyecto", hint: "students project" },
-  { src: "https://placehold.co/800x500.png", alt: "Aula moderna con tecnología", hint: "classroom technology" },
-  { src: "https://placehold.co/800x500.png", alt: "Evento deportivo escolar", hint: "school sports event" },
-  { src: "https://placehold.co/800x500.png", alt: "Biblioteca escolar", hint: "school library" },
+  { src: carousel1Img, alt: "Vista del campus escolar", hint: "campus building modern" },
+  { src: carousel2Img, alt: "Estudiantes colaborando en un proyecto", hint: "students project" },
+  { src: carousel3Img, alt: "Aula moderna con tecnología", hint: "classroom technology" },
 ];
 
 export default function RootPage() {
@@ -107,7 +110,7 @@ export default function RootPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
             <Button size="lg" asChild className="shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out">
-              <Link href="/dashboard">
+              <Link href="/login">
                 Empezar <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
@@ -120,13 +123,14 @@ export default function RootPage() {
         </div>
         <div className="relative h-64 md:h-[400px] lg:h-[500px] rounded-xl shadow-2xl overflow-hidden group animate-fade-in" style={{ animationDelay: '300ms' }}>
           <Image
-            src="https://placehold.co/800x600.png"
+            src={portadaImg}
             alt="Ilustración de gestión escolar moderna"
             fill
             style={{ objectFit: "cover" }}
             className="transition-transform duration-500 group-hover:scale-105"
             data-ai-hint="education students"
             priority
+            placeholder="blur"
           />
            <div className="absolute inset-0 bg-gradient-to-t from-background/50 to-transparent"></div>
         </div>
@@ -195,6 +199,7 @@ export default function RootPage() {
                       className="transition-transform duration-500 group-hover:scale-105"
                       data-ai-hint={image.hint}
                       sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
+                      placeholder="blur"
                     />
                   </div>
                 </CarouselItem>

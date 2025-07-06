@@ -28,7 +28,7 @@ export default function LogoutPage() {
             <CardDescription>Será redirigido a la página de inicio de sesión.</CardDescription>
             </CardHeader>
             <CardContent>
-                <p className="text-sm text-muted-foreground text-center">Gracias por visitar Academia Nova.</p>
+                <p className="text-sm text-muted-foreground text-center">Gracias por visitar Sofía Educa.</p>
             </CardContent>
         </Card>
     </div>

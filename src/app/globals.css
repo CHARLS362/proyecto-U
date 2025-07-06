@@ -23,18 +23,24 @@
     --primary: 207 88% 71%; /* Soft Blue #64B5F6 */
     --primary-foreground: 207 88% 10%; /* Dark Blue for contrast */
 
-    --secondary: 207 88% 90%; /* Lighter blue for secondary elements */
-    --secondary-foreground: 207 88% 10%;
+    --secondary: 262 84% 60%;
+    --secondary-foreground: 262 84% 10%;
 
     --accent: 36 100% 75%; /* Light Orange #FFCC80 */
     --accent-foreground: 36 100% 15%; /* Dark Orange/Brown for contrast */
 
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
+
+    --success: 145 63% 42%;
+    --success-foreground: 145 63% 95%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 45 93% 10%;
 
     --ring: 207 88% 65%; /* A slightly darker shade of primary for rings */
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* Sidebar specific colors */
     --sidebar-background: 0 0% 100%; /* White */
@@ -72,17 +78,24 @@
     --primary: 207 88% 65%;
     --primary-foreground: 207 88% 10%;
 
-    --secondary: 207 88% 25%;
-    --secondary-foreground: 207 88% 90%;
+    --secondary: 262 84% 70%;
+    --secondary-foreground: 262 84% 95%;
     
-    /* Accent adjusted for dark theme sidebar to match image's green */
     --accent: 36 100% 70%; 
     --accent-foreground: 36 100% 10%;
 
-    --destructive: 0 62% 40%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
+    --success: 145 63% 49%;
+    --success-foreground: 145 63% 95%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 45 93% 95%;
+
     --ring: 207 88% 60%;
+
+    --radius: 0.75rem;
 
     /* Dark Sidebar specific colors - updated to match image */
     --sidebar-background: 220 13% 10%; /* Very dark gray, almost black */
@@ -109,5 +122,3 @@
     -moz-osx-font-smoothing: grayscale;
   }
 }
-
-/* Removed .background-cubes-container, .cube, and @keyframes float */
