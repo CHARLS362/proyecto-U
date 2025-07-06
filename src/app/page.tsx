@@ -110,7 +110,7 @@ export default function RootPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
             <Button size="lg" asChild className="shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 ease-in-out">
-              <Link href="/admin/dashboard">
+              <Link href="/login">
                 Empezar <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
