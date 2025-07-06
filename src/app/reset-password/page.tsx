@@ -105,21 +105,16 @@ export default function ResetPasswordPage() {
           </form>
         </div>
 
-        <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
+        <div className="hidden md:block relative">
           <Image
             src={loginImg}
             alt="Restablecer contraseña"
             fill
             style={{ objectFit: 'cover' }}
-            className="opacity-30"
+            className="rounded-r-xl"
             data-ai-hint="password security shield"
             placeholder="blur"
           />
-          <div className="relative z-10 text-center text-background drop-shadow-lg">
-            <ShieldCheck className="mx-auto h-16 w-16 mb-4"/>
-            <h2 className="text-4xl font-bold mb-2">SEGURIDAD PRIMERO</h2>
-            <p className="text-lg font-light">Tu nueva contraseña está protegida.</p>
-          </div>
         </div>
       </Card>
     </div>

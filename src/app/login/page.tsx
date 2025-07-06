@@ -98,22 +98,16 @@ export default function LoginPage() {
           </form>
         </div>
 
-        <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
+        <div className="hidden md:block relative">
           <Image
             src={loginImg}
             alt="Bienvenido a Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}
-            className="opacity-30"
+            className="rounded-r-xl"
             data-ai-hint="anime student hero"
             placeholder="blur"
           />
-          <div className="relative z-10 text-center text-foreground drop-shadow-lg">
-            <p className="text-xs font-semibold tracking-wider uppercase mb-2 text-foreground/80">TO BE HEROX</p>
-            <p className="text-sm font-light tracking-wider uppercase mb-6 text-foreground/70">PRE-UNIVERSITY PREPARATION</p>
-            <h2 className="text-5xl font-bold mb-2">SISTEMA INTEGRAL</h2>
-            <p className="text-lg font-light">Planificar, Servir</p>
-          </div>
         </div>
       </Card>
     </div>
