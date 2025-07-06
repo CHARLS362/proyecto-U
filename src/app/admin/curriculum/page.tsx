@@ -1,15 +1,20 @@
-
 'use client';
 
 import { useState } from "react";
 import { PageTitle } from "@/components/common/PageTitle";
-import { LibraryBig, FileText, UploadCloud, Search, Download, Upload } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LibraryBig, UploadCloud, Search, Download, Trash2, Database } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -19,17 +24,54 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+
+// Mock data
+const mockSyllabi = {
+  "primaria-1-A": [
+    { id: 1, subject: "Matemática", fileName: "mat_prim_1A.pdf", uploadDate: "2024-03-10" },
+    { id: 2, subject: "Comunicación", fileName: "com_prim_1A.pdf", uploadDate: "2024-03-11" },
+  ],
+  "secundaria-3-B": [
+    { id: 3, subject: "Ciencia y Tecnología", fileName: "cyt_sec_3B.pdf", uploadDate: "2024-03-12" },
+    { id: 4, subject: "Ciencias Sociales", fileName: "cs_sec_3B.pdf", uploadDate: "2024-03-12" },
+  ]
+};
 
 const subjects = [
-  { id: 1, name: "No" },
-  { id: 2, name: "Inglés" },
-  { id: 3, name: "Matemáticas" },
-  { id: 4, name: "Ciencias" },
-  { id: 5, name: "Comercio" },
+  { id: 1, name: "Matemática" },
+  { id: 2, name: "Comunicación" },
+  { id: 3, name: "Ciencia y Tecnología" },
+  { id: 4, name: "Ciencias Sociales" },
+  { id: 5, name: "Inglés" },
 ];
+
+const primaryGrades = [
+  { value: '1', label: '1º de Primaria' },
+  { value: '2', label: '2º de Primaria' },
+  { value: '3', label: '3º de Primaria' },
+  { value: '4', label: '4º de Primaria' },
+  { value: '5', label: '5º de Primaria' },
+  { value: '6', label: '6º de Primaria' },
+];
+
+const secondaryGrades = [
+  { value: '1', label: '1º de Secundaria' },
+  { value: '2', label: '2º de Secundaria' },
+  { value: '3', label: '3º de Secundaria' },
+  { value: '4', label: '4º de Secundaria' },
+  { value: '5', label: '5º de Secundaria' },
+];
+
 
 export default function CurriculumPage() {
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  
+  const [foundSyllabi, setFoundSyllabi] = useState<typeof mockSyllabi[keyof typeof mockSyllabi] | null>(null);
+  const { toast } = useToast();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -39,30 +81,68 @@ export default function CurriculumPage() {
     }
   };
 
-  const UploadDialogContent = ({ idSuffix }: { idSuffix: string | number }) => (
-    <DialogContent className="sm:max-w-[425px]">
+  const handleSearchSyllabus = () => {
+    if (!selectedLevel || !selectedGrade || !selectedSection) {
+        toast({
+            title: "Filtros incompletos",
+            description: "Por favor, seleccione nivel, grado y sección.",
+            variant: "destructive"
+        });
+        return;
+    }
+    const key = `${selectedLevel}-${selectedGrade}-${selectedSection}` as keyof typeof mockSyllabi;
+    const results = mockSyllabi[key] || [];
+    setFoundSyllabi(results);
+    toast({
+        title: "Búsqueda completada",
+        description: `Se encontraron ${results.length} programas de estudio.`
+    });
+  }
+
+  const UploadDialogContent = () => (
+    <DialogContent className="sm:max-w-md">
       <DialogHeader>
-        <DialogTitle>Subir programa de estudios</DialogTitle>
+        <DialogTitle>Subir Programa de Estudios</DialogTitle>
       </DialogHeader>
       <div className="py-4 space-y-4">
-        <div className="grid gap-2">
-          <Label htmlFor={`class-select-${idSuffix}`}>Clase</Label>
-          <Select defaultValue="12-comercio">
-            <SelectTrigger id={`class-select-${idSuffix}`}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-              <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-              <SelectItem value="10-arte">10 (Arte)</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           <div className="grid gap-2">
+                <Label htmlFor="dialog-level">Nivel</Label>
+                <Select>
+                    <SelectTrigger id="dialog-level"><SelectValue placeholder="-- Nivel --" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="primaria">Primaria</SelectItem>
+                        <SelectItem value="secundaria">Secundaria</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+             <div className="grid gap-2">
+                <Label htmlFor="dialog-grade">Grado</Label>
+                <Select>
+                    <SelectTrigger id="dialog-grade"><SelectValue placeholder="-- Grado --" /></SelectTrigger>
+                    <SelectContent>
+                      {primaryGrades.map(g => <SelectItem key={`p-${g.value}`} value={`p-${g.value}`}>{g.label}</SelectItem>)}
+                      {secondaryGrades.map(g => <SelectItem key={`s-${g.value}`} value={`s-${g.value}`}>{g.label}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+            </div>
+             <div className="grid gap-2">
+                <Label htmlFor="dialog-section">Sección</Label>
+                <Select>
+                    <SelectTrigger id="dialog-section"><SelectValue placeholder="-- Sección --" /></SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor={`subject-select-${idSuffix}`}>Sujeto</Label>
+          <Label htmlFor="subject-select">Asignatura</Label>
           <Select>
-            <SelectTrigger id={`subject-select-${idSuffix}`}>
-              <SelectValue placeholder="--select--" />
+            <SelectTrigger id="subject-select">
+              <SelectValue placeholder="-- Seleccionar Asignatura --" />
             </SelectTrigger>
             <SelectContent>
               {subjects.map((subject) => (
@@ -72,22 +152,22 @@ export default function CurriculumPage() {
           </Select>
         </div>
         <div className="grid gap-2">
-          <Label htmlFor={`syllabus-file-${idSuffix}`} className="text-sm text-muted-foreground">
-            Subir archivo pdf (tamaño máximo 200 MB)
+          <Label htmlFor="syllabus-file" className="text-sm text-muted-foreground">
+            Subir archivo PDF (tamaño máximo 20MB)
           </Label>
           <div className="flex items-center gap-2">
-            <Input id={`syllabus-file-${idSuffix}`} type="file" className="hidden" onChange={handleFileChange} accept=".pdf" />
+            <Input id="syllabus-file" type="file" className="hidden" onChange={handleFileChange} accept=".pdf" />
             <Button asChild variant="outline" className="shrink-0">
-              <Label htmlFor={`syllabus-file-${idSuffix}`} className="cursor-pointer font-normal">Seleccionar archivo</Label>
+              <Label htmlFor="syllabus-file" className="cursor-pointer font-normal">Seleccionar archivo</Label>
             </Button>
             <span className="text-sm text-muted-foreground truncate">{fileName}</span>
           </div>
         </div>
       </div>
       <DialogFooter>
-        <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+        <Button type="submit" onClick={() => toast({ title: "Simulación exitosa", description: "El programa de estudios ha sido subido."})}>
           <UploadCloud className="mr-2 h-4 w-4" />
-          Subir
+          Subir Programa
         </Button>
       </DialogFooter>
     </DialogContent>
@@ -95,83 +175,126 @@ export default function CurriculumPage() {
 
   return (
     <div className="space-y-6">
-      <PageTitle title="Programa de estudios" icon={LibraryBig} />
-      
-      <Card className="shadow-lg animate-fade-in">
-        <CardHeader className="flex flex-row items-center justify-between pb-4">
-          <div className="flex items-center gap-3">
-            <FileText className="h-5 w-5 text-muted-foreground" />
-            <CardTitle className="text-lg">Programa de estudios</CardTitle>
-          </div>
-          <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
+      <PageTitle title="Programa de estudios" subtitle="Gestione los planes de estudio por nivel, grado y sección." icon={LibraryBig}>
+         <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
             <DialogTrigger asChild>
-              <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
+              <Button>
                 <UploadCloud className="mr-2 h-4 w-4" />
-                Subir programa de estudios
+                Subir Programa
               </Button>
             </DialogTrigger>
-            <UploadDialogContent idSuffix="header" />
+            <UploadDialogContent />
           </Dialog>
+      </PageTitle>
+      
+      <Card className="shadow-lg animate-fade-in">
+        <CardHeader>
+          <CardTitle className="text-lg">Buscar Programas de Estudio</CardTitle>
+          <CardDescription>Seleccione los filtros para encontrar los planes de estudio de una clase específica.</CardDescription>
         </CardHeader>
-        <Separator />
-        <CardContent className="pt-6 space-y-6">
-            <div className="flex items-end gap-4">
-                 <div className="grid gap-2">
-                    <Label htmlFor="class">Clase</Label>
-                    <Select defaultValue="12-comercio">
-                      <SelectTrigger id="class" className="w-[200px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
-                      </SelectContent>
+        <CardContent>
+            <div className="flex flex-wrap items-end gap-4">
+                 <div className="grid gap-2 flex-grow sm:flex-grow-0">
+                    <Label htmlFor="level-filter">Nivel</Label>
+                    <Select value={selectedLevel} onValueChange={(value) => {
+                        setSelectedLevel(value);
+                        setSelectedGrade('');
+                    }}>
+                        <SelectTrigger id="level-filter" className="w-full sm:w-[200px]">
+                            <SelectValue placeholder="-- Nivel --" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="primaria">Primaria</SelectItem>
+                            <SelectItem value="secundaria">Secundaria</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+                 <div className="grid gap-2 flex-grow sm:flex-grow-0">
+                    <Label htmlFor="grade-filter">Grado</Label>
+                    <Select value={selectedGrade} onValueChange={setSelectedGrade} disabled={!selectedLevel}>
+                        <SelectTrigger id="grade-filter" className="w-full sm:w-[200px]">
+                            <SelectValue placeholder={!selectedLevel ? "Seleccione un nivel" : "-- Grado --"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {selectedLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={`pf-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                            {selectedLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={`sf-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                 </div>
+                  <div className="grid gap-2 flex-grow sm:flex-grow-0">
+                    <Label htmlFor="section-filter">Sección</Label>
+                    <Select value={selectedSection} onValueChange={setSelectedSection}>
+                        <SelectTrigger id="section-filter" className="w-full sm:w-[200px]">
+                            <SelectValue placeholder="-- Sección --" />
+                        </SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="A">A</SelectItem>
+                           <SelectItem value="B">B</SelectItem>
+                           <SelectItem value="C">C</SelectItem>
+                        </SelectContent>
                     </Select>
                   </div>
-                  <Button>
+                  <Button onClick={handleSearchSyllabus} className="w-full sm:w-auto">
                     <Search className="mr-2 h-4 w-4" />
                     Encontrar
                   </Button>
             </div>
-
-            <Separator />
-            
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[50px]">#</TableHead>
-                        <TableHead>Sujeto</TableHead>
-                        <TableHead className="text-center">Programa de estudios</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {subjects.slice(0, 2).map((subject, index) => (
-                         <TableRow key={subject.id}>
-                            <TableCell className="font-medium">{index + 1}.</TableCell>
-                            <TableCell>{subject.name}</TableCell>
-                            <TableCell className="text-center space-x-2">
-                                <Button className="bg-green-600 hover:bg-green-700 text-white">
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Descargar
-                                </Button>
-                                <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
-                                  <DialogTrigger asChild>
-                                    <Button className="bg-blue-100 hover:bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900">
-                                        <Upload className="mr-2 h-4 w-4" />
-                                        Subir
-                                    </Button>
-                                  </DialogTrigger>
-                                  <UploadDialogContent idSuffix={subject.id} />
-                                </Dialog>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
         </CardContent>
       </Card>
+
+      {foundSyllabi && (
+        <Card className="shadow-lg animate-fade-in">
+          <CardHeader>
+            <CardTitle>Resultados</CardTitle>
+            <CardDescription>
+                Programas de estudio encontrados para: {selectedLevel && `${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}`} {selectedGrade && `- ${selectedGrade}º Grado`} {selectedSection && `- Sección ${selectedSection}`}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {foundSyllabi.length > 0 ? (
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[50px]">#</TableHead>
+                            <TableHead>Asignatura</TableHead>
+                            <TableHead>Archivo</TableHead>
+                            <TableHead>Fecha de Subida</TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {foundSyllabi.map((syllabus, index) => (
+                             <TableRow key={syllabus.id}>
+                                <TableCell className="font-medium">{index + 1}.</TableCell>
+                                <TableCell>{syllabus.subject}</TableCell>
+                                <TableCell className="text-muted-foreground">{syllabus.fileName}</TableCell>
+                                <TableCell className="text-muted-foreground">{syllabus.uploadDate}</TableCell>
+                                <TableCell className="text-right space-x-2">
+                                    <Button size="sm">
+                                        <Download className="mr-2 h-4 w-4" />
+                                        Descargar
+                                    </Button>
+                                    <Button variant="destructive" size="sm">
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        Eliminar
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            ) : (
+                 <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="p-4 bg-accent/20 rounded-full mb-4">
+                        <Database className="h-12 w-12 text-accent" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-foreground">Sin resultados</h3>
+                    <p className="text-sm text-muted-foreground">No se encontraron programas para los filtros seleccionados.</p>
+                </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
