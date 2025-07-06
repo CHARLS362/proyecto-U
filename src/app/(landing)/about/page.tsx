@@ -28,7 +28,7 @@ export default function AboutPage() {
         </div>
         <div className="relative h-80 md:h-96 rounded-xl shadow-xl overflow-hidden group">
           <Image
-            src="https://placehold.co/800x600.png"
+            src="/recursos/acerca-de.jpg"
             alt="Instalaciones de Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}

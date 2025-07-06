@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
 
         <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
           <Image
-            src="https://placehold.co/600x800.png"
+            src="/recursos/forgot-password.jpg"
             alt="Recuperar contraseña"
             fill
             style={{ objectFit: 'cover' }}

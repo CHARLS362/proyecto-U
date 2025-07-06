@@ -52,11 +52,11 @@ const features = [
 ];
 
 const carouselImages = [
-  { src: "https://placehold.co/800x500.png", alt: "Vista del campus escolar", hint: "campus building modern" },
-  { src: "https://placehold.co/800x500.png", alt: "Estudiantes colaborando en un proyecto", hint: "students project" },
-  { src: "https://placehold.co/800x500.png", alt: "Aula moderna con tecnología", hint: "classroom technology" },
-  { src: "https://placehold.co/800x500.png", alt: "Evento deportivo escolar", hint: "school sports event" },
-  { src: "https://placehold.co/800x500.png", alt: "Biblioteca escolar", hint: "school library" },
+  { src: "/recursos/carrucel1.jpg", alt: "Vista del campus escolar", hint: "campus building modern" },
+  { src: "/recursos/carrucel2.jpg", alt: "Estudiantes colaborando en un proyecto", hint: "students project" },
+  { src: "/recursos/carrucel3.jpg", alt: "Aula moderna con tecnología", hint: "classroom technology" },
+  { src: "/recursos/carrucel4.jpg", alt: "Evento deportivo escolar", hint: "school sports event" },
+  { src: "/recursos/carrucel5.jpg", alt: "Biblioteca escolar", hint: "school library" },
 ];
 
 export default function RootPage() {
@@ -120,7 +120,7 @@ export default function RootPage() {
         </div>
         <div className="relative h-64 md:h-[400px] lg:h-[500px] rounded-xl shadow-2xl overflow-hidden group animate-fade-in" style={{ animationDelay: '300ms' }}>
           <Image
-            src="https://placehold.co/800x600.png"
+            src="/recursos/portada.jpg"
             alt="Ilustración de gestión escolar moderna"
             fill
             style={{ objectFit: "cover" }}
