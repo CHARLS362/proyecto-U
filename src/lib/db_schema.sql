@@ -1,228 +1,323 @@
--- Borrar la base de datos si existe para empezar de cero
-DROP DATABASE IF EXISTS `db_abb6c5_gestion`;
+-- Base de Datos para Sofía Educa - Sistema de Gestión Escolar
+-- Diseñada para ser robusta, escalable y alineada con el frontend.
+-- Versión 2.0
 
--- Crear la base de datos
-CREATE DATABASE `db_abb6c5_gestion` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- Usar la nueva base de datos
-USE `db_abb6c5_gestion`;
+--
+-- Base de datos: `sofia_educa_db`
+--
+CREATE DATABASE IF NOT EXISTS `sofia_educa_db` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `sofia_educa_db`;
 
--- Tabla para USUARIOS (Central de autenticación)
+-- --------------------------------------------------------
+
+--
+-- Tabla `usuarios`
+-- Almacena la información básica para la autenticación y el rol de cada persona en el sistema.
+--
 CREATE TABLE `usuarios` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `correo` VARCHAR(100) NOT NULL UNIQUE,
-  `contrasena` VARCHAR(255) NOT NULL,
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `correo` VARCHAR(255) NOT NULL UNIQUE,
+  `contrasena_hash` VARCHAR(255) NOT NULL,
   `rol` ENUM('admin', 'docente', 'estudiante') NOT NULL,
-  `identificador` VARCHAR(40) NOT NULL UNIQUE,
-  `tema` ENUM('claro','oscuro') NOT NULL DEFAULT 'claro'
-);
+  `nombre_completo` VARCHAR(255) NOT NULL,
+  `url_avatar` VARCHAR(255) DEFAULT 'https://placehold.co/100x100.png',
+  `activo` BOOLEAN NOT NULL DEFAULT TRUE,
+  `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `ultima_actualizacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para CLASES
+-- --------------------------------------------------------
+
+--
+-- Tabla `clases`
+-- Define los grados y secciones disponibles en la institución.
+--
 CREATE TABLE `clases` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `nombre` VARCHAR(50) NOT NULL, -- ej: "3er Grado", "5to de Secundaria"
-  `seccion` VARCHAR(10) NOT NULL -- ej: "A", "B"
-);
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `grado` VARCHAR(50) NOT NULL COMMENT 'Ej: 3ro de Secundaria',
+  `seccion` VARCHAR(10) NOT NULL COMMENT 'Ej: A, B, C',
+  `aula` VARCHAR(50) DEFAULT NULL COMMENT 'Ej: Aula 101',
+  UNIQUE KEY `grado_seccion_unique` (`grado`, `seccion`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para DOCENTES
+-- --------------------------------------------------------
+
+--
+-- Tabla `docentes`
+-- Almacena información detallada y específica de los docentes.
+--
 CREATE TABLE `docentes` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_usuario` INT NOT NULL UNIQUE,
-  `nombre` VARCHAR(50) NOT NULL,
-  `apellido` VARCHAR(50) NOT NULL,
-  `fecha_nacimiento` DATE,
-  `genero` ENUM('masculino', 'femenino', 'otro'),
-  `direccion` VARCHAR(255),
-  `telefono` VARCHAR(20),
-  `contacto_referencia` VARCHAR(20) NULL,
-  `relacion_referencia` VARCHAR(50) NULL,
-  `url_avatar` VARCHAR(255) DEFAULT 'https://placehold.co/100x100.png',
-  `estado` ENUM('activo', 'inactivo') DEFAULT 'activo',
-  FOREIGN KEY (`id_usuario`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
-);
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario` INT UNSIGNED NOT NULL,
+  `nombres` VARCHAR(100) NOT NULL,
+  `apellidos` VARCHAR(100) NOT NULL,
+  `fecha_nacimiento` DATE DEFAULT NULL,
+  `genero` ENUM('Masculino', 'Femenino', 'Otro') DEFAULT NULL,
+  `telefono` VARCHAR(20) DEFAULT NULL,
+  `direccion` VARCHAR(255) DEFAULT NULL,
+  `contacto_referencia` VARCHAR(20) DEFAULT NULL,
+  `relacion_referencia` VARCHAR(50) DEFAULT NULL,
+  CONSTRAINT `fk_docente_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para ESTUDIANTES
+-- --------------------------------------------------------
+
+--
+-- Tabla `estudiantes`
+-- Almacena información detallada de los estudiantes, incluyendo datos del apoderado.
+--
 CREATE TABLE `estudiantes` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_usuario` INT NOT NULL UNIQUE,
-  `nombre` VARCHAR(50) NOT NULL,
-  `apellido` VARCHAR(50) NOT NULL,
-  `fecha_nacimiento` DATE,
-  `genero` ENUM('masculino', 'femenino', 'otro'),
-  `direccion` VARCHAR(255),
-  `telefono` VARCHAR(20),
-  `url_avatar` VARCHAR(255) DEFAULT 'https://placehold.co/100x100.png',
-  `id_clase` INT,
-  `nombre_tutor` VARCHAR(100),
-  `contacto_tutor` VARCHAR(20),
-  FOREIGN KEY (`id_usuario`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`id_clase`) REFERENCES `clases`(`id`) ON DELETE SET NULL
-);
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario` INT UNSIGNED NOT NULL,
+  `id_clase` INT UNSIGNED DEFAULT NULL,
+  `nombres` VARCHAR(100) NOT NULL,
+  `apellidos` VARCHAR(100) NOT NULL,
+  `fecha_nacimiento` DATE DEFAULT NULL,
+  `genero` ENUM('Masculino', 'Femenino', 'Otro') DEFAULT NULL,
+  `telefono` VARCHAR(20) DEFAULT NULL,
+  `direccion` VARCHAR(255) DEFAULT NULL,
+  `ciudad` VARCHAR(100) DEFAULT NULL,
+  `departamento` VARCHAR(100) DEFAULT NULL,
+  `fecha_matricula` DATE NOT NULL,
+  `nombre_apoderado` VARCHAR(200) DEFAULT NULL,
+  `contacto_apoderado` VARCHAR(20) DEFAULT NULL,
+  `correo_apoderado` VARCHAR(255) DEFAULT NULL,
+  `direccion_apoderado` VARCHAR(255) DEFAULT NULL,
+  CONSTRAINT `fk_estudiante_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_estudiante_clase` FOREIGN KEY (`id_clase`) REFERENCES `clases` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
--- Tabla para ASIGNATURAS
+--
+-- Tabla `asignaturas`
+-- Catálogo de todas las materias que se pueden impartir.
+--
 CREATE TABLE `asignaturas` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `nombre` VARCHAR(100) NOT NULL,
-  `descripcion` TEXT
-);
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `nombre` VARCHAR(100) NOT NULL UNIQUE,
+  `departamento` VARCHAR(100) DEFAULT NULL COMMENT 'Ej: Ciencias, Humanidades'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para CURSOS (Instancia de una asignatura para una clase y profesor)
+-- --------------------------------------------------------
+
+--
+-- Tabla `cursos`
+-- Instancia de una asignatura impartida por un docente en una clase específica durante un año académico.
+--
 CREATE TABLE `cursos` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `codigo` VARCHAR(20) NOT NULL UNIQUE,
-  `id_asignatura` INT NOT NULL,
-  `id_clase` INT NOT NULL,
-  `id_docente` INT NOT NULL,
-  `horario` VARCHAR(100), -- ej: "Lun 10:00-11:30, Mie 10:00-11:30"
-  `capacidad` INT,
-  FOREIGN KEY (`id_asignatura`) REFERENCES `asignaturas`(`id`),
-  FOREIGN KEY (`id_clase`) REFERENCES `clases`(`id`),
-  FOREIGN KEY (`id_docente`) REFERENCES `docentes`(`id`)
-);
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_asignatura` INT UNSIGNED NOT NULL,
+  `id_clase` INT UNSIGNED NOT NULL,
+  `id_docente` INT UNSIGNED NOT NULL,
+  `codigo_curso` VARCHAR(20) NOT NULL UNIQUE,
+  `horario` VARCHAR(255) DEFAULT NULL COMMENT 'Ej: Lu, Mi 10:00-11:30',
+  `capacidad` INT UNSIGNED DEFAULT 30,
+  `ano_academico` YEAR NOT NULL,
+  `url_syllabus` VARCHAR(255) DEFAULT NULL,
+  `descripcion` TEXT,
+  CONSTRAINT `fk_curso_asignatura` FOREIGN KEY (`id_asignatura`) REFERENCES `asignaturas` (`id`),
+  CONSTRAINT `fk_curso_clase` FOREIGN KEY (`id_clase`) REFERENCES `clases` (`id`),
+  CONSTRAINT `fk_curso_docente` FOREIGN KEY (`id_docente`) REFERENCES `docentes` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para INSCRIPCIONES (Tabla de unión para Estudiantes y Cursos)
+-- --------------------------------------------------------
+
+--
+-- Tabla `inscripciones` (Matrículas)
+-- Tabla de unión que registra qué estudiante está inscrito en qué curso.
+--
 CREATE TABLE `inscripciones` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_estudiante` INT NOT NULL,
-  `id_curso` INT NOT NULL,
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_estudiante` INT UNSIGNED NOT NULL,
+  `id_curso` INT UNSIGNED NOT NULL,
   `fecha_inscripcion` DATE NOT NULL,
-  `progreso` INT DEFAULT 0, -- Progreso en porcentaje
-  UNIQUE(`id_estudiante`, `id_curso`),
-  FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE
-);
+  `progreso_curso` TINYINT UNSIGNED DEFAULT 0,
+  UNIQUE KEY `estudiante_curso_unique` (`id_estudiante`, `id_curso`),
+  CONSTRAINT `fk_inscripcion_estudiante` FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_inscripcion_curso` FOREIGN KEY (`id_curso`) REFERENCES `cursos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para TAREAS
-CREATE TABLE `tareas` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_curso` INT NOT NULL,
-  `titulo` VARCHAR(100) NOT NULL,
-  `descripcion` TEXT,
-  `fecha_publicacion` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `fecha_entrega` DATETIME NOT NULL,
-  FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
 
--- Tabla para ENTREGAS
-CREATE TABLE `entregas` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_tarea` INT NOT NULL,
-  `id_estudiante` INT NOT NULL,
-  `fecha_entrega` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `archivo_url` VARCHAR(255),
-  `estado` ENUM('entregado', 'calificado', 'retrasado') NOT NULL,
-  `nota` DECIMAL(5, 2), -- Nota sobre 20.00
-  `retroalimentacion` TEXT,
-  UNIQUE(`id_tarea`, `id_estudiante`),
-  FOREIGN KEY (`id_tarea`) REFERENCES `tareas`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes`(`id`) ON DELETE CASCADE
-);
-
-
--- Tabla para ASISTENCIA
+--
+-- Tabla `asistencia`
+-- Registra la asistencia diaria de un estudiante a un curso.
+--
 CREATE TABLE `asistencia` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_estudiante` INT NOT NULL,
-  `id_curso` INT NOT NULL,
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_inscripcion` INT UNSIGNED NOT NULL,
   `fecha` DATE NOT NULL,
-  `estado` ENUM('presente', 'ausente', 'tarde', 'justificado') NOT NULL,
-  UNIQUE(`id_estudiante`, `id_curso`, `fecha`),
-  FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes`(`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE
-);
+  `estado` ENUM('Presente', 'Ausente', 'Tarde', 'Justificado') NOT NULL,
+  UNIQUE KEY `asistencia_unica` (`id_inscripcion`, `fecha`),
+  CONSTRAINT `fk_asistencia_inscripcion` FOREIGN KEY (`id_inscripcion`) REFERENCES `inscripciones` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para EVENTOS_CALENDARIO
-CREATE TABLE `eventos_calendario` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `titulo` VARCHAR(100) NOT NULL,
+-- --------------------------------------------------------
+
+--
+-- Tabla `tareas`
+-- Tareas asignadas por un docente para un curso.
+--
+CREATE TABLE `tareas` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_curso` INT UNSIGNED NOT NULL,
+  `titulo` VARCHAR(255) NOT NULL,
   `descripcion` TEXT,
-  `fecha_inicio` DATETIME NOT NULL,
-  `fecha_fin` DATETIME,
-  `tipo` ENUM('feriado', 'examen', 'reunion', 'actividad', 'entrega') NOT NULL,
-  `color` VARCHAR(20) -- ej: '#FF5733'
-);
+  `fecha_publicacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_entrega` DATETIME NOT NULL,
+  CONSTRAINT `fk_tarea_curso` FOREIGN KEY (`id_curso`) REFERENCES `cursos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para COMUNICADOS (Noticias/Anuncios)
+-- --------------------------------------------------------
+
+--
+-- Tabla `entregas`
+-- Entregas de tareas realizadas por los estudiantes.
+--
+CREATE TABLE `entregas` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_tarea` INT UNSIGNED NOT NULL,
+  `id_estudiante` INT UNSIGNED NOT NULL,
+  `fecha_entrega` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `url_archivo` VARCHAR(255) DEFAULT NULL,
+  `estado` ENUM('Entregado', 'Calificado') NOT NULL DEFAULT 'Entregado',
+  `nota` DECIMAL(5, 2) DEFAULT NULL,
+  `retroalimentacion` TEXT,
+  UNIQUE KEY `entrega_unica` (`id_tarea`, `id_estudiante`),
+  CONSTRAINT `fk_entrega_tarea` FOREIGN KEY (`id_tarea`) REFERENCES `tareas` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_entrega_estudiante` FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabla `comunicados`
+-- Noticias y anuncios para la comunidad escolar.
+--
 CREATE TABLE `comunicados` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `titulo` VARCHAR(100) NOT NULL,
-  `contenido` TEXT,
-  `id_emisor` INT NOT NULL,
-  `fecha_publicacion` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `importancia` ENUM('normal', 'media', 'alta') DEFAULT 'normal',
-  `destinatario_rol` ENUM('todos', 'docentes', 'estudiantes'),
-  `destinatario_clase` INT, -- Opcional, para filtrar por clase
-  FOREIGN KEY (`id_emisor`) REFERENCES `usuarios`(`id`),
-  FOREIGN KEY (`destinatario_clase`) REFERENCES `clases`(`id`) ON DELETE SET NULL
-);
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario_emisor` INT UNSIGNED NOT NULL,
+  `titulo` VARCHAR(255) NOT NULL,
+  `contenido` TEXT NOT NULL,
+  `importancia` ENUM('normal', 'informativo', 'advertencia', 'urgente') NOT NULL DEFAULT 'normal',
+  `rol_destino` ENUM('todos', 'admin', 'docente', 'estudiante') DEFAULT 'todos',
+  `id_clase_destino` INT UNSIGNED DEFAULT NULL,
+  `fecha_publicacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_comunicado_usuario` FOREIGN KEY (`id_usuario_emisor`) REFERENCES `usuarios` (`id`),
+  CONSTRAINT `fk_comunicado_clase` FOREIGN KEY (`id_clase_destino`) REFERENCES `clases` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para SOLICITUDES_PERMISO
+-- --------------------------------------------------------
+
+--
+-- Tabla `solicitudes_permiso`
+-- Solicitudes de licencia/permiso de docentes y estudiantes.
+--
 CREATE TABLE `solicitudes_permiso` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `id_usuario` INT NOT NULL,
-  `tipo_permiso` VARCHAR(50) NOT NULL,
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario_solicitante` INT UNSIGNED NOT NULL,
+  `tipo_permiso` VARCHAR(100) NOT NULL,
   `motivo` TEXT NOT NULL,
   `fecha_inicio` DATE NOT NULL,
   `fecha_fin` DATE NOT NULL,
-  `fecha_solicitud` DATETIME DEFAULT CURRENT_TIMESTAMP,
-  `estado` ENUM('pendiente', 'aprobado', 'rechazado') DEFAULT 'pendiente',
-  FOREIGN KEY (`id_usuario`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
-);
+  `estado` ENUM('Pendiente', 'Aprobado', 'Rechazado') NOT NULL DEFAULT 'Pendiente',
+  `fecha_solicitud` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_permiso_usuario` FOREIGN KEY (`id_usuario_solicitante`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- Tabla para CÓDIGOS OTP
+-- --------------------------------------------------------
+
+--
+-- Tabla `eventos_calendario`
+-- Eventos generales de la escuela (feriados, reuniones, etc.).
+--
+CREATE TABLE `eventos_calendario` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `titulo` VARCHAR(255) NOT NULL,
+  `descripcion` TEXT,
+  `fecha_inicio` DATETIME NOT NULL,
+  `fecha_fin` DATETIME DEFAULT NULL,
+  `tipo_evento` VARCHAR(50) NOT NULL COMMENT 'Ej: Feriado, Examen, Actividad',
+  `color` VARCHAR(20) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Tabla `codigos_otp`
+-- Almacena los códigos para la recuperación de contraseñas.
+--
 CREATE TABLE `codigos_otp` (
-  `id` INT AUTO_INCREMENT PRIMARY KEY,
-  `correo` VARCHAR(100) NOT NULL,
-  `codigo` VARCHAR(6) NOT NULL,
-  `fecha_expiracion` DATETIME NOT NULL,
-  `utilizado` BOOLEAN DEFAULT FALSE
-);
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `correo` VARCHAR(255) NOT NULL,
+  `codigo` VARCHAR(10) NOT NULL,
+  `fecha_expiracion` TIMESTAMP NOT NULL,
+  KEY `idx_correo` (`correo`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- --- INSERCIÓN DE DATOS DE EJEMPLO ---
 
--- Usuarios
-INSERT INTO `usuarios` (`id`, `correo`, `contrasena`, `rol`, `identificador`) VALUES
-(1, 'admin@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'admin', 'ADM001'),
-(2, 'juan.perez@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'docente', 'DOC001'),
-(3, 'ana.gomez@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'estudiante', 'EST001'),
-(4, 'luis.rodriguez@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'estudiante', 'EST002'),
-(5, 'maria.garcia@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'docente', 'DOC002');
+-- --------------------------------------------------------
+-- INSERCIÓN DE DATOS DE EJEMPLO
+-- --------------------------------------------------------
 
--- Clases
-INSERT INTO `clases` (`id`, `nombre`, `seccion`) VALUES
-(1, '5to de Secundaria', 'A'),
-(2, '5to de Secundaria', 'B'),
-(3, '4to de Secundaria', 'A');
+-- Insertar Clases
+INSERT INTO `clases` (`id`, `grado`, `seccion`, `aula`) VALUES
+(1, '3er Grado de Secundaria', 'A', '101'),
+(2, '4to Grado de Secundaria', 'A', '201'),
+(3, '5to Grado de Secundaria', 'B', '302');
 
--- Docentes
-INSERT INTO `docentes` (`id`, `id_usuario`, `nombre`, `apellido`, `fecha_nacimiento`, `genero`, `direccion`, `telefono`, `contacto_referencia`, `relacion_referencia`) VALUES
-(1, 2, 'Juan', 'Pérez', '1985-05-20', 'masculino', 'Av. del Saber 123', '987654321', '912345678', 'Esposa'),
-(2, 5, 'María', 'García', '1990-11-15', 'femenino', 'Calle de la Enseñanza 456', '987654322', '912345677', 'Hermano');
+-- Insertar Usuarios (con contraseñas hasheadas para 'password')
+-- La contraseña para todos es 'password'. El hash se genera con: const hashed = await bcrypt.hash('password', 10);
+INSERT INTO `usuarios` (`id`, `correo`, `contrasena_hash`, `rol`, `nombre_completo`, `url_avatar`) VALUES
+(1, 'admin@sofiaeduca.com', '$2b$10$t/vX2YgE3z.yv.u3nO4wE.m4zL8y.wF5nU2YqI4zE/qN6q.m5rS.G', 'admin', 'Admin General', 'https://placehold.co/100x100/7F00FF/FFFFFF.png'),
+(2, 'juan.docente@sofiaeduca.com', '$2b$10$t/vX2YgE3z.yv.u3nO4wE.m4zL8y.wF5nU2YqI4zE/qN6q.m5rS.G', 'docente', 'Juan Pérez Docente', 'https://placehold.co/100x100/007FFF/FFFFFF.png'),
+(3, 'maria.docente@sofiaeduca.com', '$2b$10$t/vX2YgE3z.yv.u3nO4wE.m4zL8y.wF5nU2YqI4zE/qN6q.m5rS.G', 'docente', 'María García Docente', 'https://placehold.co/100x100/FF7F00/FFFFFF.png'),
+(4, 'ana.perez@example.com', '$2b$10$t/vX2YgE3z.yv.u3nO4wE.m4zL8y.wF5nU2YqI4zE/qN6q.m5rS.G', 'estudiante', 'Ana Pérez', 'https://placehold.co/100x100/00FF7F/FFFFFF.png'),
+(5, 'luis.garcia@example.com', '$2b$10$t/vX2YgE3z.yv.u3nO4wE.m4zL8y.wF5nU2YqI4zE/qN6q.m5rS.G', 'estudiante', 'Luis García', 'https://placehold.co/100x100/FF007F/FFFFFF.png');
 
--- Estudiantes
-INSERT INTO `estudiantes` (`id`, `id_usuario`, `nombre`, `apellido`, `fecha_nacimiento`, `genero`, `direccion`, `telefono`, `id_clase`, `nombre_tutor`, `contacto_tutor`) VALUES
-(1, 3, 'Ana', 'Gómez', '2008-04-10', 'femenino', 'Jr. Los Lirios 789', '912345678', 1, 'Marta Gómez', '912345679'),
-(2, 4, 'Luis', 'Rodríguez', '2008-08-22', 'masculino', 'Calle Las Begonias 101', '923456789', 1, 'Jorge Rodríguez', '923456780');
+-- Insertar Docentes
+INSERT INTO `docentes` (`id`, `id_usuario`, `nombres`, `apellidos`, `telefono`, `contacto_referencia`, `relacion_referencia`) VALUES
+(1, 2, 'Juan', 'Pérez', '987654321', '911223344', 'Esposa'),
+(2, 3, 'María', 'García', '987654322', '922334455', 'Hermano');
 
--- Asignaturas
-INSERT INTO `asignaturas` (`id`, `nombre`, `descripcion`) VALUES
-(1, 'Matemáticas V', 'Cálculo diferencial e integral.'),
-(2, 'Historia del Perú', 'Desde la época prehispánica hasta la actualidad.'),
-(3, 'Química Orgánica', 'Estudio de los compuestos de carbono.');
+-- Insertar Estudiantes
+INSERT INTO `estudiantes` (`id`, `id_usuario`, `id_clase`, `nombres`, `apellidos`, `fecha_matricula`, `nombre_apoderado`, `contacto_apoderado`) VALUES
+(1, 4, 2, 'Ana', 'Pérez', '2024-03-01', 'Carlos Pérez', '912345678'),
+(2, 5, 3, 'Luis', 'García', '2024-03-01', 'Marta García', '923456789');
 
--- Cursos
-INSERT INTO `cursos` (`id`, `codigo`, `id_asignatura`, `id_clase`, `id_docente`, `horario`, `capacidad`) VALUES
-(1, 'MAT501A', 1, 1, 1, 'Lun 08:00-10:00, Mie 08:00-10:00', 30),
-(2, 'HIS501A', 2, 1, 2, 'Mar 10:00-12:00, Jue 10:00-12:00', 30);
+-- Insertar Asignaturas
+INSERT INTO `asignaturas` (`id`, `nombre`, `departamento`) VALUES
+(1, 'Matemáticas', 'Ciencias'),
+(2, 'Historia del Perú', 'Humanidades'),
+(3, 'Química', 'Ciencias'),
+(4, 'Arte y Cultura', 'Artes');
 
--- Inscripciones
-INSERT INTO `inscripciones` (`id`, `id_estudiante`, `id_curso`, `fecha_inscripcion`, `progreso`) VALUES
-(1, 1, 1, '2024-03-01', 75),
-(2, 1, 2, '2024-03-01', 60),
-(3, 2, 1, '2024-03-01', 85);
+-- Insertar Cursos (Asignaturas impartidas en una clase por un docente)
+INSERT INTO `cursos` (`id`, `id_asignatura`, `id_clase`, `id_docente`, `codigo_curso`, `horario`, `ano_academico`) VALUES
+(1, 1, 2, 1, 'MAT-4A-2024', 'Lu 08:00-09:30, Mi 08:00-09:30', 2024),
+(2, 2, 2, 2, 'HIS-4A-2024', 'Ma 10:00-11:30, Ju 10:00-11:30', 2024),
+(3, 1, 3, 1, 'MAT-5B-2024', 'Lu 10:00-11:30, Vi 10:00-11:30', 2024);
 
--- Eventos Calendario
-INSERT INTO `eventos_calendario` (`id`, `titulo`, `descripcion`, `fecha_inicio`, `tipo`, `color`) VALUES
-(1, 'Examen Parcial de Matemáticas', 'Evaluación de la primera mitad del curso.', '2024-08-15 10:00:00', 'examen', '#dc2626'),
-(2, 'Día de la Independencia', 'Feriado nacional.', '2024-07-28 00:00:00', 'feriado', '#6b7280');
+-- Insertar Inscripciones (Matrículas de estudiantes a cursos)
+INSERT INTO `inscripciones` (`id_estudiante`, `id_curso`, `fecha_inscripcion`, `progreso_curso`) VALUES
+(1, 1, '2024-03-01', 75),
+(1, 2, '2024-03-01', 60),
+(2, 3, '2024-03-01', 88);
+
+-- Insertar Comunicados
+INSERT INTO `comunicados` (`id_usuario_emisor`, `titulo`, `contenido`, `importancia`) VALUES
+(1, 'Inicio del Año Escolar 2024', 'Bienvenidos al nuevo año escolar. Las clases inician el 1 de marzo.', 'informativo'),
+(1, 'Simulacro de Sismo', 'El próximo viernes se realizará un simulacro de sismo a las 10:00 AM.', 'advertencia');
+
+-- Insertar Eventos
+INSERT INTO `eventos_calendario` (`titulo`, `descripcion`, `fecha_inicio`, `fecha_fin`, `tipo_evento`, `color`) VALUES
+('Día del Trabajo', 'Feriado nacional', '2024-05-01 00:00:00', '2024-05-01 23:59:59', 'Feriado', '#808080'),
+('Exámenes Bimestrales', 'Semana de exámenes del primer bimestre', '2024-05-13 08:00:00', '2024-05-17 14:00:00', 'Examen', '#FF4136');
+
+
+COMMIT;
