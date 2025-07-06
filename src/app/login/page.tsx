@@ -99,7 +99,7 @@ export default function LoginPage() {
 
         <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
           <Image
-            src="/recursos/login.jpg"
+            src="https://placehold.co/800x1000.png"
             alt="Bienvenido a Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}

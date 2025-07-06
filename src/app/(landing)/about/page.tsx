@@ -2,6 +2,7 @@
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, Target, Users } from 'lucide-react';
+import aboutImg from '@/recursos/acerca-de.jpg';
 
 export default function AboutPage() {
   return (
@@ -28,12 +29,13 @@ export default function AboutPage() {
         </div>
         <div className="relative h-80 md:h-96 rounded-xl shadow-xl overflow-hidden group">
           <Image
-            src="/recursos/acerca-de.jpg"
+            src={aboutImg}
             alt="Instalaciones de Sofía Educa"
             fill
             style={{ objectFit: 'cover' }}
             className="transition-transform duration-500 group-hover:scale-105"
             data-ai-hint="school campus modern"
+            placeholder="blur"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/30 to-transparent"></div>
         </div>

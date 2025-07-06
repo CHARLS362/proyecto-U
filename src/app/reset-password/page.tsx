@@ -106,7 +106,7 @@ export default function ResetPasswordPage() {
 
         <div className="hidden md:flex relative items-center justify-center p-10 bg-gradient-to-br from-primary/20 to-accent/20 select-none">
           <Image
-            src="/recursos/reset-password.jpg"
+            src="https://placehold.co/800x1000.png"
             alt="Restablecer contraseña"
             fill
             style={{ objectFit: 'cover' }}
