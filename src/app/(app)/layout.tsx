@@ -1,7 +1,7 @@
 
-import { SidebarProvider, Sidebar, SidebarInset } from '@/components/ui/sidebar';
-import { AppSidebar } from '@/components/layout/AppSidebar';
-import { AppHeader } from '@/components/layout/AppHeader';
+import { SidebarProvider, Sidebar, SidebarInset } from '../../components/ui/sidebar';
+import { AppSidebar } from '../../components/layout/AppSidebar';
+import { AppHeader } from '../../components/layout/AppHeader';
 
 export default function AppLayout({
   children,
@@ -15,7 +15,7 @@ export default function AppLayout({
       </Sidebar>
       <SidebarInset>
         <AppHeader />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 animate-fade-in">
           {children}
         </main>
       </SidebarInset>
