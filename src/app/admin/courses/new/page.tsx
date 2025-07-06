@@ -23,6 +23,7 @@ const courseFormSchema = z.object({
   description: z.string().optional(),
   level: z.string({ required_error: "Debe seleccionar un nivel." }).min(1, "Debe seleccionar un nivel."),
   gradeId: z.string({ required_error: "Debe seleccionar un grado." }).min(1, "Debe seleccionar un grado."),
+  section: z.string({ required_error: "Debe seleccionar una sección." }).min(1, "Debe seleccionar una sección."),
   instructorId: z.string({ required_error: "Debe seleccionar un instructor." }).min(1, "Debe seleccionar un instructor."),
   department: z.string().min(3, "El departamento es obligatorio."),
   capacity: z.coerce.number().min(1, "La capacidad debe ser al menos 1.").max(100, "La capacidad no puede exceder 100."),
@@ -60,6 +61,7 @@ export default function NewCoursePage() {
       description: "",
       level: "",
       gradeId: "",
+      section: "",
       instructorId: "",
       department: "",
       capacity: 25,
@@ -124,7 +126,7 @@ export default function NewCoursePage() {
                 </FormItem>
               )} />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <FormField control={form.control} name="level" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Nivel Educativo</FormLabel>
@@ -153,6 +155,20 @@ export default function NewCoursePage() {
                                 {selectedLevel === 'secundaria' && secondaryGrades.map(grade => (
                                     <SelectItem key={grade.value} value={grade.value}>{grade.label}</SelectItem>
                                 ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="section" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Sección</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                                <SelectItem value="A">A</SelectItem>
+                                <SelectItem value="B">B</SelectItem>
+                                <SelectItem value="C">C</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
