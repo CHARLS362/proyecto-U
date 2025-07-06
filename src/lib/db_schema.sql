@@ -1,339 +1,228 @@
---
--- Base de Datos: sofia_educa_db
--- Descripción: Esquema completo para el sistema de gestión escolar "Sofía Educa".
---
+-- Borrar la base de datos si existe para empezar de cero
+DROP DATABASE IF EXISTS `db_abb6c5_gestion`;
 
---
--- Desactivar verificación de claves foráneas para la carga inicial.
---
-SET FOREIGN_KEY_CHECKS=0;
+-- Crear la base de datos
+CREATE DATABASE `db_abb6c5_gestion` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+-- Usar la nueva base de datos
+USE `db_abb6c5_gestion`;
 
---
--- Estructura de tabla para la tabla `usuarios`
--- Almacena las credenciales y roles para el inicio de sesión. Es la tabla central de autenticación.
---
-DROP TABLE IF EXISTS `usuarios`;
+-- Tabla para USUARIOS (Central de autenticación)
 CREATE TABLE `usuarios` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `correo` VARCHAR(255) NOT NULL UNIQUE,
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `correo` VARCHAR(100) NOT NULL UNIQUE,
   `contrasena` VARCHAR(255) NOT NULL,
   `rol` ENUM('admin', 'docente', 'estudiante') NOT NULL,
-  `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `identificador` VARCHAR(40) NOT NULL UNIQUE,
+  `tema` ENUM('claro','oscuro') NOT NULL DEFAULT 'claro'
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `clases`
--- Define los grupos de aulas, por ejemplo: 3er Grado, Sección A.
---
-DROP TABLE IF EXISTS `clases`;
+-- Tabla para CLASES
 CREATE TABLE `clases` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre` VARCHAR(100) NOT NULL COMMENT 'Ej: 3º de Secundaria',
-  `seccion` VARCHAR(10) NOT NULL COMMENT 'Ej: A, B, C',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_clase_seccion_unica` (`nombre`, `seccion`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `nombre` VARCHAR(50) NOT NULL, -- ej: "3er Grado", "5to de Secundaria"
+  `seccion` VARCHAR(10) NOT NULL -- ej: "A", "B"
+);
 
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `docentes`
--- Almacena información detallada de los docentes, vinculada a un usuario.
---
-DROP TABLE IF EXISTS `docentes`;
+-- Tabla para DOCENTES
 CREATE TABLE `docentes` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_usuario` INT UNSIGNED NOT NULL UNIQUE,
-  `nombre` VARCHAR(100) NOT NULL,
-  `apellido` VARCHAR(100) NOT NULL,
-  `telefono` VARCHAR(20) DEFAULT NULL,
-  `direccion` VARCHAR(255) DEFAULT NULL,
-  `fecha_nacimiento` DATE DEFAULT NULL,
-  `genero` ENUM('masculino', 'femenino', 'otro') DEFAULT NULL,
-  `avatar_url` VARCHAR(255) DEFAULT 'https://placehold.co/100x100.png',
-  `estado` ENUM('Activo', 'Inactivo') NOT NULL DEFAULT 'Activo',
-  PRIMARY KEY (`id`),
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario` INT NOT NULL UNIQUE,
+  `nombre` VARCHAR(50) NOT NULL,
+  `apellido` VARCHAR(50) NOT NULL,
+  `fecha_nacimiento` DATE,
+  `genero` ENUM('masculino', 'femenino', 'otro'),
+  `direccion` VARCHAR(255),
+  `telefono` VARCHAR(20),
+  `contacto_referencia` VARCHAR(20) NULL,
+  `relacion_referencia` VARCHAR(50) NULL,
+  `url_avatar` VARCHAR(255) DEFAULT 'https://placehold.co/100x100.png',
+  `estado` ENUM('activo', 'inactivo') DEFAULT 'activo',
   FOREIGN KEY (`id_usuario`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `estudiantes`
--- Almacena información detallada de los estudiantes, vinculada a un usuario.
---
-DROP TABLE IF EXISTS `estudiantes`;
+-- Tabla para ESTUDIANTES
 CREATE TABLE `estudiantes` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_usuario` INT UNSIGNED NOT NULL UNIQUE,
-  `id_clase` INT UNSIGNED,
-  `nombre` VARCHAR(100) NOT NULL,
-  `apellido` VARCHAR(100) NOT NULL,
-  `telefono` VARCHAR(20) DEFAULT NULL,
-  `direccion` VARCHAR(255) DEFAULT NULL,
-  `fecha_nacimiento` DATE DEFAULT NULL,
-  `genero` ENUM('masculino', 'femenino', 'otro') DEFAULT NULL,
-  `nombre_apoderado` VARCHAR(200) DEFAULT NULL,
-  `contacto_apoderado` VARCHAR(20) DEFAULT NULL,
-  `avatar_url` VARCHAR(255) DEFAULT 'https://placehold.co/100x100.png',
-  `fecha_matricula` DATE,
-  PRIMARY KEY (`id`),
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario` INT NOT NULL UNIQUE,
+  `nombre` VARCHAR(50) NOT NULL,
+  `apellido` VARCHAR(50) NOT NULL,
+  `fecha_nacimiento` DATE,
+  `genero` ENUM('masculino', 'femenino', 'otro'),
+  `direccion` VARCHAR(255),
+  `telefono` VARCHAR(20),
+  `url_avatar` VARCHAR(255) DEFAULT 'https://placehold.co/100x100.png',
+  `id_clase` INT,
+  `nombre_tutor` VARCHAR(100),
+  `contacto_tutor` VARCHAR(20),
   FOREIGN KEY (`id_usuario`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_clase`) REFERENCES `clases`(`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- --------------------------------------------------------
 
---
--- Estructura de tabla para la tabla `asignaturas`
--- Define las materias o asignaturas que se imparten en la institución.
---
-DROP TABLE IF EXISTS `asignaturas`;
+-- Tabla para ASIGNATURAS
 CREATE TABLE `asignaturas` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `nombre` VARCHAR(100) NOT NULL UNIQUE,
-  `descripcion` TEXT,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `nombre` VARCHAR(100) NOT NULL,
+  `descripcion` TEXT
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `cursos`
--- Representa una asignatura impartida por un docente a una clase en un horario específico.
---
-DROP TABLE IF EXISTS `cursos`;
+-- Tabla para CURSOS (Instancia de una asignatura para una clase y profesor)
 CREATE TABLE `cursos` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_asignatura` INT UNSIGNED NOT NULL,
-  `id_docente` INT UNSIGNED NOT NULL,
-  `id_clase` INT UNSIGNED NOT NULL,
-  `codigo_curso` VARCHAR(20) NOT NULL UNIQUE,
-  `horario` VARCHAR(100) COMMENT 'Ej: Lu, Mi 10:00-11:30',
-  `capacidad` INT UNSIGNED,
-  PRIMARY KEY (`id`),
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `codigo` VARCHAR(20) NOT NULL UNIQUE,
+  `id_asignatura` INT NOT NULL,
+  `id_clase` INT NOT NULL,
+  `id_docente` INT NOT NULL,
+  `horario` VARCHAR(100), -- ej: "Lun 10:00-11:30, Mie 10:00-11:30"
+  `capacidad` INT,
   FOREIGN KEY (`id_asignatura`) REFERENCES `asignaturas`(`id`),
-  FOREIGN KEY (`id_docente`) REFERENCES `docentes`(`id`),
-  FOREIGN KEY (`id_clase`) REFERENCES `clases`(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  FOREIGN KEY (`id_clase`) REFERENCES `clases`(`id`),
+  FOREIGN KEY (`id_docente`) REFERENCES `docentes`(`id`)
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `inscripciones`
--- Tabla de unión para la relación muchos a muchos entre estudiantes y cursos.
---
-DROP TABLE IF EXISTS `inscripciones`;
+-- Tabla para INSCRIPCIONES (Tabla de unión para Estudiantes y Cursos)
 CREATE TABLE `inscripciones` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_estudiante` INT UNSIGNED NOT NULL,
-  `id_curso` INT UNSIGNED NOT NULL,
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `id_estudiante` INT NOT NULL,
+  `id_curso` INT NOT NULL,
   `fecha_inscripcion` DATE NOT NULL,
-  `progreso` INT UNSIGNED DEFAULT 0,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_estudiante_curso_unico` (`id_estudiante`, `id_curso`),
+  `progreso` INT DEFAULT 0, -- Progreso en porcentaje
+  UNIQUE(`id_estudiante`, `id_curso`),
   FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `asistencia`
--- Registra la asistencia de un estudiante a un curso en una fecha específica.
---
-DROP TABLE IF EXISTS `asistencia`;
-CREATE TABLE `asistencia` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_inscripcion` INT UNSIGNED NOT NULL,
-  `fecha` DATE NOT NULL,
-  `estado` ENUM('presente', 'ausente', 'tarde', 'justificado') NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_asistencia_unica` (`id_inscripcion`, `fecha`),
-  FOREIGN KEY (`id_inscripcion`) REFERENCES `inscripciones`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `tareas`
--- Define las tareas asignadas por un docente en un curso.
---
-DROP TABLE IF EXISTS `tareas`;
+-- Tabla para TAREAS
 CREATE TABLE `tareas` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_curso` INT UNSIGNED NOT NULL,
-  `titulo` VARCHAR(255) NOT NULL,
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `id_curso` INT NOT NULL,
+  `titulo` VARCHAR(100) NOT NULL,
   `descripcion` TEXT,
-  `fecha_creacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `fecha_publicacion` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `fecha_entrega` DATETIME NOT NULL,
-  PRIMARY KEY (`id`),
   FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `entregas`
--- Almacena las entregas de los estudiantes para cada tarea, incluyendo calificación.
---
-DROP TABLE IF EXISTS `entregas`;
+-- Tabla para ENTREGAS
 CREATE TABLE `entregas` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_tarea` INT UNSIGNED NOT NULL,
-  `id_estudiante` INT UNSIGNED NOT NULL,
-  `fecha_entrega` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `id_tarea` INT NOT NULL,
+  `id_estudiante` INT NOT NULL,
+  `fecha_entrega` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `archivo_url` VARCHAR(255),
-  `calificacion` DECIMAL(5, 2),
+  `estado` ENUM('entregado', 'calificado', 'retrasado') NOT NULL,
+  `nota` DECIMAL(5, 2), -- Nota sobre 20.00
   `retroalimentacion` TEXT,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_entrega_unica` (`id_tarea`, `id_estudiante`),
+  UNIQUE(`id_tarea`, `id_estudiante`),
   FOREIGN KEY (`id_tarea`) REFERENCES `tareas`(`id`) ON DELETE CASCADE,
   FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
--- --------------------------------------------------------
 
---
--- Estructura de tabla para la tabla `comunicados`
--- Para el tablón de anuncios (noticias), permite segmentar por rol o clase.
---
-DROP TABLE IF EXISTS `comunicados`;
-CREATE TABLE `comunicados` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_usuario_emisor` INT UNSIGNED NOT NULL,
-  `titulo` VARCHAR(255) NOT NULL,
-  `contenido` TEXT NOT NULL,
-  `fecha_publicacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `importancia` ENUM('normal', 'media', 'alta') DEFAULT 'normal',
-  `rol_destino` ENUM('todos', 'admin', 'docente', 'estudiante') DEFAULT 'todos',
-  `id_clase_destino` INT UNSIGNED DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`id_usuario_emisor`) REFERENCES `usuarios`(`id`),
-  FOREIGN KEY (`id_clase_destino`) REFERENCES `clases`(`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Tabla para ASISTENCIA
+CREATE TABLE `asistencia` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `id_estudiante` INT NOT NULL,
+  `id_curso` INT NOT NULL,
+  `fecha` DATE NOT NULL,
+  `estado` ENUM('presente', 'ausente', 'tarde', 'justificado') NOT NULL,
+  UNIQUE(`id_estudiante`, `id_curso`, `fecha`),
+  FOREIGN KEY (`id_estudiante`) REFERENCES `estudiantes`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`id_curso`) REFERENCES `cursos`(`id`) ON DELETE CASCADE
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `solicitudes_permiso`
--- Para las solicitudes de licencia de estudiantes y docentes.
---
-DROP TABLE IF EXISTS `solicitudes_permiso`;
-CREATE TABLE `solicitudes_permiso` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_usuario_solicitante` INT UNSIGNED NOT NULL,
-  `tipo_permiso` VARCHAR(100) NOT NULL,
-  `motivo` TEXT NOT NULL,
-  `fecha_inicio` DATE NOT NULL,
-  `fecha_fin` DATE NOT NULL,
-  `estado` ENUM('pendiente', 'aprobado', 'rechazado') NOT NULL DEFAULT 'pendiente',
-  `fecha_solicitud` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  FOREIGN KEY (`id_usuario_solicitante`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `eventos_calendario`
--- Para eventos generales de la escuela (feriados, reuniones, etc.).
---
-DROP TABLE IF EXISTS `eventos_calendario`;
+-- Tabla para EVENTOS_CALENDARIO
 CREATE TABLE `eventos_calendario` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `titulo` VARCHAR(255) NOT NULL,
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `titulo` VARCHAR(100) NOT NULL,
   `descripcion` TEXT,
   `fecha_inicio` DATETIME NOT NULL,
   `fecha_fin` DATETIME,
-  `tipo_evento` VARCHAR(50) DEFAULT 'General',
-  `color` VARCHAR(50) DEFAULT 'hsl(var(--primary))',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `tipo` ENUM('feriado', 'examen', 'reunion', 'actividad', 'entrega') NOT NULL,
+  `color` VARCHAR(20) -- ej: '#FF5733'
+);
 
+-- Tabla para COMUNICADOS (Noticias/Anuncios)
+CREATE TABLE `comunicados` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `titulo` VARCHAR(100) NOT NULL,
+  `contenido` TEXT,
+  `id_emisor` INT NOT NULL,
+  `fecha_publicacion` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `importancia` ENUM('normal', 'media', 'alta') DEFAULT 'normal',
+  `destinatario_rol` ENUM('todos', 'docentes', 'estudiantes'),
+  `destinatario_clase` INT, -- Opcional, para filtrar por clase
+  FOREIGN KEY (`id_emisor`) REFERENCES `usuarios`(`id`),
+  FOREIGN KEY (`destinatario_clase`) REFERENCES `clases`(`id`) ON DELETE SET NULL
+);
 
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `codigos_otp`
--- Almacena temporalmente los códigos para la recuperación de contraseñas.
---
-DROP TABLE IF EXISTS `codigos_otp`;
-CREATE TABLE `codigos_otp` (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `id_usuario` INT UNSIGNED NOT NULL,
-  `codigo` VARCHAR(10) NOT NULL,
-  `fecha_expiracion` TIMESTAMP NOT NULL,
-  PRIMARY KEY (`id`),
+-- Tabla para SOLICITUDES_PERMISO
+CREATE TABLE `solicitudes_permiso` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `id_usuario` INT NOT NULL,
+  `tipo_permiso` VARCHAR(50) NOT NULL,
+  `motivo` TEXT NOT NULL,
+  `fecha_inicio` DATE NOT NULL,
+  `fecha_fin` DATE NOT NULL,
+  `fecha_solicitud` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `estado` ENUM('pendiente', 'aprobado', 'rechazado') DEFAULT 'pendiente',
   FOREIGN KEY (`id_usuario`) REFERENCES `usuarios`(`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
+-- Tabla para CÓDIGOS OTP
+CREATE TABLE `codigos_otp` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `correo` VARCHAR(100) NOT NULL,
+  `codigo` VARCHAR(6) NOT NULL,
+  `fecha_expiracion` DATETIME NOT NULL,
+  `utilizado` BOOLEAN DEFAULT FALSE
+);
 
---
--- Activar verificación de claves foráneas.
---
-SET FOREIGN_KEY_CHECKS=1;
+-- --- INSERCIÓN DE DATOS DE EJEMPLO ---
 
--- --------------------------------------------------------
--- INSERCIÓN DE DATOS DE EJEMPLO
--- --------------------------------------------------------
-
--- Usuarios (contraseña para todos: 'password')
--- Contraseña hasheada con bcrypt: $2b$10$T8rL/3D.Lp1/pB.0K9.bSOu8U.I0/3sVz4eT.I5t/6L.O0T.H0E3G
-INSERT INTO `usuarios` (`id`, `correo`, `contrasena`, `rol`) VALUES
-(1, 'admin@sofiaeduca.com', '$2b$10$T8rL/3D.Lp1/pB.0K9.bSOu8U.I0/3sVz4eT.I5t/6L.O0T.H0E3G', 'admin'),
-(2, 'juan.docente@sofiaeduca.com', '$2b$10$T8rL/3D.Lp1/pB.0K9.bSOu8U.I0/3sVz4eT.I5t/6L.O0T.H0E3G', 'docente'),
-(3, 'maria.docente@sofiaeduca.com', '$2b$10$T8rL/3D.Lp1/pB.0K9.bSOu8U.I0/3sVz4eT.I5t/6L.O0T.H0E3G', 'docente'),
-(4, 'ana.perez@example.com', '$2b$10$T8rL/3D.Lp1/pB.0K9.bSOu8U.I0/3sVz4eT.I5t/6L.O0T.H0E3G', 'estudiante'),
-(5, 'luis.garcia@example.com', '$2b$10$T8rL/3D.Lp1/pB.0K9.bSOu8U.I0/3sVz4eT.I5t/6L.O0T.H0E3G', 'estudiante');
-
+-- Usuarios
+INSERT INTO `usuarios` (`id`, `correo`, `contrasena`, `rol`, `identificador`) VALUES
+(1, 'admin@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'admin', 'ADM001'),
+(2, 'juan.perez@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'docente', 'DOC001'),
+(3, 'ana.gomez@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'estudiante', 'EST001'),
+(4, 'luis.rodriguez@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'estudiante', 'EST002'),
+(5, 'maria.garcia@sofiaeduca.com', '$2b$10$f9vN8L4qj3J/iP/kP3zYpeo2wX6zS5Z.O5eE6zR4j3J/iP/kP3zYp', 'docente', 'DOC002');
 
 -- Clases
 INSERT INTO `clases` (`id`, `nombre`, `seccion`) VALUES
-(1, '3º de Secundaria', 'A'),
-(2, '4º de Secundaria', 'A'),
-(3, '5º de Secundaria', 'A');
-
+(1, '5to de Secundaria', 'A'),
+(2, '5to de Secundaria', 'B'),
+(3, '4to de Secundaria', 'A');
 
 -- Docentes
-INSERT INTO `docentes` (`id`, `id_usuario`, `nombre`, `apellido`) VALUES
-(1, 2, 'Juan', 'Docente'),
-(2, 3, 'María', 'Maestra');
-
+INSERT INTO `docentes` (`id`, `id_usuario`, `nombre`, `apellido`, `fecha_nacimiento`, `genero`, `direccion`, `telefono`, `contacto_referencia`, `relacion_referencia`) VALUES
+(1, 2, 'Juan', 'Pérez', '1985-05-20', 'masculino', 'Av. del Saber 123', '987654321', '912345678', 'Esposa'),
+(2, 5, 'María', 'García', '1990-11-15', 'femenino', 'Calle de la Enseñanza 456', '987654322', '912345677', 'Hermano');
 
 -- Estudiantes
-INSERT INTO `estudiantes` (`id`, `id_usuario`, `id_clase`, `nombre`, `apellido`, `nombre_apoderado`, `contacto_apoderado`) VALUES
-(1, 4, 1, 'Ana', 'Pérez', 'Carlos Pérez', '987654321'),
-(2, 5, 2, 'Luis', 'García', 'Elena García', '912345678');
-
+INSERT INTO `estudiantes` (`id`, `id_usuario`, `nombre`, `apellido`, `fecha_nacimiento`, `genero`, `direccion`, `telefono`, `id_clase`, `nombre_tutor`, `contacto_tutor`) VALUES
+(1, 3, 'Ana', 'Gómez', '2008-04-10', 'femenino', 'Jr. Los Lirios 789', '912345678', 1, 'Marta Gómez', '912345679'),
+(2, 4, 'Luis', 'Rodríguez', '2008-08-22', 'masculino', 'Calle Las Begonias 101', '923456789', 1, 'Jorge Rodríguez', '923456780');
 
 -- Asignaturas
 INSERT INTO `asignaturas` (`id`, `nombre`, `descripcion`) VALUES
-(1, 'Matemáticas', 'Curso de álgebra, geometría y cálculo.'),
-(2, 'Historia', 'Curso sobre historia universal y del Perú.'),
-(3, 'Ciencias', 'Curso de biología, química y física.'),
-(4, 'Arte', 'Curso de apreciación artística y técnicas de pintura.');
-
+(1, 'Matemáticas V', 'Cálculo diferencial e integral.'),
+(2, 'Historia del Perú', 'Desde la época prehispánica hasta la actualidad.'),
+(3, 'Química Orgánica', 'Estudio de los compuestos de carbono.');
 
 -- Cursos
-INSERT INTO `cursos` (`id`, `id_asignatura`, `id_docente`, `id_clase`, `codigo_curso`, `horario`) VALUES
-(1, 1, 1, 1, 'MAT-3A', 'Lu, Mi 08:00-09:30'),
-(2, 2, 2, 1, 'HIS-3A', 'Ma, Ju 08:00-09:30'),
-(3, 1, 1, 2, 'MAT-4A', 'Lu, Mi 10:00-11:30');
+INSERT INTO `cursos` (`id`, `codigo`, `id_asignatura`, `id_clase`, `id_docente`, `horario`, `capacidad`) VALUES
+(1, 'MAT501A', 1, 1, 1, 'Lun 08:00-10:00, Mie 08:00-10:00', 30),
+(2, 'HIS501A', 2, 1, 2, 'Mar 10:00-12:00, Jue 10:00-12:00', 30);
 
 -- Inscripciones
-INSERT INTO `inscripciones` (`id_estudiante`, `id_curso`, `fecha_inscripcion`, `progreso`) VALUES
-(1, 1, '2024-03-01', 75),
-(1, 2, '2024-03-01', 60),
-(2, 3, '2024-03-01', 85);
+INSERT INTO `inscripciones` (`id`, `id_estudiante`, `id_curso`, `fecha_inscripcion`, `progreso`) VALUES
+(1, 1, 1, '2024-03-01', 75),
+(2, 1, 2, '2024-03-01', 60),
+(3, 2, 1, '2024-03-01', 85);
 
--- Eventos del Calendario
-INSERT INTO `eventos_calendario` (`titulo`, `descripcion`, `fecha_inicio`, `tipo_evento`) VALUES
-('Reunión de Docentes', 'Reunión mensual de planificación.', NOW() + INTERVAL 5 DAY, 'Reunión'),
-('Feria de Ciencias', 'Exposición de proyectos de los estudiantes.', NOW() + INTERVAL 10 DAY, 'Actividad');
+-- Eventos Calendario
+INSERT INTO `eventos_calendario` (`id`, `titulo`, `descripcion`, `fecha_inicio`, `tipo`, `color`) VALUES
+(1, 'Examen Parcial de Matemáticas', 'Evaluación de la primera mitad del curso.', '2024-08-15 10:00:00', 'examen', '#dc2626'),
+(2, 'Día de la Independencia', 'Feriado nacional.', '2024-07-28 00:00:00', 'feriado', '#6b7280');
