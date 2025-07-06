@@ -108,9 +108,9 @@ export default function LoginPage() {
             data-ai-hint="anime student hero"
             placeholder="blur"
           />
-          <div className="relative z-10 text-center text-background drop-shadow-lg">
-            <p className="text-xs font-semibold tracking-wider uppercase mb-2 text-background/80">TO BE HERO</p>
-            <p className="text-sm font-light tracking-wider uppercase mb-6 text-background/70">PRE-UNIVERSITY PREPARAT</p>
+          <div className="relative z-10 text-center text-foreground drop-shadow-lg">
+            <p className="text-xs font-semibold tracking-wider uppercase mb-2 text-foreground/80">TO BE HEROX</p>
+            <p className="text-sm font-light tracking-wider uppercase mb-6 text-foreground/70">PRE-UNIVERSITY PREPARATION</p>
             <h2 className="text-5xl font-bold mb-2">SISTEMA INTEGRAL</h2>
             <p className="text-lg font-light">Planificar, Servir</p>
           </div>
