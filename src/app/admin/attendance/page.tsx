@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, FileText, Filter, Database, Calendar as CalendarIcon } from 'lucide-react';
+import { Search, FileText, Database, Calendar as CalendarIcon, ClipboardCheck } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -36,50 +36,74 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { PageTitle } from '@/components/common/PageTitle';
+
+const primaryGrades = [
+  { value: '1-pri', label: '1º de Primaria' },
+  { value: '2-pri', label: '2º de Primaria' },
+  { value: '3-pri', label: '3º de Primaria' },
+  { value: '4-pri', label: '4º de Primaria' },
+  { value: '5-pri', label: '5º de Primaria' },
+  { value: '6-pri', label: '6º de Primaria' },
+];
+
+const secondaryGrades = [
+  { value: '1-sec', label: '1º de Secundaria' },
+  { value: '2-sec', label: '2º de Secundaria' },
+  { value: '3-sec', label: '3º de Secundaria' },
+  { value: '4-sec', label: '4º de Secundaria' },
+  { value: '5-sec', label: '5º de Secundaria' },
+];
 
 export default function AttendancePage() {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('');
 
   return (
     <div className="space-y-6">
+      <PageTitle title="Gestión de Asistencia" subtitle="Tome asistencia diaria o consulte registros históricos por fecha." icon={ClipboardCheck} />
+      
       <Tabs defaultValue="tomar-asistencia" className="w-full animate-fade-in">
         <TabsList className="grid w-full grid-cols-2 sm:max-w-xs">
           <TabsTrigger value="tomar-asistencia">Tomar asistencia</TabsTrigger>
-          <TabsTrigger value="asistencia-fecha">Asistencia según la fecha</TabsTrigger>
+          <TabsTrigger value="asistencia-fecha">Asistencia por fecha</TabsTrigger>
         </TabsList>
         <TabsContent value="tomar-asistencia" className="mt-6">
           <div className="space-y-6">
             <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">Mostrar asistencia</CardTitle>
-                </div>
-                <Button variant="ghost" size="icon">
-                    <Filter className="h-4 w-4" />
-                </Button>
+              <CardHeader>
+                <CardTitle className="text-lg">Filtros de Asistencia</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                  <div className="grid gap-2">
-                    <Label htmlFor="class">Clase</Label>
-                    <Select defaultValue="12-comercio">
-                      <SelectTrigger id="class">
-                        <SelectValue />
-                      </SelectTrigger>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                   <div className="grid gap-2">
+                    <Label htmlFor="level-take">Nivel</Label>
+                    <Select value={selectedLevel} onValueChange={(value) => {
+                        setSelectedLevel(value);
+                        setSelectedGrade('');
+                    }}>
+                      <SelectTrigger id="level-take"><SelectValue placeholder="-- Nivel --" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                        <SelectItem value="primaria">Primaria</SelectItem>
+                        <SelectItem value="secundaria">Secundaria</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="section">Sección</Label>
-                    <Select defaultValue="A">
-                      <SelectTrigger id="section">
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Label htmlFor="grade-take">Grado</Label>
+                    <Select value={selectedGrade} onValueChange={setSelectedGrade} disabled={!selectedLevel}>
+                      <SelectTrigger id="grade-take"><SelectValue placeholder={!selectedLevel ? "Seleccione un nivel" : "-- Grado --"} /></SelectTrigger>
+                      <SelectContent>
+                        {selectedLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                        {selectedLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="section-take">Sección</Label>
+                    <Select>
+                      <SelectTrigger id="section-take"><SelectValue placeholder="-- Sección --" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="A">A</SelectItem>
                         <SelectItem value="B">B</SelectItem>
@@ -96,14 +120,8 @@ export default function AttendancePage() {
             </Card>
 
             <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">Lista de estudiantes</CardTitle>
-                </div>
-                 <Button variant="ghost" size="icon">
-                    <Filter className="h-4 w-4" />
-                </Button>
+              <CardHeader>
+                <CardTitle className="text-lg">Lista de estudiantes</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
@@ -112,9 +130,7 @@ export default function AttendancePage() {
                       <TableHead>#</TableHead>
                       <TableHead>Número de rollo</TableHead>
                       <TableHead>Nombre</TableHead>
-                      <TableHead className="text-center">Total de días</TableHead>
-                      <TableHead className="text-center">Presente</TableHead>
-                      <TableHead className="text-center">Porcentaje</TableHead>
+                      <TableHead className="text-center">Asistencia</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -124,14 +140,12 @@ export default function AttendancePage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9">
-                            <AvatarImage src="https://placehold.co/40x40.png" alt="Estudiante kumar" data-ai-hint="robot avatar" />
+                            <AvatarImage src="https://placehold.co/40x40.png" alt="Estudiante" data-ai-hint="student avatar" />
                             <AvatarFallback>EK</AvatarFallback>
                           </Avatar>
-                          <span className="font-medium text-foreground">Estudiante kumar</span>
+                          <span className="font-medium text-foreground">Estudiante de Ejemplo</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-center">0</TableCell>
-                      <TableCell className="text-center">0</TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center">
                             <Switch id="attendance-switch-1" />
@@ -143,7 +157,7 @@ export default function AttendancePage() {
               </CardContent>
               <CardFooter className="flex justify-end gap-2 pt-4 border-t">
                   <Button variant="outline">Reiniciar</Button>
-                  <Button>Entregar</Button>
+                  <Button>Guardar</Button>
               </CardFooter>
             </Card>
           </div>
@@ -152,32 +166,33 @@ export default function AttendancePage() {
           <div className="space-y-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle className="text-lg">Información</CardTitle>
-                </div>
+                <CardTitle className="text-lg">Buscar por Fecha</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
-                  <div className="grid gap-2">
-                    <Label htmlFor="date-class">Clase</Label>
-                    <Select defaultValue="12-comercio">
-                      <SelectTrigger id="date-class">
-                        <SelectValue />
-                      </SelectTrigger>
+                   <div className="grid gap-2">
+                    <Label htmlFor="level-find">Nivel</Label>
+                     <Select>
+                      <SelectTrigger id="level-find"><SelectValue placeholder="-- Nivel --" /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                        <SelectItem value="primaria">Primaria</SelectItem>
+                        <SelectItem value="secundaria">Secundaria</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="date-section">Sección</Label>
-                    <Select defaultValue="A">
-                      <SelectTrigger id="date-section">
-                        <SelectValue />
-                      </SelectTrigger>
+                    <Label htmlFor="grade-find">Grado</Label>
+                    <Select>
+                      <SelectTrigger id="grade-find"><SelectValue placeholder="-- Grado --" /></SelectTrigger>
+                      <SelectContent>
+                        {/* Grade options here */}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                   <div className="grid gap-2">
+                    <Label htmlFor="section-find">Sección</Label>
+                    <Select>
+                      <SelectTrigger id="section-find"><SelectValue placeholder="-- Sección --" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="A">A</SelectItem>
                         <SelectItem value="B">B</SelectItem>
@@ -212,7 +227,7 @@ export default function AttendancePage() {
                       </PopoverContent>
                     </Popover>
                   </div>
-                  <Button className="w-full md:w-auto">
+                  <Button className="w-full md:w-auto md:col-span-full lg:col-span-1">
                     <Search className="mr-2 h-4 w-4" />
                     Encontrar
                   </Button>
@@ -224,10 +239,7 @@ export default function AttendancePage() {
             
             <Card className="shadow-lg">
                 <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <CardTitle className="text-lg">Hoja de asistencia</CardTitle>
-                    </div>
+                    <CardTitle className="text-lg">Hoja de asistencia</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -236,7 +248,7 @@ export default function AttendancePage() {
                                 <TableHead>#</TableHead>
                                 <TableHead>Número de rollo</TableHead>
                                 <TableHead>Nombre</TableHead>
-                                <TableHead>Asistencia</TableHead>
+                                <TableHead className="text-center">Estado</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -248,6 +260,7 @@ export default function AttendancePage() {
                             <Database className="h-12 w-12 text-accent" />
                         </div>
                         <h3 className="text-lg font-semibold text-foreground">Sin datos</h3>
+                        <p className="text-sm text-muted-foreground">Utilice los filtros de arriba para buscar un registro.</p>
                     </div>
                 </CardContent>
             </Card>
