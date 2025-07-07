@@ -418,29 +418,17 @@ export default function NewsPage() {
                       <DialogContent className="p-0 sm:max-w-2xl bg-card border-none overflow-hidden rounded-lg">
                         <div className="relative p-8">
                             <div className="flex justify-between items-start">
-                                <div className="font-bold text-xl tracking-wider flex items-center gap-1">
-                                    <span style={{ color: '#00A1B4' }}>PRO</span>
-                                    <span style={{ color: '#E30613' }}>NA</span>
-                                    <span style={{ color: '#FFD200' }}>BEC</span>
+                                <div className="font-bold text-2xl tracking-wider text-foreground">
+                                    ADMINISTRACIÓN
                                 </div>
-                                <ArrowUpRight className="h-10 w-10 text-blue-600 -rotate-45 absolute top-4 right-4 opacity-50" />
+                                <ArrowUpRight className="h-10 w-10 text-primary -rotate-45 absolute top-4 right-4 opacity-50" />
                             </div>
                             <div className="mt-8 text-center space-y-4">
-                                <h2 className="text-3xl font-bold mb-4" style={{ color: '#EC008C'}}>¡{notice.title}!</h2>
+                                <h2 className="text-3xl font-bold mb-4 text-primary">¡{notice.title}!</h2>
                                 <p className="text-muted-foreground text-lg text-left">
                                     {notice.body}
                                 </p>
-                                <p className="text-muted-foreground text-lg mt-4 text-left">
-                                  La información que nos brindes nos permitirá estar en contacto contigo en cualquier momento, como becario o becaria de Sofía Educa.
-                                </p>
                             </div>
-                        </div>
-                        <div className="h-2.5 w-full flex">
-                            <div className="w-1/5" style={{ backgroundColor: '#00A1B4' }}></div>
-                            <div className="w-1/5" style={{ backgroundColor: '#8DC63F' }}></div>
-                            <div className="w-1/5" style={{ backgroundColor: '#FFD200' }}></div>
-                            <div className="w-1/5" style={{ backgroundColor: '#F7941E' }}></div>
-                            <div className="w-1/5" style={{ backgroundColor: '#E30613' }}></div>
                         </div>
                       </DialogContent>
                     </Dialog>
