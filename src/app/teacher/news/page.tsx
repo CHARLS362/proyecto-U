@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageTitle } from "@/components/common/PageTitle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
@@ -22,9 +22,24 @@ import {
   Download,
   Edit,
   Trash2,
-  Loader2
+  Loader2,
+  Users,
+  User,
+  Users2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { mockCourses, mockStudents } from '@/lib/mockData';
+
+// Simula el ID del docente que ha iniciado sesión
+const LOGGED_IN_TEACHER_ID = "T1749005331";
+
 
 export default function TeacherNewsPage() {
   const { toast } = useToast();
@@ -33,6 +48,40 @@ export default function TeacherNewsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
+
+  // New state for targeting the notice
+  const [sendTo, setSendTo] = useState('all');
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [selectedClassId, setSelectedClassId] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+
+  // Get data for the logged in teacher
+  const teacherCourses = useMemo(() => {
+    return mockCourses.filter(course => course.instructorId === LOGGED_IN_TEACHER_ID);
+  }, []);
+
+  const studentsOfTeacher = useMemo(() => {
+    const teacherCourseIds = new Set(teacherCourses.map(c => c.id));
+    const studentSet = new Set();
+    mockStudents.forEach(student => {
+        if (student.courses.some(course => teacherCourseIds.has(course.id))) {
+            studentSet.add(student);
+        }
+    });
+    return Array.from(studentSet) as typeof mockStudents;
+  }, [teacherCourses]);
+
+  const availableClasses = useMemo(() => {
+    const classSet = new Set(teacherCourses.map(c => c.classId || ''));
+    return Array.from(classSet).filter(Boolean);
+  }, [teacherCourses]);
+
+  const classDisplayMapping: { [key: string]: string } = {
+      "5-sec": "5º de Secundaria",
+      "3-sec": "3º de Secundaria",
+      "4-sec": "4º de Secundaria",
+  };
+
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -47,6 +96,10 @@ export default function TeacherNewsPage() {
     setBody('');
     setImportance('normal');
     setFileName('Ningún archivo seleccionado');
+    setSendTo('all');
+    setSelectedStudentId('');
+    setSelectedClassId('');
+    setSelectedSection('');
     const form = document.getElementById('create-notice-form') as HTMLFormElement;
     if (form) form.reset();
   }
@@ -54,6 +107,19 @@ export default function TeacherNewsPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
+    
+    // Log data for backend
+    console.log({
+        title,
+        body,
+        importance,
+        fileName,
+        sendTo,
+        selectedStudentId,
+        selectedClassId,
+        selectedSection,
+    });
+
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       toast({
@@ -111,7 +177,7 @@ export default function TeacherNewsPage() {
     <div className="space-y-6">
       <PageTitle title="Tablón de anuncios" icon={Newspaper} />
       
-      <Tabs defaultValue="tablon-de-anuncios" className="w-full animate-fade-in">
+      <Tabs defaultValue="crear-aviso" className="w-full animate-fade-in">
         <TabsList className="grid w-full grid-cols-2 sm:max-w-xs">
           <TabsTrigger value="crear-aviso">Crear aviso</TabsTrigger>
           <TabsTrigger value="tablon-de-anuncios">Tablón de anuncios</TabsTrigger>
@@ -131,6 +197,67 @@ export default function TeacherNewsPage() {
             <Separator />
             <form id="create-notice-form" onSubmit={handleSubmit}>
               <CardContent className="pt-6 space-y-6">
+                
+                {/* Send To Section */}
+                <div className="grid gap-3 p-4 border rounded-lg bg-muted/30">
+                  <Label className="font-semibold text-foreground">Enviar a:</Label>
+                  <RadioGroup value={sendTo} onValueChange={setSendTo} className="flex flex-col sm:flex-row gap-4" disabled={isSubmitting}>
+                      <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="all" id="send-to-all" />
+                          <Label htmlFor="send-to-all" className="flex items-center gap-2"><Users className="h-4 w-4" /> Todos</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="student" id="send-to-student" />
+                          <Label htmlFor="send-to-student" className="flex items-center gap-2"><User className="h-4 w-4" /> Alumno específico</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="class" id="send-to-class" />
+                          <Label htmlFor="send-to-class" className="flex items-center gap-2"><Users2 className="h-4 w-4" /> Clase específica</Label>
+                      </div>
+                  </RadioGroup>
+
+                  {sendTo === 'student' && (
+                    <div className="grid gap-2 pt-2 animate-fade-in">
+                      <Label htmlFor="student-select">Seleccionar Estudiante</Label>
+                      <Select onValueChange={setSelectedStudentId} disabled={isSubmitting}>
+                        <SelectTrigger id="student-select"><SelectValue placeholder="-- Seleccionar Estudiante --" /></SelectTrigger>
+                        <SelectContent>
+                          {studentsOfTeacher.map(student => (
+                            <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
+                  {sendTo === 'class' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 animate-fade-in">
+                       <div className="grid gap-2">
+                        <Label htmlFor="class-select">Seleccionar Grado</Label>
+                        <Select onValueChange={setSelectedClassId} disabled={isSubmitting}>
+                          <SelectTrigger id="class-select"><SelectValue placeholder="-- Seleccionar Grado --" /></SelectTrigger>
+                          <SelectContent>
+                            {availableClasses.map(classId => (
+                                <SelectItem key={classId} value={classId}>{classDisplayMapping[classId] || classId}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                       <div className="grid gap-2">
+                        <Label htmlFor="section-select">Seleccionar Sección</Label>
+                        <Select onValueChange={setSelectedSection} disabled={isSubmitting}>
+                          <SelectTrigger id="section-select"><SelectValue placeholder="-- Seleccionar Sección --" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="A">A</SelectItem>
+                            <SelectItem value="B">B</SelectItem>
+                            <SelectItem value="C">C</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid gap-2">
                   <Label htmlFor="aviso-titulo">Título del aviso</Label>
                   <Input id="aviso-titulo" placeholder="título del aviso" value={title} onChange={(e) => setTitle(e.target.value)} required disabled={isSubmitting} />
@@ -146,7 +273,7 @@ export default function TeacherNewsPage() {
                   <div className="flex items-center gap-2">
                     <Input id="aviso-archivo" type="file" className="hidden" onChange={handleFileChange} disabled={isSubmitting} />
                     <Button asChild variant="outline" className="shrink-0" disabled={isSubmitting}>
-                      <Label htmlFor="aviso-archivo" className="cursor-pointer">Seleccionar archivo</Label>
+                      <Label htmlFor="aviso-archivo" className="cursor-pointer font-normal">Seleccionar archivo</Label>
                     </Button>
                     <span className="text-sm text-muted-foreground truncate">{fileName}</span>
                   </div>
