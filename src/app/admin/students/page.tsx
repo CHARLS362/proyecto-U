@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -18,7 +18,8 @@ import {
   Send,
   Camera,
   ChevronRight,
-  Loader2
+  Loader2,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -174,6 +175,12 @@ export default function StudentsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+
+  // State for Comment Tab
+  const [selectedLevelComment, setSelectedLevelComment] = useState('');
+  const [selectedGradeComment, setSelectedGradeComment] = useState('');
+  const [selectedSectionComment, setSelectedSectionComment] = useState('');
+  const [selectedStudentIdComment, setSelectedStudentIdComment] = useState('');
 
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
@@ -399,11 +406,23 @@ export default function StudentsPage() {
     }
   }
 
-
   const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     student.id.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const filteredStudentsForComment = useMemo(() => {
+    if (!selectedGradeComment || !selectedSectionComment) {
+      return [];
+    }
+    return students.filter(student => 
+      student.classId === selectedGradeComment && student.section === selectedSectionComment
+    );
+  }, [students, selectedGradeComment, selectedSectionComment]);
+
+  const selectedStudentForComment = useMemo(() => {
+    return students.find(s => s.id === selectedStudentIdComment);
+  }, [students, selectedStudentIdComment]);
 
   return (
     <>
@@ -614,48 +633,65 @@ export default function StudentsPage() {
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                 <div className="grid gap-2">
-                  <Label htmlFor="comment-class">Clase</Label>
-                  <Select defaultValue="5-sec">
-                    <SelectTrigger id="comment-class">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="3-sec">3º de Secundaria</SelectItem>
-                      <SelectItem value="4-sec">4º de Secundaria</SelectItem>
-                      <SelectItem value="5-sec">5º de Secundaria</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Label htmlFor="comment-level">Nivel</Label>
+                    <Select value={selectedLevelComment} onValueChange={(value) => {
+                        setSelectedLevelComment(value);
+                        setSelectedGradeComment('');
+                        setSelectedStudentIdComment('');
+                    }}>
+                        <SelectTrigger id="comment-level">
+                            <SelectValue placeholder="Seleccionar Nivel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="primaria">Primaria</SelectItem>
+                            <SelectItem value="secundaria">Secundaria</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                 <div className="grid gap-2">
+                    <Label htmlFor="comment-grade">Grado</Label>
+                    <Select value={selectedGradeComment} onValueChange={(value) => {
+                        setSelectedGradeComment(value);
+                        setSelectedStudentIdComment('');
+                    }} disabled={!selectedLevelComment}>
+                        <SelectTrigger id="comment-grade">
+                            <SelectValue placeholder={!selectedLevelComment ? "Seleccione nivel" : "Seleccionar Grado"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {selectedLevelComment === 'primaria' && primaryGrades.map(g => <SelectItem key={`comment-p-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                            {selectedLevelComment === 'secundaria' && secondaryGrades.map(g => <SelectItem key={`comment-s-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="comment-section">Sección</Label>
-                  <Select defaultValue="A">
-                    <SelectTrigger id="comment-section">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A">A</SelectItem>
-                      <SelectItem value="B">B</SelectItem>
-                      <SelectItem value="C">C</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Label htmlFor="comment-section">Sección</Label>
+                    <Select value={selectedSectionComment} onValueChange={(value) => {
+                        setSelectedSectionComment(value);
+                        setSelectedStudentIdComment('');
+                    }}>
+                        <SelectTrigger id="comment-section">
+                            <SelectValue placeholder="Seleccionar Sección" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="A">A</SelectItem>
+                            <SelectItem value="B">B</SelectItem>
+                            <SelectItem value="C">C</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="comment-student">Alumno</Label>
-                  <Select defaultValue="S001">
+                  <Select value={selectedStudentIdComment} onValueChange={setSelectedStudentIdComment} disabled={!selectedGradeComment || !selectedSectionComment}>
                     <SelectTrigger id="comment-student">
-                      <SelectValue />
+                      <SelectValue placeholder={!selectedGradeComment || !selectedSectionComment ? "Seleccione grado y sección" : "Seleccionar Alumno"} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="S001">Ana Pérez</SelectItem>
-                        <SelectItem value="S002">Luis García</SelectItem>
-                        <SelectItem value="S003">Sofía Rodríguez</SelectItem>
+                      {filteredStudentsForComment.map(student => (
+                        <SelectItem key={`comment-stud-${student.id}`} value={student.id}>{student.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full md:w-auto">
-                  <SearchIcon className="mr-2 h-4 w-4" />
-                  Encontrar
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -666,16 +702,26 @@ export default function StudentsPage() {
                     <CardTitle>Alumno</CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center text-center">
-                    <Avatar className="h-32 w-32 mb-4 border-2 border-border">
-                        <AvatarImage src="https://placehold.co/128x128.png" alt="Estudiante" data-ai-hint="student avatar" />
-                        <AvatarFallback>AP</AvatarFallback>
-                    </Avatar>
-                    <h3 className="text-xl font-semibold text-foreground">Ana Pérez</h3>
-                    <div className="text-left text-sm text-muted-foreground mt-4 space-y-2 w-full bg-muted/30 p-4 rounded-lg">
-                        <p><span className="font-medium text-foreground/80">Identificación:</span> S001</p>
-                        <p><span className="font-medium text-foreground/80">Teléfono:</span> 987654321</p>
-                        <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> 10/04/2008</p>
-                    </div>
+                    {selectedStudentForComment ? (
+                        <>
+                            <Avatar className="h-32 w-32 mb-4 border-2 border-border">
+                                <AvatarImage src={selectedStudentForComment.avatarUrl} alt={selectedStudentForComment.name} data-ai-hint="student avatar" />
+                                <AvatarFallback>{selectedStudentForComment.name.slice(0,2)}</AvatarFallback>
+                            </Avatar>
+                            <h3 className="text-xl font-semibold text-foreground">{selectedStudentForComment.name}</h3>
+                            <div className="text-left text-sm text-muted-foreground mt-4 space-y-2 w-full bg-muted/30 p-4 rounded-lg">
+                                <p><span className="font-medium text-foreground/80">Identificación:</span> {selectedStudentForComment.id}</p>
+                                <p><span className="font-medium text-foreground/80">Teléfono:</span> {selectedStudentForComment.phone}</p>
+                                <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> {new Date(selectedStudentForComment.dob || '').toLocaleDateString('es-ES')}</p>
+                            </div>
+                        </>
+                    ) : (
+                         <div className="flex flex-col items-center justify-center py-10 h-full text-muted-foreground">
+                            <User className="h-16 w-16 mb-4 opacity-50" />
+                            <p className="font-medium">Seleccione un estudiante</p>
+                            <p className="text-sm text-center">Use los filtros de arriba para encontrar y seleccionar un estudiante.</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
             
