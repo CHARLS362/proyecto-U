@@ -55,6 +55,7 @@ export default function TeacherAttendancePage() {
   // State for student list
   const [isSearching, setIsSearching] = useState(false);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Derivados de la carga académica del docente
   const teacherCourses = useMemo(() => {
@@ -115,6 +116,35 @@ export default function TeacherAttendancePage() {
   useState(() => {
     setFilteredStudents(studentsOfTeacher);
   });
+
+  const handleSaveAttendance = async () => {
+    if (filteredStudents.length === 0) {
+      toast({
+        title: "Sin estudiantes",
+        description: "No hay estudiantes en la lista para guardar asistencia.",
+        variant: "warning",
+      });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast({
+        title: "Asistencia Guardada",
+        description: `Se ha guardado la asistencia para ${filteredStudents.length} estudiantes.`,
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al Guardar",
+        description: "No se pudo guardar la asistencia. Intente de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -232,7 +262,10 @@ export default function TeacherAttendancePage() {
               {filteredStudents.length > 0 && (
                 <CardFooter className="flex justify-end gap-2 pt-4 border-t">
                     <Button variant="outline">Reiniciar</Button>
-                    <Button>Guardar Asistencia</Button>
+                    <Button onClick={handleSaveAttendance} disabled={isSaving}>
+                      {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ClipboardCheck className="mr-2 h-4 w-4" />}
+                      {isSaving ? 'Guardando...' : 'Guardar Asistencia'}
+                    </Button>
                 </CardFooter>
               )}
             </Card>

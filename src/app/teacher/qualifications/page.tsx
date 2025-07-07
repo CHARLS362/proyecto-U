@@ -13,7 +13,8 @@ import {
   Save, 
   ArrowLeft,
   Search,
-  Database
+  Database,
+  Loader2
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -56,6 +57,7 @@ export default function TeacherQualificationsPage() {
   const [isEnteringGrades, setIsEnteringGrades] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [studentsForGrading, setStudentsForGrading] = useState<Student[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   const teacherCourses = useMemo(() => {
     return mockCourses.filter(course => course.instructorId === LOGGED_IN_TEACHER_ID);
@@ -104,6 +106,29 @@ export default function TeacherQualificationsPage() {
     setStudentsForGrading([]);
   };
   
+  const handleSaveGrades = async () => {
+    setIsSaving(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast({
+        title: "Calificaciones Guardadas",
+        description: "Las notas han sido registradas exitosamente.",
+        variant: "success",
+      });
+      // Optionally, you could reset the view here
+      // handleBack();
+    } catch (error) {
+      toast({
+        title: "Error al Guardar",
+        description: "No se pudieron guardar las calificaciones. Intente de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const UploadDialog = () => {
     const [selectedClass, setSelectedClass] = useState('');
     const [selectedSection, setSelectedSection] = useState('');
@@ -288,9 +313,9 @@ export default function TeacherQualificationsPage() {
                 </Table>
               </CardContent>
               <CardFooter className="flex justify-end pt-4 mt-4 border-t">
-                <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold">
-                  <Save className="mr-2 h-4 w-4" />
-                  Guardar Calificaciones
+                <Button onClick={handleSaveGrades} disabled={isSaving} className="bg-green-600 hover:bg-green-700 text-white font-semibold">
+                  {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                  {isSaving ? "Guardando..." : "Guardar Calificaciones"}
                 </Button>
               </CardFooter>
             </Card>
