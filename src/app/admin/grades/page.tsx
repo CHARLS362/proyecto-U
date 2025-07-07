@@ -29,6 +29,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function GradesPage() {
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedSubject, setSelectedSubject] = useState('');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -55,6 +59,23 @@ export default function GradesPage() {
     { id: 3, name: "Matemáticas" },
     { id: 4, name: "Ciencias" },
     { id: 5, name: "Comercio" },
+  ];
+
+  const primaryGrades = [
+    { value: '1-pri', label: '1º de Primaria' },
+    { value: '2-pri', label: '2º de Primaria' },
+    { value: '3-pri', label: '3º de Primaria' },
+    { value: '4-pri', label: '4º de Primaria' },
+    { value: '5-pri', label: '5º de Primaria' },
+    { value: '6-pri', label: '6º de Primaria' },
+  ];
+
+  const secondaryGrades = [
+    { value: '1-sec', label: '1º de Secundaria' },
+    { value: '2-sec', label: '2º de Secundaria' },
+    { value: '3-sec', label: '3º de Secundaria' },
+    { value: '4-sec', label: '4º de Secundaria' },
+    { value: '5-sec', label: '5º de Secundaria' },
   ];
 
   return (
@@ -134,23 +155,55 @@ export default function GradesPage() {
       <Separator />
 
       <div className="space-y-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-        <div className="flex items-end gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-end">
           <div className="grid gap-2">
-            <Label htmlFor="class">Clase</Label>
-            <Select defaultValue="12-comercio">
-              <SelectTrigger id="class" className="w-[240px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                <SelectItem value="10-arte">10 (Arte)</SelectItem>
-              </SelectContent>
+            <Label htmlFor="level-select">Nivel</Label>
+            <Select value={selectedLevel} onValueChange={(value) => {
+                setSelectedLevel(value);
+                setSelectedGrade('');
+            }}>
+                <SelectTrigger id="level-select"><SelectValue placeholder="-- Nivel --"/></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="primaria">Primaria</SelectItem>
+                    <SelectItem value="secundaria">Secundaria</SelectItem>
+                </SelectContent>
             </Select>
           </div>
-          <Button>
-            <Search className="mr-2 h-4 w-4" />
-            Encontrar
+          <div className="grid gap-2">
+            <Label htmlFor="grade-select">Grado</Label>
+            <Select value={selectedGrade} onValueChange={setSelectedGrade} disabled={!selectedLevel}>
+                <SelectTrigger id="grade-select"><SelectValue placeholder={!selectedLevel ? "Seleccione nivel" : "-- Grado --"} /></SelectTrigger>
+                <SelectContent>
+                    {selectedLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                    {selectedLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="section-select">Sección</Label>
+            <Select value={selectedSection} onValueChange={setSelectedSection}>
+                <SelectTrigger id="section-select"><SelectValue placeholder="-- Sección --"/></SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="A">A</SelectItem>
+                    <SelectItem value="B">B</SelectItem>
+                    <SelectItem value="C">C</SelectItem>
+                </SelectContent>
+            </Select>
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="subject-filter">Asignatura</Label>
+            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+                <SelectTrigger id="subject-filter"><SelectValue placeholder="-- Asignatura --"/></SelectTrigger>
+                <SelectContent>
+                    {subjects.map((subject) => (
+                        <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+          </div>
+          <Button className="w-full lg:w-auto">
+              <Search className="mr-2 h-4 w-4" />
+              Encontrar
           </Button>
         </div>
 
