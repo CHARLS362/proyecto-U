@@ -110,6 +110,24 @@ const daysOfWeek = [
   { key: 'viernes', label: 'VIERNES' },
 ];
 
+const primaryGrades = [
+  { value: '1-pri', label: '1º de Primaria' },
+  { value: '2-pri', label: '2º de Primaria' },
+  { value: '3-pri', label: '3º de Primaria' },
+  { value: '4-pri', label: '4º de Primaria' },
+  { value: '5-pri', label: '5º de Primaria' },
+  { value: '6-pri', label: '6º de Primaria' },
+];
+
+const secondaryGrades = [
+  { value: '1-sec', label: '1º de Secundaria' },
+  { value: '2-sec', label: '2º de Secundaria' },
+  { value: '3-sec', label: '3º de Secundaria' },
+  { value: '4-sec', label: '4º de Secundaria' },
+  { value: '5-sec', label: '5º de Secundaria' },
+];
+
+
 export default function SchedulePage() {
   const [showSchedule, setShowSchedule] = useState(false);
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
@@ -117,8 +135,15 @@ export default function SchedulePage() {
   const [schedules, setSchedules] = useState(initialScheduleData);
   const [tempSchedules, setTempSchedules] = useState(initialScheduleData);
 
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+
+  const [displayFilters, setDisplayFilters] = useState({ grade: '', section: '' });
+
   const handleFind = () => {
     setShowSchedule(true);
+    setDisplayFilters({ grade: selectedGrade, section: selectedSection });
   };
   
   const handleEdit = () => {
@@ -160,6 +185,8 @@ export default function SchedulePage() {
   const currentDayKey = daysOfWeek[selectedDayIndex].key;
   const currentSchedule = (isEditing ? tempSchedules[currentDayKey] : schedules[currentDayKey]) || [];
 
+  const gradeLabel = [...primaryGrades, ...secondaryGrades].find(g => g.value === displayFilters.grade)?.label;
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div>
@@ -180,23 +207,37 @@ export default function SchedulePage() {
         <CardContent>
           <div className="flex flex-wrap items-end gap-4">
             <div className="grid gap-1.5 flex-grow sm:flex-grow-0">
-              <Label htmlFor="class">Clase</Label>
-              <Select defaultValue="12-comercio" disabled={isEditing}>
-                <SelectTrigger id="class" className="w-full sm:w-[200px]">
-                  <SelectValue />
+              <Label htmlFor="level">Nivel</Label>
+              <Select value={selectedLevel} onValueChange={(value) => {
+                  setSelectedLevel(value);
+                  setSelectedGrade('');
+              }} disabled={isEditing}>
+                <SelectTrigger id="level" className="w-full sm:w-[200px]">
+                  <SelectValue placeholder="-- Nivel --" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                  <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                  <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                  <SelectItem value="primaria">Primaria</SelectItem>
+                  <SelectItem value="secundaria">Secundaria</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-1.5 flex-grow sm:flex-grow-0">
+              <Label htmlFor="grade">Grado</Label>
+              <Select value={selectedGrade} onValueChange={setSelectedGrade} disabled={isEditing || !selectedLevel}>
+                <SelectTrigger id="grade" className="w-full sm:w-[200px]">
+                  <SelectValue placeholder={!selectedLevel ? "Seleccione un nivel" : "-- Grado --"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                  {selectedLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-1.5 flex-grow sm:flex-grow-0">
               <Label htmlFor="section">Sección</Label>
-              <Select defaultValue="A" disabled={isEditing}>
+              <Select value={selectedSection} onValueChange={setSelectedSection} disabled={isEditing}>
                 <SelectTrigger id="section" className="w-full sm:w-[200px]">
-                  <SelectValue />
+                  <SelectValue placeholder="-- Sección --" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="A">A</SelectItem>
@@ -205,7 +246,7 @@ export default function SchedulePage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button className="w-full sm:w-auto" onClick={handleFind} disabled={isEditing}>
+            <Button className="w-full sm:w-auto" onClick={handleFind} disabled={isEditing || !selectedGrade || !selectedSection}>
               <Search className="mr-2 h-4 w-4" />
               Encontrar
             </Button>
@@ -216,7 +257,9 @@ export default function SchedulePage() {
       {showSchedule && (
         <Card className="shadow-lg animate-fade-in" style={{ animationDelay: '200ms' }}>
           <CardHeader>
-            <Badge className="w-fit text-base font-semibold px-4 py-1.5 bg-muted text-muted-foreground hover:bg-muted">Clase 12c A</Badge>
+            <Badge className="w-fit text-base font-semibold px-4 py-1.5 bg-muted text-muted-foreground hover:bg-muted">
+              {gradeLabel ? `${gradeLabel} - Sección ${displayFilters.section}` : 'Horario'}
+            </Badge>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between border rounded-md p-1 bg-muted/50 mb-6">
