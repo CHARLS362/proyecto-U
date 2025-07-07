@@ -53,6 +53,7 @@ export default function TeacherStudentsPage() {
   
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Encuentra los cursos que enseña el docente logueado
@@ -98,7 +99,9 @@ export default function TeacherStudentsPage() {
     if (selectedSection !== 'all') {
       students = students.filter(s => s.section === selectedSection);
     }
-
+    if (selectedCourse !== 'all') {
+      students = students.filter(student => student.courses.some(course => course.id === selectedCourse));
+    }
     if (searchTerm) {
       students = students.filter(s => 
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -130,7 +133,7 @@ export default function TeacherStudentsPage() {
           <CardDescription>Seleccione una clase y sección para ver la lista de estudiantes.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
             <div className="grid gap-2">
               <Label htmlFor="class">Clase</Label>
                <Select value={selectedClass} onValueChange={setSelectedClass}>
@@ -156,6 +159,20 @@ export default function TeacherStudentsPage() {
                   <SelectItem value="A">A</SelectItem>
                   <SelectItem value="B">B</SelectItem>
                   <SelectItem value="C">C</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="course">Curso</Label>
+              <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                <SelectTrigger id="course">
+                  <SelectValue placeholder="Seleccionar Curso" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos mis cursos</SelectItem>
+                  {teacherCourses.map(course => (
+                    <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
