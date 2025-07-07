@@ -41,8 +41,7 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PageTitle } from '@/components/common/PageTitle';
-import { mockStudents } from '@/lib/mockData';
-import type { Student } from '@/lib/mockData';
+import { mockStudents, mockCourses, type Student } from '@/lib/mockData';
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -135,6 +134,23 @@ const defaultValues: Partial<StudentFormValues> = {
   guardianDob: "",
 };
 
+const primaryGrades = [
+  { value: '1-pri', label: '1º de Primaria' },
+  { value: '2-pri', label: '2º de Primaria' },
+  { value: '3-pri', label: '3º de Primaria' },
+  { value: '4-pri', label: '4º de Primaria' },
+  { value: '5-pri', label: '5º de Primaria' },
+  { value: '6-pri', label: '6º de Primaria' },
+];
+
+const secondaryGrades = [
+  { value: '1-sec', label: '1º de Secundaria' },
+  { value: '2-sec', label: '2º de Secundaria' },
+  { value: '3-sec', label: '3º de Secundaria' },
+  { value: '4-sec', label: '4º de Secundaria' },
+  { value: '5-sec', label: '5º de Secundaria' },
+];
+
 
 export default function StudentsPage() {
   const router = useRouter();
@@ -142,6 +158,11 @@ export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>(mockStudents);
   const [searchTerm, setSearchTerm] = useState('');
   
+  const [selectedLevel, setSelectedLevel] = useState('');
+  const [selectedGrade, setSelectedGrade] = useState('');
+  const [selectedSection, setSelectedSection] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState('');
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [currentStudentId, setCurrentStudentId] = useState<string | null>(null);
@@ -447,36 +468,63 @@ export default function StudentsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                 <div className="grid gap-2">
-                  <Label htmlFor="class">Clase</Label>
-                   <Select>
-                    <SelectTrigger id="class">
-                      <SelectValue placeholder="Seleccionar Clase" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="3-sec">3º de Secundaria</SelectItem>
-                        <SelectItem value="4-sec">4º de Secundaria</SelectItem>
-                        <SelectItem value="5-sec">5º de Secundaria</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Label htmlFor="level">Nivel</Label>
+                    <Select value={selectedLevel} onValueChange={(value) => {
+                        setSelectedLevel(value);
+                        setSelectedGrade('');
+                    }}>
+                        <SelectTrigger id="level">
+                            <SelectValue placeholder="Seleccionar Nivel" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="primaria">Primaria</SelectItem>
+                            <SelectItem value="secundaria">Secundaria</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="section">Sección</Label>
-                  <Select>
-                    <SelectTrigger id="section">
-                      <SelectValue placeholder="Seleccionar Sección" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="A">A</SelectItem>
-                      <SelectItem value="B">B</SelectItem>
-                      <SelectItem value="C">C</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Label htmlFor="grade">Grado</Label>
+                    <Select value={selectedGrade} onValueChange={setSelectedGrade} disabled={!selectedLevel}>
+                        <SelectTrigger id="grade">
+                            <SelectValue placeholder={!selectedLevel ? "Seleccione un nivel" : "Seleccionar Grado"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {selectedLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                            {selectedLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                 </div>
-                <Button className="w-full md:w-auto">
-                  <SearchIcon className="mr-2 h-4 w-4" />
-                  Encontrar
+                <div className="grid gap-2">
+                    <Label htmlFor="section">Sección</Label>
+                    <Select value={selectedSection} onValueChange={setSelectedSection}>
+                        <SelectTrigger id="section">
+                            <SelectValue placeholder="Seleccionar Sección" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="A">A</SelectItem>
+                            <SelectItem value="B">B</SelectItem>
+                            <SelectItem value="C">C</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="course">Curso</Label>
+                    <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                        <SelectTrigger id="course">
+                            <SelectValue placeholder="Seleccionar Curso" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {mockCourses.map(course => (
+                                <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Button className="w-full lg:w-auto">
+                    <SearchIcon className="mr-2 h-4 w-4" />
+                    Encontrar
                 </Button>
               </div>
             </CardContent>
