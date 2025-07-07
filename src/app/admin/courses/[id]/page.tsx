@@ -1,7 +1,7 @@
 
 import { PageTitle } from "@/components/common/PageTitle";
 import { mockCourses, mockStudents } from "@/lib/mockData";
-import { BookOpenText, Users, Clock, CalendarDays, BarChart, UserCircle, Edit, Trash2, User, ChevronLeft, ListOrdered } from "lucide-react";
+import { BookOpenText, Users, Clock, CalendarDays, BarChart, UserCircle, Edit, Trash2, User, ChevronLeft, ListOrdered, School } from "lucide-react";
 import Link from "next/link";
 import { notFound } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +62,11 @@ export default async function CourseProfilePage({ params }: { params: { id: stri
                 <CardContent className="space-y-4 text-sm">
                     <p className="text-muted-foreground">{course.description}</p>
                     <Separator />
+                     <div className="flex items-center gap-3">
+                        <School className="h-5 w-5 text-primary"/>
+                        <span className="font-medium">Nivel:</span>
+                        <span>{course.level}</span>
+                    </div>
                     <div className="flex items-center gap-3">
                         <UserCircle className="h-5 w-5 text-primary"/>
                         <span className="font-medium">Instructor:</span>
@@ -76,11 +81,6 @@ export default async function CourseProfilePage({ params }: { params: { id: stri
                         <Clock className="h-5 w-5 text-primary"/>
                         <span className="font-medium">Horario:</span>
                         <span>{course.schedule}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                        <BarChart className="h-5 w-5 text-primary"/>
-                        <span className="font-medium">Capacidad:</span>
-                        <Badge variant="secondary">{course.enrolledStudentsCount} / {course.capacity}</Badge>
                     </div>
                 </CardContent>
             </Card>

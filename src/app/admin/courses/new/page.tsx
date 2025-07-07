@@ -26,7 +26,6 @@ const courseFormSchema = z.object({
   section: z.string({ required_error: "Debe seleccionar una sección." }).min(1, "Debe seleccionar una sección."),
   instructorId: z.string({ required_error: "Debe seleccionar un instructor." }).min(1, "Debe seleccionar un instructor."),
   department: z.string().min(3, "El departamento es obligatorio."),
-  capacity: z.coerce.number().min(1, "La capacidad debe ser al menos 1.").max(100, "La capacidad no puede exceder 100."),
   schedule: z.string().min(5, "El horario es obligatorio."),
 });
 
@@ -64,7 +63,6 @@ export default function NewCoursePage() {
       section: "",
       instructorId: "",
       department: "",
-      capacity: 25,
       schedule: "",
     },
   });
@@ -136,8 +134,8 @@ export default function NewCoursePage() {
                         }} value={field.value}>
                             <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar Nivel --" /></SelectTrigger></FormControl>
                             <SelectContent>
-                                <SelectItem value="primaria">Primaria</SelectItem>
-                                <SelectItem value="secundaria">Secundaria</SelectItem>
+                                <SelectItem value="Primaria">Primaria</SelectItem>
+                                <SelectItem value="Secundaria">Secundaria</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
@@ -149,10 +147,10 @@ export default function NewCoursePage() {
                         <Select onValueChange={field.onChange} value={field.value} disabled={!selectedLevel}>
                             <FormControl><SelectTrigger><SelectValue placeholder={!selectedLevel ? "Seleccione un nivel primero" : "-- Seleccionar Grado --"} /></SelectTrigger></FormControl>
                             <SelectContent>
-                                {selectedLevel === 'primaria' && primaryGrades.map(grade => (
+                                {selectedLevel === 'Primaria' && primaryGrades.map(grade => (
                                     <SelectItem key={grade.value} value={grade.value}>{grade.label}</SelectItem>
                                 ))}
-                                {selectedLevel === 'secundaria' && secondaryGrades.map(grade => (
+                                {selectedLevel === 'Secundaria' && secondaryGrades.map(grade => (
                                     <SelectItem key={grade.value} value={grade.value}>{grade.label}</SelectItem>
                                 ))}
                             </SelectContent>
@@ -202,22 +200,13 @@ export default function NewCoursePage() {
                 )} />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField control={form.control} name="capacity" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Capacidad</FormLabel>
-                        <FormControl><Input type="number" min="1" {...field} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="schedule" render={({ field }) => (
+               <FormField control={form.control} name="schedule" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Horario</FormLabel>
                     <FormControl><Input placeholder="Ej: Lu, Mi 10-11:30" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
-              </div>
 
             </CardContent>
             <CardContent className="flex justify-end gap-2 pt-4 border-t">

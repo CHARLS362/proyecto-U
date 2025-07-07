@@ -36,9 +36,8 @@ export interface Course {
   instructor: string;
   instructorId?: string;
   instructorAvatar?: string;
-  enrolledStudentsCount: number;
-  capacity: number;
   department: string;
+  level: "Primaria" | "Secundaria" | "Ambos";
   syllabusUrl?: string;
   classId?: string;
 }
@@ -151,16 +150,16 @@ export interface Teacher {
   refRelationship?: string;
 }
 
-export interface GradeScore {
-    studentId: string;
-    studentName: string;
-    scores: (number | null)[];
-}
-
 export interface GradesReport {
     className: string;
     subjects: string[];
     grades: GradeScore[];
+}
+
+export interface GradeScore {
+    studentId: string;
+    studentName: string;
+    scores: (number | null)[];
 }
 
 export const mockStudents: Student[] = [
@@ -313,9 +312,8 @@ export const mockCourses: Course[] = [
     instructor: "Dr. Eduardo López",
     instructorId: "T1749005331", 
     instructorAvatar: "https://placehold.co/40x40.png",
-    enrolledStudentsCount: 25,
-    capacity: 30,
     department: "Matemáticas",
+    level: "Secundaria",
     syllabusUrl: "/syllabi/MAT501.pdf",
     classId: "5-sec",
   },
@@ -328,9 +326,8 @@ export const mockCourses: Course[] = [
     instructor: "Prof. Isabel Vargas",
     instructorId: "T1749005332",
     instructorAvatar: "https://placehold.co/40x40.png",
-    enrolledStudentsCount: 18,
-    capacity: 25,
     department: "Humanidades",
+    level: "Secundaria",
     syllabusUrl: "/syllabi/HIS301.pdf",
     classId: "3-sec",
   },
@@ -343,9 +340,8 @@ export const mockCourses: Course[] = [
     instructor: "Ing. Ricardo Montes",
     instructorId: "T1749005333",
     instructorAvatar: "https://placehold.co/40x40.png",
-    enrolledStudentsCount: 30,
-    capacity: 30,
     department: "Tecnología",
+    level: "Secundaria",
     syllabusUrl: "/syllabi/CS401.pdf",
     classId: "4-sec",
   },
@@ -358,11 +354,24 @@ export const mockCourses: Course[] = [
     instructor: "Dra. Isabel Vargas",
     instructorId: "T1749005332",
     instructorAvatar: "https://placehold.co/40x40.png",
-    enrolledStudentsCount: 22,
-    capacity: 25,
     department: "Ciencias Naturales",
+    level: "Secundaria",
     syllabusUrl: "/syllabi/QUM401.pdf",
     classId: "4-sec",
+  },
+  {
+    id: "C005",
+    code: "ART101",
+    name: "Arte y Cultura",
+    description: "Exploración de diversas manifestaciones artísticas.",
+    schedule: "Vie 11:00-12:30",
+    instructor: "Sra. Carmen Ríos",
+    instructorId: "T1749005332",
+    instructorAvatar: "https://placehold.co/40x40.png",
+    department: "Artes",
+    level: "Primaria",
+    syllabusUrl: "/syllabi/ART101.pdf",
+    classId: "5-pri",
   },
 ];
 
