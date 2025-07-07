@@ -42,7 +42,6 @@ const navItems = [
   { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
   { href: '/admin/grades', label: 'Notas', icon: NotebookText },
   { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
-  { href: '/admin/bus-service', label: 'Servicio de Bus', icon: Bus },
 ];
 
 const bottomNavItems = [
