@@ -27,6 +27,7 @@ import {
   User,
   GraduationCap,
   Loader2,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { mockCourses, mockTeachers, mockNotices, type Notice } from '@/lib/mockData';
@@ -40,6 +41,9 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 
@@ -61,6 +65,10 @@ export default function NewsPage() {
 
   const [notices, setNotices] = useState<Notice[]>(mockNotices);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Edit Modal State
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingNotice, setEditingNotice] = useState<Notice | null>(null);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -99,15 +107,10 @@ export default function NewsPage() {
     if (form) form.reset();
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    console.log({
-        title, body, importance, fileName, sendTo,
-        targetLevel, targetGrade, targetCourse, targetTeacher
-    });
-
     const newNotice: Notice = {
       id: `N${Date.now()}`,
       title,
@@ -137,8 +140,67 @@ export default function NewsPage() {
       setIsSubmitting(false);
     }
   };
+  
+  const handleOpenEditModal = (notice: Notice) => {
+    setEditingNotice(notice);
+    setTitle(notice.title);
+    setBody(notice.body || '');
+    setImportance(notice.status);
+    setFileName(notice.file?.name || 'Ningún archivo seleccionado');
+    // For simplicity, targeting options are reset on edit.
+    // A real app would need logic to pre-fill these.
+    setSendTo('all');
+    setTargetLevel('');
+    setTargetGrade('');
+    setTargetCourse('');
+    setTargetTeacher('');
+    setIsEditModalOpen(true);
+  };
+  
+  const handleUpdateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!editingNotice) return;
+    setIsSubmitting(true);
+
+    const updatedNoticeData: Notice = {
+      ...editingNotice,
+      title,
+      body,
+      status: importance as any,
+      file: fileName !== 'Ningún archivo seleccionado' ? { name: fileName, size: editingNotice.file?.size || 'N/A', type: editingNotice.file?.type || 'N/A' } : undefined,
+    };
+
+    try {
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        setNotices(prev => prev.map(n => n.id === editingNotice.id ? updatedNoticeData : n));
+        toast({
+            title: "Aviso Actualizado",
+            description: `El aviso "${title}" se ha actualizado.`,
+            variant: "success",
+        });
+        setIsEditModalOpen(false);
+        setEditingNotice(null);
+    } catch(error) {
+        toast({
+            title: "Error al Actualizar",
+            description: "No se pudo guardar los cambios.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
 
   const handleActionClick = (action: string, noticeTitle: string) => {
+    if (action === "Eliminar") {
+        setNotices(prev => prev.filter(n => n.title !== noticeTitle));
+        toast({
+            title: `Acción: ${action}`,
+            description: `Se ha ejecutado "${action}" en el aviso "${noticeTitle}".`,
+            variant: "success",
+        });
+        return;
+    }
     toast({
       title: `Acción: ${action}`,
       description: `Se ha ejecutado "${action}" en el aviso "${noticeTitle}".`,
@@ -187,7 +249,7 @@ export default function NewsPage() {
               </Button>
             </CardHeader>
             <Separator />
-            <form id="create-notice-form" onSubmit={handleSubmit}>
+            <form id="create-notice-form" onSubmit={handleCreateSubmit}>
               <CardContent className="pt-6 space-y-6">
                 
                 <div className="grid gap-3 p-4 border rounded-lg bg-muted/30">
@@ -344,7 +406,7 @@ export default function NewsPage() {
                              )}
                           </div>
                           <div className="flex items-center">
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-600 hover:text-blue-700" onClick={() => handleActionClick('Editar', notice.title)}>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-600 hover:text-blue-700" onClick={() => handleOpenEditModal(notice)}>
                               <Edit className="h-4 w-4" />
                             </Button>
                             <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80" onClick={() => handleActionClick('Eliminar', notice.title)}>
@@ -353,31 +415,33 @@ export default function NewsPage() {
                           </div>
                         </CardFooter>
                       </Card>
-                      <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none p-0">
-                        <Card className="flex flex-col justify-between shadow-lg bg-card rounded-lg overflow-hidden">
-                          <CardHeader className="p-4">
+                      <DialogContent className="p-0 sm:max-w-2xl bg-card border-none overflow-hidden rounded-lg">
+                        <div className="relative p-8">
                             <div className="flex justify-between items-start">
-                              <div>
-                                <CardTitle className="text-sm font-bold uppercase tracking-wider">{notice.title}</CardTitle>
-                                <CardDescription className="text-xs mt-1">
-                                  {new Date(notice.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                </CardDescription>
-                              </div>
-                              <span className={`h-3 w-3 rounded-full ${importanceColors[notice.status]}`}></span>
+                                <div className="font-bold text-xl tracking-wider flex items-center gap-1">
+                                    <span style={{ color: '#00A1B4' }}>PRO</span>
+                                    <span style={{ color: '#E30613' }}>NA</span>
+                                    <span style={{ color: '#FFD200' }}>BEC</span>
+                                </div>
+                                <ArrowUpRight className="h-10 w-10 text-blue-600 -rotate-45 absolute top-4 right-4 opacity-50" />
                             </div>
-                          </CardHeader>
-                          <CardContent className="px-4 pb-4 flex-grow">
-                            <p className="text-sm text-muted-foreground">{notice.body}</p>
-                          </CardContent>
-                           {notice.file && (
-                            <CardFooter className="p-2 bg-muted/50 border-t flex justify-between items-center">
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                  <Download className="h-4 w-4"/>
-                                  <span>{notice.file.name} ({notice.file.size || 'N/A'})</span>
-                              </div>
-                            </CardFooter>
-                          )}
-                        </Card>
+                            <div className="mt-8 text-center space-y-4">
+                                <h2 className="text-3xl font-bold mb-4" style={{ color: '#EC008C'}}>¡{notice.title}!</h2>
+                                <p className="text-muted-foreground text-lg text-left">
+                                    {notice.body}
+                                </p>
+                                <p className="text-muted-foreground text-lg mt-4 text-left">
+                                  La información que nos brindes nos permitirá estar en contacto contigo en cualquier momento, como becario o becaria de Sofía Educa.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="h-2.5 w-full flex">
+                            <div className="w-1/5" style={{ backgroundColor: '#00A1B4' }}></div>
+                            <div className="w-1/5" style={{ backgroundColor: '#8DC63F' }}></div>
+                            <div className="w-1/5" style={{ backgroundColor: '#FFD200' }}></div>
+                            <div className="w-1/5" style={{ backgroundColor: '#F7941E' }}></div>
+                            <div className="w-1/5" style={{ backgroundColor: '#E30613' }}></div>
+                        </div>
                       </DialogContent>
                     </Dialog>
                   ))}
@@ -398,6 +462,76 @@ export default function NewsPage() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-xl">
+            <DialogHeader>
+                <DialogTitle>Editar Aviso</DialogTitle>
+                <DialogDescription>Modifique los detalles del aviso y guarde los cambios.</DialogDescription>
+            </DialogHeader>
+            <form id="edit-notice-form" onSubmit={handleUpdateSubmit} className="max-h-[70vh] overflow-y-auto px-1">
+              <div className="pt-6 space-y-6">
+                <div className="grid gap-3 p-4 border rounded-lg bg-muted/30">
+                  <Label className="font-semibold text-foreground">Enviar a:</Label>
+                  <RadioGroup value={sendTo} onValueChange={setSendTo} className="flex flex-wrap items-center gap-x-6 gap-y-4" disabled={isSubmitting}>
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="all" id="edit-send-to-all" /><Label htmlFor="edit-send-to-all" className="flex items-center gap-2"><Users className="h-4 w-4" /> Todos</Label></div>
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="level" id="edit-send-to-level" /><Label htmlFor="edit-send-to-level" className="flex items-center gap-2"><GraduationCap className="h-4 w-4" /> Nivel específico</Label></div>
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="course" id="edit-send-to-course" /><Label htmlFor="edit-send-to-course" className="flex items-center gap-2"><BookOpenText className="h-4 w-4" /> Curso específico</Label></div>
+                      <div className="flex items-center space-x-2"><RadioGroupItem value="teacher" id="edit-send-to-teacher" /><Label htmlFor="edit-send-to-teacher" className="flex items-center gap-2"><User className="h-4 w-4" /> Docente específico</Label></div>
+                  </RadioGroup>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-aviso-titulo">Título del aviso</Label>
+                  <Input id="edit-aviso-titulo" required value={title} onChange={e => setTitle(e.target.value)} disabled={isSubmitting} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-aviso-cuerpo">Cuerpo del aviso</Label>
+                  <Textarea id="edit-aviso-cuerpo" required value={body} onChange={e => setBody(e.target.value)} disabled={isSubmitting} />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-aviso-archivo">Cualquier archivo</Label>
+                  <div className="flex items-center gap-2">
+                    <Input id="edit-aviso-archivo" type="file" className="hidden" onChange={handleFileChange} disabled={isSubmitting} />
+                    <Button asChild variant="outline" className="shrink-0" disabled={isSubmitting}>
+                      <Label htmlFor="edit-aviso-archivo" className="cursor-pointer font-normal">Seleccionar archivo</Label>
+                    </Button>
+                    <span className="text-sm text-muted-foreground truncate">{fileName}</span>
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Importancia</Label>
+                  <RadioGroup value={importance} onValueChange={setImportance} className="flex items-center gap-4" disabled={isSubmitting}>
+                     <Label htmlFor="edit-importance-green" className="cursor-pointer">
+                      <RadioGroupItem value="normal" id="edit-importance-green" className="peer sr-only" />
+                      <div className="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center ring-2 ring-transparent peer-data-[state=checked]:ring-primary">
+                        {importance === 'normal' && <Check className="h-4 w-4 text-white" />}
+                      </div>
+                    </Label>
+                    <Label htmlFor="edit-importance-yellow" className="cursor-pointer">
+                      <RadioGroupItem value="warning" id="edit-importance-yellow" className="peer sr-only" />
+                      <div className="h-6 w-6 rounded-full bg-yellow-500 flex items-center justify-center ring-2 ring-transparent peer-data-[state=checked]:ring-primary">
+                        {importance === 'warning' && <Check className="h-4 w-4 text-white" />}
+                      </div>
+                    </Label>
+                    <Label htmlFor="edit-importance-red" className="cursor-pointer">
+                      <RadioGroupItem value="urgente" id="edit-importance-red" className="peer sr-only" />
+                      <div className="h-6 w-6 rounded-full bg-red-500 flex items-center justify-center ring-2 ring-transparent peer-data-[state=checked]:ring-primary">
+                        {importance === 'urgente' && <Check className="h-4 w-4 text-white" />}
+                      </div>
+                    </Label>
+                  </RadioGroup>
+                </div>
+              </div>
+               <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                  <Button variant="outline" type="button" onClick={() => setIsEditModalOpen(false)} disabled={isSubmitting}>Cancelar</Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Guardar Cambios
+                  </Button>
+              </CardFooter>
+            </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
