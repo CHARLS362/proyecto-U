@@ -37,6 +37,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const primaryGrades = [
   { value: '1-pri', label: '1º de Primaria' }, { value: '2-pri', label: '2º de Primaria' },
@@ -146,7 +151,8 @@ export default function NewsPage() {
     media: 'bg-yellow-500',
     alta: 'bg-red-500',
     urgente: 'bg-red-500',
-    informativo: 'bg-blue-500'
+    informativo: 'bg-blue-500',
+    warning: 'bg-yellow-500',
   };
 
   const availableCourses = useMemo(() => {
@@ -305,34 +311,75 @@ export default function NewsPage() {
               {notices.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {notices.map((notice) => (
-                    <Card key={notice.id} className="flex flex-col justify-between shadow-md hover:shadow-lg transition-shadow bg-muted/20 rounded-lg">
-                      <CardHeader className="p-4 flex flex-row justify-between items-start">
-                        <div>
-                          <CardTitle className="text-base font-medium text-foreground">{notice.title}</CardTitle>
-                          <CardDescription className="text-xs">{new Date(notice.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</CardDescription>
-                        </div>
-                        <span className={`mt-1 h-3.5 w-3.5 rounded-full ${importanceColors[notice.status]}`}></span>
-                      </CardHeader>
-                      <CardContent className="px-4 pb-4 flex-grow">
-                        <p className="text-sm text-foreground font-medium">{notice.body}</p>
-                      </CardContent>
-                      {notice.file && (
-                        <>
-                          <Separator />
-                          <CardFooter className="p-2 flex justify-between items-center">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleActionClick('Ver', notice.title)}><Eye className="h-4 w-4"/></Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleActionClick('Descargar', notice.title)}><Download className="h-4 w-4"/></Button>
-                              <span>{`${notice.file.size || 'N/A'}`}</span>
+                    <Dialog key={notice.id}>
+                      <Card className="flex flex-col justify-between shadow-md hover:shadow-xl transition-shadow bg-card rounded-lg overflow-hidden">
+                        <CardHeader className="p-4">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-sm font-bold uppercase tracking-wider">{notice.title}</CardTitle>
+                              <CardDescription className="text-xs mt-1">
+                                {new Date(notice.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              </CardDescription>
                             </div>
-                            <div className="flex items-center">
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-green-600 hover:text-green-700" onClick={() => handleActionClick('Editar', notice.title)}><Edit className="h-4 w-4"/></Button>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80" onClick={() => handleActionClick('Eliminar', notice.title)}><Trash2 className="h-4 w-4"/></Button>
+                            <span className={`h-3 w-3 rounded-full flex-shrink-0 ${importanceColors[notice.status]}`}></span>
+                          </div>
+                        </CardHeader>
+                        <CardContent className="px-4 pb-4 flex-grow">
+                          <p className="text-sm text-muted-foreground">{notice.body}</p>
+                        </CardContent>
+                        <CardFooter className="p-2 bg-muted/50 border-t flex justify-between items-center">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <DialogTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7">
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                            </DialogTrigger>
+                             {notice.file && (
+                                <>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleActionClick('Descargar', notice.title)}>
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                                <span>{notice.file.size || 'N/A'}</span>
+                                </>
+                             )}
+                          </div>
+                          <div className="flex items-center">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-600 hover:text-blue-700" onClick={() => handleActionClick('Editar', notice.title)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive/80" onClick={() => handleActionClick('Eliminar', notice.title)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </CardFooter>
+                      </Card>
+                      <DialogContent className="sm:max-w-md bg-transparent border-none shadow-none p-0">
+                        <Card className="flex flex-col justify-between shadow-lg bg-card rounded-lg overflow-hidden">
+                          <CardHeader className="p-4">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <CardTitle className="text-sm font-bold uppercase tracking-wider">{notice.title}</CardTitle>
+                                <CardDescription className="text-xs mt-1">
+                                  {new Date(notice.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                </CardDescription>
+                              </div>
+                              <span className={`h-3 w-3 rounded-full ${importanceColors[notice.status]}`}></span>
                             </div>
-                          </CardFooter>
-                        </>
-                      )}
-                    </Card>
+                          </CardHeader>
+                          <CardContent className="px-4 pb-4 flex-grow">
+                            <p className="text-sm text-muted-foreground">{notice.body}</p>
+                          </CardContent>
+                           {notice.file && (
+                            <CardFooter className="p-2 bg-muted/50 border-t flex justify-between items-center">
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                  <Download className="h-4 w-4"/>
+                                  <span>{notice.file.name} ({notice.file.size || 'N/A'})</span>
+                              </div>
+                            </CardFooter>
+                          )}
+                        </Card>
+                      </DialogContent>
+                    </Dialog>
                   ))}
                 </div>
               ) : (
@@ -354,4 +401,3 @@ export default function NewsPage() {
     </div>
   );
 }
-
