@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PageTitle } from "@/components/common/PageTitle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
@@ -49,9 +49,13 @@ export default function TeacherNewsPage() {
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
 
-  // New state for targeting the notice
+  // Targeting state
   const [sendTo, setSendTo] = useState('all');
+  // for sending to a specific student
+  const [selectedClassForStudent, setSelectedClassForStudent] = useState('');
+  const [selectedSectionForStudent, setSelectedSectionForStudent] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState('');
+  // for sending to a specific class
   const [selectedClassId, setSelectedClassId] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
 
@@ -75,6 +79,25 @@ export default function TeacherNewsPage() {
     const classSet = new Set(teacherCourses.map(c => c.classId || ''));
     return Array.from(classSet).filter(Boolean);
   }, [teacherCourses]);
+  
+  const filteredStudentsForSelection = useMemo(() => {
+    if (sendTo !== 'student' || !selectedClassForStudent || !selectedSectionForStudent) {
+      return [];
+    }
+    return studentsOfTeacher.filter(student => 
+      student.classId === selectedClassForStudent && 
+      student.section === selectedSectionForStudent
+    );
+  }, [studentsOfTeacher, selectedClassForStudent, selectedSectionForStudent, sendTo]);
+
+  // Effect to reset filters when 'sendTo' changes
+  useEffect(() => {
+    setSelectedClassId('');
+    setSelectedSection('');
+    setSelectedClassForStudent('');
+    setSelectedSectionForStudent('');
+    setSelectedStudentId('');
+  }, [sendTo]);
 
   const classDisplayMapping: { [key: string]: string } = {
       "5-sec": "5º de Secundaria",
@@ -100,6 +123,8 @@ export default function TeacherNewsPage() {
     setSelectedStudentId('');
     setSelectedClassId('');
     setSelectedSection('');
+    setSelectedClassForStudent('');
+    setSelectedSectionForStudent('');
     const form = document.getElementById('create-notice-form') as HTMLFormElement;
     if (form) form.reset();
   }
@@ -118,6 +143,8 @@ export default function TeacherNewsPage() {
         selectedStudentId,
         selectedClassId,
         selectedSection,
+        selectedClassForStudent,
+        selectedSectionForStudent,
     });
 
     try {
@@ -217,16 +244,48 @@ export default function TeacherNewsPage() {
                   </RadioGroup>
 
                   {sendTo === 'student' && (
-                    <div className="grid gap-2 pt-2 animate-fade-in">
-                      <Label htmlFor="student-select">Seleccionar Estudiante</Label>
-                      <Select onValueChange={setSelectedStudentId} disabled={isSubmitting}>
-                        <SelectTrigger id="student-select"><SelectValue placeholder="-- Seleccionar Estudiante --" /></SelectTrigger>
-                        <SelectContent>
-                          {studentsOfTeacher.map(student => (
-                            <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 animate-fade-in">
+                        <div className="grid gap-2">
+                            <Label htmlFor="class-for-student-select">Seleccionar Grado</Label>
+                            <Select onValueChange={(value) => {
+                                setSelectedClassForStudent(value);
+                                setSelectedStudentId('');
+                            }} value={selectedClassForStudent} disabled={isSubmitting}>
+                                <SelectTrigger id="class-for-student-select"><SelectValue placeholder="-- Grado --" /></SelectTrigger>
+                                <SelectContent>
+                                    {availableClasses.map(classId => (
+                                        <SelectItem key={classId} value={classId}>{classDisplayMapping[classId] || classId}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="section-for-student-select">Seleccionar Sección</Label>
+                            <Select onValueChange={(value) => {
+                                setSelectedSectionForStudent(value);
+                                setSelectedStudentId('');
+                            }} value={selectedSectionForStudent} disabled={isSubmitting}>
+                                <SelectTrigger id="section-for-student-select"><SelectValue placeholder="-- Sección --" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="A">A</SelectItem>
+                                    <SelectItem value="B">B</SelectItem>
+                                    <SelectItem value="C">C</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2 sm:col-span-2">
+                            <Label htmlFor="student-select">Seleccionar Estudiante</Label>
+                            <Select onValueChange={setSelectedStudentId} value={selectedStudentId} disabled={isSubmitting || !selectedClassForStudent || !selectedSectionForStudent}>
+                                <SelectTrigger id="student-select">
+                                    <SelectValue placeholder={!selectedClassForStudent || !selectedSectionForStudent ? "Primero seleccione grado y sección" : "-- Seleccionar Estudiante --"} />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {filteredStudentsForSelection.map(student => (
+                                        <SelectItem key={student.id} value={student.id}>{student.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                   )}
 
