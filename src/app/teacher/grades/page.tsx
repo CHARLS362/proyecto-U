@@ -9,7 +9,8 @@ import {
   Eye, 
   Download, 
   Edit, 
-  Trash2 
+  Trash2,
+  Loader2
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,10 @@ import { useToast } from '@/hooks/use-toast';
 // Simula el ID del docente que ha iniciado sesión
 const LOGGED_IN_TEACHER_ID = "T1749005331";
 
-export default function TeacherGradesPage() {
+const UploadGradesDialog = ({ trigger }: { trigger: React.ReactNode }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const teacherCourses = useMemo(() => {
@@ -59,36 +62,48 @@ export default function TeacherGradesPage() {
     }
   };
 
-  const assignments = [
-    {
-      id: 1,
-      title: 'Tarea de hindi',
-      date: '19 de junio de 2024',
-      status: 'Hazlo a tiempo',
-      statusColor: 'text-green-600 dark:text-green-400',
-      file: { name: 'tarea.png', size: '7 KB' }
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast({
+        title: "Notas Subidas",
+        description: "El archivo de notas ha sido subido y procesado.",
+        variant: "success",
+      });
+      setIsOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error al Subir",
+        description: "No se pudo subir el archivo de notas.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
-  ];
+  };
+  
+  const onOpenChange = (open: boolean) => {
+    if (!open) {
+      setFileName('Ningún archivo seleccionado');
+    }
+    setIsOpen(open);
+  }
 
-  const UploadDialog = () => {
-    const [dialogFileName, setDialogFileName] = useState('Ningún archivo seleccionado');
-    const handleDialogFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files.length > 0) {
-            setDialogFileName(event.target.files[0].name);
-        } else {
-            setDialogFileName('Ningún archivo seleccionado');
-        }
-    };
-    return (
-        <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-            <DialogTitle>Subir notas</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => { if (isSubmitting) e.preventDefault(); }}>
+        <DialogHeader>
+          <DialogTitle>Subir notas</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                 <Label htmlFor="class-upload">Grado</Label>
-                <Select>
+                <Select disabled={isSubmitting}>
                     <SelectTrigger id="class-upload"><SelectValue placeholder="Seleccionar Grado" /></SelectTrigger>
                     <SelectContent>
                         {availableClasses.map(classId => (
@@ -99,7 +114,7 @@ export default function TeacherGradesPage() {
                 </div>
                 <div className="grid gap-2">
                 <Label htmlFor="section-upload">Sección</Label>
-                <Select>
+                <Select disabled={isSubmitting}>
                     <SelectTrigger id="section-upload"><SelectValue placeholder="Sección"/></SelectTrigger>
                     <SelectContent>
                         <SelectItem value="A">A</SelectItem>
@@ -111,7 +126,7 @@ export default function TeacherGradesPage() {
             </div>
              <div className="grid gap-2">
                 <Label htmlFor="subject-upload">Curso</Label>
-                <Select>
+                <Select disabled={isSubmitting}>
                     <SelectTrigger id="subject-upload"><SelectValue placeholder="Seleccionar Curso" /></SelectTrigger>
                     <SelectContent>
                        {teacherCourses.map((course) => (
@@ -122,34 +137,65 @@ export default function TeacherGradesPage() {
                 </div>
             <div className="grid gap-2">
                 <Label htmlFor="title-upload">Título</Label>
-                <Input id="title-upload" />
+                <Input id="title-upload" disabled={isSubmitting}/>
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="comment-upload">Comentario</Label>
-                <Textarea id="comment-upload" />
+                <Textarea id="comment-upload" disabled={isSubmitting}/>
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="file-upload" className="text-sm text-muted-foreground">
                 Subir archivo (tamaño máximo 200 MB)
                 </Label>
                 <div className="flex items-center gap-2">
-                    <Input id="file-upload" type="file" className="hidden" onChange={handleDialogFileChange} />
-                    <Button asChild variant="outline" className="shrink-0">
+                    <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} disabled={isSubmitting}/>
+                    <Button asChild variant="outline" className="shrink-0" disabled={isSubmitting}>
                     <Label htmlFor="file-upload" className="cursor-pointer font-normal">Seleccionar archivo</Label>
                     </Button>
-                    <span className="text-sm text-muted-foreground truncate">{dialogFileName}</span>
+                    <span className="text-sm text-muted-foreground truncate">{fileName}</span>
                 </div>
             </div>
-            </div>
-            <DialogFooter>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Subir
+          </div>
+          <DialogFooter>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white" disabled={isSubmitting || fileName === 'Ningún archivo seleccionado'}>
+              {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+              {isSubmitting ? 'Subiendo...' : 'Subir'}
             </Button>
-            </DialogFooter>
-        </DialogContent>
-    )
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default function TeacherGradesPage() {
+  const { toast } = useToast();
+
+  const teacherCourses = useMemo(() => {
+    return mockCourses.filter(course => course.instructorId === LOGGED_IN_TEACHER_ID);
+  }, []);
+
+  const availableClasses = useMemo(() => {
+    const classSet = new Set(teacherCourses.map(c => c.classId || ''));
+    return Array.from(classSet).filter(Boolean);
+  }, [teacherCourses]);
+
+  const classDisplayMapping: { [key: string]: string } = {
+      "5-sec": "5º de Secundaria",
+      "3-sec": "3º de Secundaria",
+      "4-sec": "4º de Secundaria",
   };
+
+  const assignments = [
+    {
+      id: 1,
+      title: 'Tarea de hindi',
+      date: '19 de junio de 2024',
+      status: 'Hazlo a tiempo',
+      statusColor: 'text-green-600 dark:text-green-400',
+      file: { name: 'tarea.png', size: '7 KB' }
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -158,15 +204,14 @@ export default function TeacherGradesPage() {
           <NotebookText className="h-7 w-7 text-muted-foreground" />
           <h1 className="text-2xl font-semibold text-foreground">Notas</h1>
         </div>
-        <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
-          <DialogTrigger asChild>
+        <UploadGradesDialog 
+          trigger={
             <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
               <UploadCloud className="mr-2 h-4 w-4" />
               Cargar Notas
             </Button>
-          </DialogTrigger>
-          <UploadDialog />
-        </Dialog>
+          }
+        />
       </div>
       
       <Separator />
@@ -232,7 +277,7 @@ export default function TeacherGradesPage() {
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Button variant="ghost" size="icon" className="h-7 w-7"><Eye className="h-4 w-4"/></Button>
                   <Button variant="ghost" size="icon" className="h-7 w-7"><Download className="h-4 w-4"/></Button>
-                  <span>{assignment.file.size} ({assignment.file.name.split('.').pop()})</span>
+                  <span>{`${assignment.file.size} (${assignment.file.name.split('.').pop()})`}</span>
                 </div>
                 <div className="flex items-center">
                   <Dialog>
