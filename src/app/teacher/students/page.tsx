@@ -67,9 +67,14 @@ export default function TeacherStudentsPage() {
 
   // Filtra la lista de todos los estudiantes para obtener solo los que están en los cursos del docente
   const studentsOfTeacher = useMemo(() => {
-      return allStudents.filter(student => 
-          student.courses.some(course => teacherCourseIds.includes(course.id))
-      );
+      // Usamos un Set para evitar duplicados si un estudiante está en varios cursos del mismo profesor
+      const studentSet = new Set<Student>();
+      allStudents.forEach(student => {
+          if (student.courses.some(course => teacherCourseIds.includes(course.id))) {
+              studentSet.add(student);
+          }
+      });
+      return Array.from(studentSet);
   }, [allStudents, teacherCourseIds]);
   
   const availableClasses = useMemo(() => {
@@ -78,9 +83,9 @@ export default function TeacherStudentsPage() {
   }, [teacherCourses]);
   
   const classDisplayMapping: { [key: string]: string } = {
-      "12-comercio": "12 (Comercio)",
-      "11-ciencia": "11 (Ciencia)",
-      "10-arte": "10 (Arte)",
+      "5-sec": "5º de Secundaria",
+      "3-sec": "3º de Secundaria",
+      "4-sec": "4º de Secundaria",
   };
 
 
