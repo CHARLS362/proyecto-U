@@ -27,20 +27,132 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+const subjects = [
+  { id: 1, name: "Hindi" },
+  { id: 2, name: "Inglés" },
+  { id: 3, name: "Matemáticas" },
+  { id: 4, name: "Ciencias" },
+  { id: 5, name: "Comercio" },
+];
+
+const primaryGrades = [
+  { value: '1-pri', label: '1º de Primaria' },
+  { value: '2-pri', label: '2º de Primaria' },
+  { value: '3-pri', label: '3º de Primaria' },
+  { value: '4-pri', label: '4º de Primaria' },
+  { value: '5-pri', label: '5º de Primaria' },
+  { value: '6-pri', label: '6º de Primaria' },
+];
+
+const secondaryGrades = [
+  { value: '1-sec', label: '1º de Secundaria' },
+  { value: '2-sec', label: '2º de Secundaria' },
+  { value: '3-sec', label: '3º de Secundaria' },
+  { value: '4-sec', label: '4º de Secundaria' },
+  { value: '5-sec', label: '5º de Secundaria' },
+];
+
+const UploadDialog = () => {
+    const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+    const [dialogLevel, setDialogLevel] = useState('');
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files.length > 0) {
+            setFileName(event.target.files[0].name);
+        } else {
+            setFileName('Ningún archivo seleccionado');
+        }
+    };
+    
+    return (
+        <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+                <DialogTitle>Subir notas</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="dialog-level">Nivel</Label>
+                        <Select value={dialogLevel} onValueChange={setDialogLevel}>
+                            <SelectTrigger id="dialog-level"><SelectValue placeholder="-- Nivel --"/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="primaria">Primaria</SelectItem>
+                                <SelectItem value="secundaria">Secundaria</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="dialog-grade">Grado</Label>
+                         <Select disabled={!dialogLevel}>
+                            <SelectTrigger id="dialog-grade"><SelectValue placeholder={!dialogLevel ? "Seleccione nivel" : "-- Grado --"} /></SelectTrigger>
+                            <SelectContent>
+                                {dialogLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={`p-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                                {dialogLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={`s-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="dialog-section">Sección</Label>
+                        <Select>
+                            <SelectTrigger id="dialog-section"><SelectValue placeholder="-- Sección --"/></SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="A">A</SelectItem>
+                                <SelectItem value="B">B</SelectItem>
+                                <SelectItem value="C">C</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="dialog-subject">Asignatura</Label>
+                        <Select>
+                            <SelectTrigger id="dialog-subject"><SelectValue placeholder="-- Asignatura --" /></SelectTrigger>
+                            <SelectContent>
+                               {subjects.map((subject) => (
+                                <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="title-upload">Título</Label>
+                    <Input id="title-upload" />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="comment-upload">Comentario</Label>
+                    <Textarea id="comment-upload" />
+                </div>
+                <div className="grid gap-2">
+                    <Label htmlFor="file-upload" className="text-sm text-muted-foreground">
+                        Subir archivo (tamaño máximo 200 MB)
+                    </Label>
+                    <div className="flex items-center gap-2">
+                        <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
+                        <Button asChild variant="outline" className="shrink-0">
+                            <Label htmlFor="file-upload" className="cursor-pointer font-normal">Seleccionar archivo</Label>
+                        </Button>
+                        <span className="text-sm text-muted-foreground truncate">{fileName}</span>
+                    </div>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <UploadCloud className="mr-2 h-4 w-4" />
+                    Subir
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    );
+};
+
+
 export default function GradesPage() {
-  const [fileName, setFileName] = useState('Ningún archivo seleccionado');
   const [selectedLevel, setSelectedLevel] = useState('');
   const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setFileName(event.target.files[0].name);
-    } else {
-      setFileName('Ningún archivo seleccionado');
-    }
-  };
 
   const assignments = [
     {
@@ -52,31 +164,6 @@ export default function GradesPage() {
       file: { name: 'tarea.png', size: '7 KB' }
     }
   ];
-  
-  const subjects = [
-    { id: 1, name: "Hindi" },
-    { id: 2, name: "Inglés" },
-    { id: 3, name: "Matemáticas" },
-    { id: 4, name: "Ciencias" },
-    { id: 5, name: "Comercio" },
-  ];
-
-  const primaryGrades = [
-    { value: '1-pri', label: '1º de Primaria' },
-    { value: '2-pri', label: '2º de Primaria' },
-    { value: '3-pri', label: '3º de Primaria' },
-    { value: '4-pri', label: '4º de Primaria' },
-    { value: '5-pri', label: '5º de Primaria' },
-    { value: '6-pri', label: '6º de Primaria' },
-  ];
-
-  const secondaryGrades = [
-    { value: '1-sec', label: '1º de Secundaria' },
-    { value: '2-sec', label: '2º de Secundaria' },
-    { value: '3-sec', label: '3º de Secundaria' },
-    { value: '4-sec', label: '4º de Secundaria' },
-    { value: '5-sec', label: '5º de Secundaria' },
-  ];
 
   return (
     <div className="space-y-6">
@@ -85,70 +172,14 @@ export default function GradesPage() {
           <NotebookText className="h-7 w-7 text-muted-foreground" />
           <h1 className="text-2xl font-semibold text-foreground">Notas</h1>
         </div>
-        <Dialog onOpenChange={(open) => !open && setFileName('Ningún archivo seleccionado')}>
+        <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-green-100 hover:bg-green-200 text-green-800 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900">
               <UploadCloud className="mr-2 h-4 w-4" />
               Cargar Notas
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Subir notas</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="class-upload">Clase</Label>
-                  <Select defaultValue="12-comercio">
-                    <SelectTrigger id="class-upload"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                      <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                      <SelectItem value="10-arte">10 (Arte)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="subject-upload">Sujeto</Label>
-                  <Select>
-                    <SelectTrigger id="subject-upload"><SelectValue placeholder="--select--" /></SelectTrigger>
-                    <SelectContent>
-                       {subjects.map((subject) => (
-                        <SelectItem key={subject.id} value={subject.name.toLowerCase()}>{subject.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="title-upload">Título</Label>
-                <Input id="title-upload" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="comment-upload">Comentario</Label>
-                <Textarea id="comment-upload" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="file-upload" className="text-sm text-muted-foreground">
-                  Subir archivo (tamaño máximo 200 MB)
-                </Label>
-                <div className="flex items-center gap-2">
-                    <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
-                    <Button asChild variant="outline" className="shrink-0">
-                      <Label htmlFor="file-upload" className="cursor-pointer font-normal">Seleccionar archivo</Label>
-                    </Button>
-                    <span className="text-sm text-muted-foreground truncate">{fileName}</span>
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Subir
-              </Button>
-            </DialogFooter>
-          </DialogContent>
+          <UploadDialog />
         </Dialog>
       </div>
       
