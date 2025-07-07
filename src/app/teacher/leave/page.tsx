@@ -25,7 +25,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar as CalendarIcon, Hourglass, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Hourglass, Trash2, Loader2 } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -33,6 +33,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 
 const leaveRequests = [
@@ -55,8 +56,10 @@ const leaveRequests = [
 ]
 
 export default function LeavePage() {
+    const { toast } = useToast();
     const [startDate, setStartDate] = useState<Date | undefined>();
     const [endDate, setEndDate] = useState<Date | undefined>();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
     const statusColors: {[key: string]: string} = {
         rechazado: 'text-red-600 dark:text-red-400',
@@ -64,94 +67,125 @@ export default function LeavePage() {
         pendiente: 'text-yellow-600 dark:text-yellow-400'
     }
 
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+      try {
+        // Here you would get form data. For now, we simulate.
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        toast({
+          title: "Solicitud Enviada",
+          description: "Tu solicitud de permiso ha sido enviada para su revisión.",
+          variant: "success"
+        });
+        // Here you would typically reset the form fields.
+        setStartDate(undefined);
+        setEndDate(undefined);
+        (e.target as HTMLFormElement).reset();
+      } catch (error) {
+        toast({
+          title: "Error al Enviar",
+          description: "No se pudo enviar la solicitud. Intente de nuevo.",
+          variant: "destructive"
+        });
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
     return (
         <div className="space-y-6">
             <PageTitle title="Licencia y Permisos" icon={Hourglass} />
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-fade-in">
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <CardTitle>Nueva licencia</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="leave-type">Tipo de licencia</Label>
-                            <Select>
-                                <SelectTrigger id="leave-type">
-                                    <SelectValue placeholder="--seleccionar--" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="casual">Licencia casual</SelectItem>
-                                    <SelectItem value="medical">Licencia médica</SelectItem>
-                                    <SelectItem value="personal">Licencia personal</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="leave-description">Descripción de la licencia</Label>
-                            <Textarea id="leave-description" className="min-h-[100px]" />
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit}>
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <CardTitle>Nueva licencia</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
                             <div className="grid gap-2">
-                                <Label htmlFor="start-date">Fecha de inicio</Label>
-                                <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                    id="start-date"
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        !startDate && "text-muted-foreground"
-                                    )}
-                                    >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {startDate ? format(startDate, "dd/MM/yyyy") : <span>dd/mm/aaaa</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                    mode="single"
-                                    selected={startDate}
-                                    onSelect={setStartDate}
-                                    initialFocus
-                                    locale={es}
-                                    />
-                                </PopoverContent>
-                                </Popover>
+                                <Label htmlFor="leave-type">Tipo de licencia</Label>
+                                <Select>
+                                    <SelectTrigger id="leave-type">
+                                        <SelectValue placeholder="--seleccionar--" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="casual">Licencia casual</SelectItem>
+                                        <SelectItem value="medical">Licencia médica</SelectItem>
+                                        <SelectItem value="personal">Licencia personal</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="grid gap-2">
-                                <Label htmlFor="end-date">Fecha de finalización</Label>
-                                <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                    id="end-date"
-                                    variant={"outline"}
-                                    className={cn(
-                                        "w-full justify-start text-left font-normal",
-                                        !endDate && "text-muted-foreground"
-                                    )}
-                                    >
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {endDate ? format(endDate, "dd/MM/yyyy") : <span>dd/mm/aaaa</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                    mode="single"
-                                    selected={endDate}
-                                    onSelect={setEndDate}
-                                    initialFocus
-                                    locale={es}
-                                    />
-                                </PopoverContent>
-                                </Popover>
+                                <Label htmlFor="leave-description">Descripción de la licencia</Label>
+                                <Textarea id="leave-description" className="min-h-[100px]" required />
                             </div>
-                        </div>
-                    </CardContent>
-                    <CardFooter>
-                         <Button className="w-full">ENTREGAR</Button>
-                    </CardFooter>
-                </Card>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid gap-2">
+                                    <Label htmlFor="start-date">Fecha de inicio</Label>
+                                    <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                        id="start-date"
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !startDate && "text-muted-foreground"
+                                        )}
+                                        >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {startDate ? format(startDate, "dd/MM/yyyy") : <span>dd/mm/aaaa</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                        mode="single"
+                                        selected={startDate}
+                                        onSelect={setStartDate}
+                                        initialFocus
+                                        locale={es}
+                                        />
+                                    </PopoverContent>
+                                    </Popover>
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="end-date">Fecha de finalización</Label>
+                                    <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button
+                                        id="end-date"
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !endDate && "text-muted-foreground"
+                                        )}
+                                        >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {endDate ? format(endDate, "dd/MM/yyyy") : <span>dd/mm/aaaa</span>}
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0">
+                                        <Calendar
+                                        mode="single"
+                                        selected={endDate}
+                                        onSelect={setEndDate}
+                                        initialFocus
+                                        locale={es}
+                                        />
+                                    </PopoverContent>
+                                    </Popover>
+                                </div>
+                            </div>
+                        </CardContent>
+                        <CardFooter>
+                            <Button type="submit" className="w-full" disabled={isSubmitting}>
+                                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                {isSubmitting ? 'Enviando...' : 'ENTREGAR'}
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                </form>
 
                 <Card className="shadow-lg">
                     <CardHeader>
