@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { PageTitle } from "@/components/common/PageTitle";
-import { BookCopy, PlusCircle, Search as SearchIcon, Edit, Trash2 } from "lucide-react";
+import { BookCopy, PlusCircle, Search as SearchIcon, Edit, Trash2, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -60,6 +60,9 @@ export default function SubjectsPage() {
 
   const [subjectName, setSubjectName] = useState("");
   const [subjectLevel, setSubjectLevel] = useState("");
+  
+  const [isSaving, setIsSaving] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   const { toast } = useToast();
 
@@ -81,7 +84,7 @@ export default function SubjectsPage() {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectName.trim() || !subjectLevel) {
       toast({
@@ -92,24 +95,47 @@ export default function SubjectsPage() {
       return;
     }
 
-    if (modalMode === 'add') {
-      const newSubject = {
-        id: subjects.length > 0 ? Math.max(...subjects.map(s => s.id)) + 1 : 1,
-        name: subjectName,
-        level: subjectLevel,
-      };
-      setSubjects(prev => [...prev, newSubject]);
-      toast({ title: "Asignatura Agregada", description: `La asignatura "${subjectName}" ha sido creada.`, variant: "success" });
-    } else if (currentSubjectId) {
-      setSubjects(prev => prev.map(s => 
-        s.id === currentSubjectId ? { ...s, name: subjectName, level: subjectLevel } : s
-      ));
-      toast({ title: "Asignatura Actualizada", description: `La asignatura "${subjectName}" ha sido actualizada.`, variant: "success" });
-    }
+    setIsSaving(true);
+    try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-    handleCloseModal();
+        if (modalMode === 'add') {
+            const newSubject = {
+                id: subjects.length > 0 ? Math.max(...subjects.map(s => s.id)) + 1 : 1,
+                name: subjectName,
+                level: subjectLevel,
+            };
+            setSubjects(prev => [...prev, newSubject]);
+            toast({ title: "Asignatura Agregada", description: `La asignatura "${subjectName}" ha sido creada.`, variant: "success" });
+        } else if (currentSubjectId) {
+            setSubjects(prev => prev.map(s => 
+                s.id === currentSubjectId ? { ...s, name: subjectName, level: subjectLevel } : s
+            ));
+            toast({ title: "Asignatura Actualizada", description: `La asignatura "${subjectName}" ha sido actualizada.`, variant: "success" });
+        }
+
+        handleCloseModal();
+    } catch(error) {
+        toast({ title: "Error", description: "No se pudo guardar la asignatura. Inténtelo de nuevo.", variant: "destructive" });
+    } finally {
+        setIsSaving(false);
+    }
   };
   
+  const handleDeleteSubject = async (subject: typeof initialSubjects[0]) => {
+    setDeletingId(subject.id);
+    try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setSubjects(prev => prev.filter(s => s.id !== subject.id));
+        toast({ title: "Asignatura Eliminada", description: `Se eliminó "${subject.name}".`, variant: "success"});
+    } catch(error) {
+        toast({ title: "Error al Eliminar", description: `No se pudo eliminar "${subject.name}".`, variant: "destructive"});
+    } finally {
+        setDeletingId(null);
+    }
+  };
+
   const levelBadgeColor = (level: string) => {
     switch(level) {
       case 'Primaria': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
@@ -167,14 +193,16 @@ export default function SubjectsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button size="sm" variant="outline" onClick={() => handleOpenModal('edit', subject)}>
+                    <Button size="sm" variant="outline" onClick={() => handleOpenModal('edit', subject)} disabled={deletingId === subject.id}>
                       <Edit className="mr-1 h-3 w-3" /> Editar
                     </Button>
-                    <Button variant="destructive" size="sm" onClick={() => {
-                        setSubjects(prev => prev.filter(s => s.id !== subject.id));
-                        toast({ title: "Asignatura Eliminada", description: `Se eliminó "${subject.name}".`, variant: "success"});
-                    }}>
-                      <Trash2 className="mr-1 h-3 w-3" /> Borrar
+                    <Button variant="destructive" size="sm" onClick={() => handleDeleteSubject(subject)} disabled={deletingId === subject.id}>
+                      {deletingId === subject.id ? (
+                        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      ) : (
+                        <Trash2 className="mr-1 h-3 w-3" />
+                      )}
+                      Borrar
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -224,8 +252,9 @@ export default function SubjectsPage() {
                 </div>
               </div>
               <DialogFooter>
-                 <Button type="button" variant="outline" onClick={handleCloseModal}>Cancelar</Button>
-                <Button type="submit">
+                 <Button type="button" variant="outline" onClick={handleCloseModal} disabled={isSaving}>Cancelar</Button>
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   {modalMode === 'add' ? 'Agregar Asignatura' : 'Guardar Cambios'}
                 </Button>
               </DialogFooter>

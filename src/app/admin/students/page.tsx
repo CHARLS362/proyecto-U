@@ -17,7 +17,8 @@ import {
   MessageSquare,
   Send,
   Camera,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -148,6 +149,8 @@ export default function StudentsPage() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoFileName, setPhotoFileName] = useState('Ningún archivo seleccionado');
 
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
 
@@ -208,16 +211,30 @@ export default function StudentsPage() {
     setIsDeleteAlertOpen(true);
   };
 
-  const handleDeleteStudent = () => {
+  const handleDeleteStudent = async () => {
     if (!studentToDelete) return;
-    setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
-    toast({
-        title: "Estudiante Eliminado",
-        description: `El estudiante ${studentToDelete.name} ha sido eliminado.`,
-        variant: "success",
-    });
-    setIsDeleteAlertOpen(false);
-    setStudentToDelete(null);
+    setIsDeleting(true);
+
+    try {
+        // Simulate API call
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
+        toast({
+            title: "Estudiante Eliminado",
+            description: `El estudiante ${studentToDelete.name} ha sido eliminado.`,
+            variant: "success",
+        });
+        setIsDeleteAlertOpen(false);
+        setStudentToDelete(null);
+    } catch(error) {
+        toast({
+            title: "Error al Eliminar",
+            description: "No se pudo eliminar al estudiante. Por favor, inténtelo de nuevo.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsDeleting(false);
+    }
   };
 
 
@@ -262,80 +279,94 @@ export default function StudentsPage() {
     setStep(s => s - 1);
   };
 
-  function onSubmit(data: StudentFormValues) {
-    const classDisplayMapping: { [key: string]: string } = {
-        "3-sec": "3º de Secundaria",
-        "4-sec": "4º de Secundaria",
-        "5-sec": "5º de Secundaria",
-    };
-    const gradeLevel = classDisplayMapping[data.studentClass] || data.studentClass;
+  async function onSubmit(data: StudentFormValues) {
+    setIsSaving(true);
+    try {
+        // Simulate API Call
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-    if (modalMode === 'add') {
-        const newStudent: Student = {
-            id: `S${Date.now().toString().slice(-4)}`,
-            name: `${data.studentFirstName} ${data.studentLastName}`,
-            firstName: data.studentFirstName,
-            lastName: data.studentLastName,
-            avatarUrl: photoPreview || "https://placehold.co/100x100.png",
-            email: data.studentEmail,
-            phone: data.studentPhone,
-            courses: [],
-            enrollmentDate: new Date().toISOString().split('T')[0],
-            address: data.studentAddress,
-            gradeLevel: gradeLevel,
-            guardianName: data.guardianName,
-            guardianContact: data.guardianPhone,
-            dob: data.studentDob,
-            gender: data.studentGender as any,
-            classId: data.studentClass,
-            section: data.studentSection,
-            department: data.studentDepartment,
-            city: data.studentCity,
-            guardianEmail: data.guardianEmail,
-            guardianAddress: data.guardianAddress,
-            guardianDob: data.guardianDob,
+        const classDisplayMapping: { [key: string]: string } = {
+            "3-sec": "3º de Secundaria",
+            "4-sec": "4º de Secundaria",
+            "5-sec": "5º de Secundaria",
         };
-        setStudents(prev => [newStudent, ...prev]);
+        const gradeLevel = classDisplayMapping[data.studentClass] || data.studentClass;
+
+        if (modalMode === 'add') {
+            const newStudent: Student = {
+                id: `S${Date.now().toString().slice(-4)}`,
+                name: `${data.studentFirstName} ${data.studentLastName}`,
+                firstName: data.studentFirstName,
+                lastName: data.studentLastName,
+                avatarUrl: photoPreview || "https://placehold.co/100x100.png",
+                email: data.studentEmail,
+                phone: data.studentPhone,
+                courses: [],
+                enrollmentDate: new Date().toISOString().split('T')[0],
+                address: data.studentAddress,
+                gradeLevel: gradeLevel,
+                guardianName: data.guardianName,
+                guardianContact: data.guardianPhone,
+                dob: data.studentDob,
+                gender: data.studentGender as any,
+                classId: data.studentClass,
+                section: data.studentSection,
+                department: data.studentDepartment,
+                city: data.studentCity,
+                guardianEmail: data.guardianEmail,
+                guardianAddress: data.guardianAddress,
+                guardianDob: data.guardianDob,
+            };
+            setStudents(prev => [newStudent, ...prev]);
+            toast({
+                title: "Estudiante Agregado",
+                description: `El estudiante ${newStudent.name} ha sido registrado exitosamente.`,
+                variant: "success",
+            });
+        } else if(currentStudentId) {
+            setStudents(prev => prev.map(s => {
+                if (s.id === currentStudentId) {
+                    return {
+                        ...s,
+                        name: `${data.studentFirstName} ${data.studentLastName}`,
+                        firstName: data.studentFirstName,
+                        lastName: data.studentLastName,
+                        avatarUrl: photoPreview || s.avatarUrl,
+                        email: data.studentEmail,
+                        phone: data.studentPhone,
+                        address: data.studentAddress,
+                        gradeLevel: gradeLevel,
+                        guardianName: data.guardianName,
+                        guardianContact: data.guardianPhone,
+                        dob: data.studentDob,
+                        gender: data.studentGender as any,
+                        classId: data.studentClass,
+                        section: data.studentSection,
+                        department: data.studentDepartment,
+                        city: data.studentCity,
+                        guardianEmail: data.guardianEmail,
+                        guardianAddress: data.guardianAddress,
+                        guardianDob: data.guardianDob,
+                    };
+                }
+                return s;
+            }));
+            toast({
+                title: "Estudiante Actualizado",
+                description: `Los datos de ${data.studentFirstName} ${data.studentLastName} han sido actualizados.`,
+                variant: "success",
+            });
+        }
+        handleModalChange(false);
+    } catch (error) {
         toast({
-            title: "Estudiante Agregado",
-            description: `El estudiante ${newStudent.name} ha sido registrado exitosamente.`,
-            variant: "success",
+            title: "Error al Guardar",
+            description: "No se pudo guardar el estudiante. Por favor, inténtelo de nuevo.",
+            variant: "destructive"
         });
-    } else if(currentStudentId) {
-        setStudents(prev => prev.map(s => {
-            if (s.id === currentStudentId) {
-                return {
-                    ...s,
-                    name: `${data.studentFirstName} ${data.studentLastName}`,
-                    firstName: data.studentFirstName,
-                    lastName: data.studentLastName,
-                    avatarUrl: photoPreview || s.avatarUrl,
-                    email: data.studentEmail,
-                    phone: data.studentPhone,
-                    address: data.studentAddress,
-                    gradeLevel: gradeLevel,
-                    guardianName: data.guardianName,
-                    guardianContact: data.guardianPhone,
-                    dob: data.studentDob,
-                    gender: data.studentGender as any,
-                    classId: data.studentClass,
-                    section: data.studentSection,
-                    department: data.studentDepartment,
-                    city: data.studentCity,
-                    guardianEmail: data.guardianEmail,
-                    guardianAddress: data.guardianAddress,
-                    guardianDob: data.guardianDob,
-                };
-            }
-            return s;
-        }));
-        toast({
-            title: "Estudiante Actualizado",
-            description: `Los datos de ${data.studentFirstName} ${data.studentLastName} han sido actualizados.`,
-            variant: "success",
-        });
+    } finally {
+        setIsSaving(false);
     }
-    handleModalChange(false);
   }
   
   const getStepTitle = (currentStep: number) => {
@@ -892,7 +923,8 @@ export default function StudentsPage() {
                           <ChevronRight className="-ml-3 h-4 w-4" />
                       </Button>
                   ) : (
-                      <Button type="submit">
+                      <Button type="submit" disabled={isSaving}>
+                          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                           {modalMode === 'add' ? 'Guardar Estudiante' : 'Guardar Cambios'}
                       </Button>
                   )}
@@ -913,7 +945,10 @@ export default function StudentsPage() {
         </AlertDialogHeader>
         <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setStudentToDelete(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteStudent} className={buttonVariants({ variant: "destructive" })}>Continuar</AlertDialogAction>
+            <AlertDialogAction onClick={handleDeleteStudent} disabled={isDeleting} className={buttonVariants({ variant: "destructive" })}>
+                {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Continuar
+            </AlertDialogAction>
         </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
