@@ -21,18 +21,55 @@ import {
   Eye,
   Download,
   Edit,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function TeacherNewsPage() {
+  const { toast } = useToast();
   const [importance, setImportance] = useState('normal');
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setFileName(event.target.files[0].name);
     } else {
       setFileName('Ningún archivo seleccionado');
+    }
+  };
+
+  const handleReset = () => {
+    setTitle('');
+    setBody('');
+    setImportance('normal');
+    setFileName('Ningún archivo seleccionado');
+    const form = document.getElementById('create-notice-form') as HTMLFormElement;
+    if (form) form.reset();
+  }
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast({
+        title: "Aviso enviado",
+        description: "El nuevo aviso ha sido publicado.",
+        variant: "success",
+      });
+      handleReset();
+    } catch (error) {
+       toast({
+        title: "Error al enviar",
+        description: "No se pudo enviar el aviso. Por favor, intente de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -92,23 +129,23 @@ export default function TeacherNewsPage() {
               </Button>
             </CardHeader>
             <Separator />
-            <form>
+            <form id="create-notice-form" onSubmit={handleSubmit}>
               <CardContent className="pt-6 space-y-6">
                 <div className="grid gap-2">
                   <Label htmlFor="aviso-titulo">Título del aviso</Label>
-                  <Input id="aviso-titulo" placeholder="título del aviso" />
+                  <Input id="aviso-titulo" placeholder="título del aviso" value={title} onChange={(e) => setTitle(e.target.value)} required disabled={isSubmitting} />
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="aviso-cuerpo">Cuerpo del aviso</Label>
-                  <Textarea id="aviso-cuerpo" placeholder="Escriba el cuerpo del aviso aquí..." />
+                  <Textarea id="aviso-cuerpo" placeholder="Escriba el cuerpo del aviso aquí..." value={body} onChange={(e) => setBody(e.target.value)} required disabled={isSubmitting}/>
                 </div>
 
                 <div className="grid gap-2">
                   <Label htmlFor="aviso-archivo">Cualquier archivo</Label>
                   <div className="flex items-center gap-2">
-                    <Input id="aviso-archivo" type="file" className="hidden" onChange={handleFileChange} />
-                    <Button asChild variant="outline" className="shrink-0">
+                    <Input id="aviso-archivo" type="file" className="hidden" onChange={handleFileChange} disabled={isSubmitting} />
+                    <Button asChild variant="outline" className="shrink-0" disabled={isSubmitting}>
                       <Label htmlFor="aviso-archivo" className="cursor-pointer">Seleccionar archivo</Label>
                     </Button>
                     <span className="text-sm text-muted-foreground truncate">{fileName}</span>
@@ -117,7 +154,7 @@ export default function TeacherNewsPage() {
 
                 <div className="grid gap-2">
                   <Label>Importancia</Label>
-                  <RadioGroup value={importance} onValueChange={setImportance} className="flex items-center gap-4">
+                  <RadioGroup value={importance} onValueChange={setImportance} className="flex items-center gap-4" disabled={isSubmitting}>
                     <Label htmlFor="importance-green" className="cursor-pointer">
                       <RadioGroupItem value="normal" id="importance-green" className="peer sr-only" />
                       <div className="h-6 w-6 rounded-full bg-green-500 flex items-center justify-center ring-2 ring-transparent peer-data-[state=checked]:ring-primary">
@@ -140,8 +177,11 @@ export default function TeacherNewsPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-end gap-2 pt-4 border-t">
-                <Button variant="outline" type="reset">Reiniciar</Button>
-                <Button type="submit">Correo</Button>
+                <Button variant="outline" type="button" onClick={handleReset} disabled={isSubmitting}>Reiniciar</Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {isSubmitting ? 'Enviando...' : 'Correo'}
+                </Button>
               </CardFooter>
             </form>
           </Card>
