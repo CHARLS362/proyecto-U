@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, ChevronRight, ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,8 +31,25 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { mockTeachers, type Teacher } from '@/lib/mockData';
+import { mockTeachers, type Teacher, mockCourses } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
+
+const primaryGrades = [
+  { value: '1-pri', label: '1º de Primaria' },
+  { value: '2-pri', label: '2º de Primaria' },
+  { value: '3-pri', label: '3º de Primaria' },
+  { value: '4-pri', label: '4º de Primaria' },
+  { value: '5-pri', label: '5º de Primaria' },
+  { value: '6-pri', label: '6º de Primaria' },
+];
+
+const secondaryGrades = [
+  { value: '1-sec', label: '1º de Secundaria' },
+  { value: '2-sec', label: '2º de Secundaria' },
+  { value: '3-sec', label: '3º de Secundaria' },
+  { value: '4-sec', label: '4º de Secundaria' },
+  { value: '5-sec', label: '5º de Secundaria' },
+];
 
 
 export default function TeachersPage() {
@@ -49,9 +66,10 @@ export default function TeachersPage() {
   // Form fields state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [teacherClass, setTeacherClass] = useState('');
+  const [teacherLevel, setTeacherLevel] = useState('');
+  const [teacherGrade, setTeacherGrade] = useState('');
   const [teacherSection, setTeacherSection] = useState('');
-  const [relatedSubject, setRelatedSubject] = useState('');
+  const [teacherCourse, setTeacherCourse] = useState('');
   const [gender, setGender] = useState('');
   const [dob, setDob] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -72,9 +90,10 @@ export default function TeachersPage() {
     setFormStep(1);
     setFirstName('');
     setLastName('');
-    setTeacherClass('');
+    setTeacherLevel('');
+    setTeacherGrade('');
     setTeacherSection('');
-    setRelatedSubject('');
+    setTeacherCourse('');
     setGender('');
     setDob('');
     setPhoneNumber('');
@@ -110,13 +129,16 @@ export default function TeachersPage() {
     resetForm();
     setModalMode('edit');
     setCurrentTeacherId(teacher.id);
-
-    // Populate form state from teacher data
+  
+    const course = mockCourses.find(c => c.name === teacher.relatedSubject);
+    const level = course ? course.level : '';
+  
     setFirstName(teacher.firstName);
     setLastName(teacher.lastName);
-    setTeacherClass(teacher.class || '');
+    setTeacherLevel(level);
+    setTeacherGrade(teacher.class || '');
     setTeacherSection(teacher.section || '');
-    setRelatedSubject(teacher.relatedSubject || '');
+    setTeacherCourse(course ? course.id : '');
     setGender(teacher.gender || '');
     setDob(teacher.dob || '');
     setPhoneNumber(teacher.phoneNumber || '');
@@ -124,7 +146,7 @@ export default function TeachersPage() {
     setAddress(teacher.address || '');
     setRefContact(teacher.refContact || '');
     setRefRelationship(teacher.refRelationship || '');
-
+  
     setFormStep(1);
     setIsModalOpen(true);
   };
@@ -132,13 +154,15 @@ export default function TeachersPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const courseName = mockCourses.find(c => c.id === teacherCourse)?.name || '';
+
     const teacherDataPayload = {
       firstName,
       lastName,
       avatarUrl: "https://placehold.co/40x40.png",
-      class: teacherClass,
+      class: teacherGrade,
       section: teacherSection,
-      relatedSubject,
+      relatedSubject: courseName,
       gender,
       dob,
       phoneNumber,
@@ -462,32 +486,63 @@ export default function TeachersPage() {
                     <Input id="last-name" placeholder="Apellidos" value={lastName} onChange={e => setLastName(e.target.value)} required />
                   </div>
                 </div>
-                <div className="grid gap-2">
-                  <Label>Detalles del profesor de la clase</Label>
-                   <div className="grid grid-cols-2 gap-4">
-                      <Select onValueChange={setTeacherClass} value={teacherClass}>
-                          <SelectTrigger><SelectValue placeholder="Seleccionar Clase"/></SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="3-sec">3º de Secundaria</SelectItem>
-                              <SelectItem value="4-sec">4º de Secundaria</SelectItem>
-                              <SelectItem value="5-sec">5º de Secundaria</SelectItem>
-                          </SelectContent>
-                      </Select>
-                      <Select onValueChange={setTeacherSection} value={teacherSection}>
-                          <SelectTrigger><SelectValue placeholder="Sección"/></SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="A">A</SelectItem>
-                              <SelectItem value="B">B</SelectItem>
-                              <SelectItem value="C">C</SelectItem>
-                          </SelectContent>
-                      </Select>
-                   </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="level">Nivel</Label>
+                    <Select onValueChange={(value) => {
+                      setTeacherLevel(value);
+                      setTeacherGrade('');
+                      setTeacherCourse('');
+                    }} value={teacherLevel}>
+                      <SelectTrigger><SelectValue placeholder="-- Nivel --"/></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Primaria">Primaria</SelectItem>
+                        <SelectItem value="Secundaria">Secundaria</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="grade">Grado</Label>
+                    <Select onValueChange={(value) => {
+                      setTeacherGrade(value);
+                      setTeacherCourse('');
+                    }} value={teacherGrade} disabled={!teacherLevel}>
+                      <SelectTrigger><SelectValue placeholder={!teacherLevel ? "Seleccione nivel" : "-- Grado --"}/></SelectTrigger>
+                      <SelectContent>
+                        {teacherLevel === 'Primaria' && primaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                        {teacherLevel === 'Secundaria' && secondaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="grid gap-2">
-                   <Label htmlFor="related-subject">Tema relacionado</Label>
-                   <Input id="related-subject" placeholder="Ej: Matemáticas" value={relatedSubject} onChange={e => setRelatedSubject(e.target.value)} />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="section">Sección</Label>
+                    <Select onValueChange={setTeacherSection} value={teacherSection}>
+                      <SelectTrigger><SelectValue placeholder="-- Sección --"/></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A</SelectItem>
+                        <SelectItem value="B">B</SelectItem>
+                        <SelectItem value="C">C</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="course">Curso Asignado</Label>
+                    <Select onValueChange={setTeacherCourse} value={teacherCourse} disabled={!teacherGrade}>
+                      <SelectTrigger><SelectValue placeholder={!teacherGrade ? "Seleccione grado" : "-- Curso --"}/></SelectTrigger>
+                      <SelectContent>
+                        {mockCourses.filter(c => c.classId === teacherGrade).map(c => (
+                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                 <div className="grid gap-2">
+
+                <div className="grid gap-2">
                    <Label htmlFor="gender">Género</Label>
                    <Select onValueChange={setGender} value={gender}>
                       <SelectTrigger id="gender"><SelectValue placeholder="Seleccionar género"/></SelectTrigger>
