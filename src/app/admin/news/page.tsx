@@ -416,6 +416,10 @@ export default function NewsPage() {
                         </CardFooter>
                       </Card>
                       <DialogContent className="p-0 sm:max-w-2xl bg-card border-none overflow-hidden rounded-lg">
+                        <DialogHeader className="sr-only">
+                            <DialogTitle>Vista Previa: {notice.title}</DialogTitle>
+                            {notice.body && <DialogDescription>{notice.body}</DialogDescription>}
+                        </DialogHeader>
                         <div className="relative p-8">
                             <div className="flex justify-between items-start">
                                 <div className="font-bold text-2xl tracking-wider text-foreground">
