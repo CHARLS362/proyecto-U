@@ -19,13 +19,13 @@ import {
   Newspaper, 
   CalendarClock, 
   LibraryBig, 
-  NotebookText, 
   Award, 
   Bus, 
   Settings,
   LogOut,
   BookOpenText,
   ClipboardEdit,
+  MessageSquare,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -40,7 +40,7 @@ const navItems = [
   { href: '/admin/news', label: 'Tabla de noticias', icon: Newspaper },
   { href: '/admin/calendar', label: 'Horario', icon: CalendarClock },
   { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
-  { href: '/admin/grades', label: 'Notas', icon: NotebookText },
+  { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
   { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
 ];
 
