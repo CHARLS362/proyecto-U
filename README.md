@@ -1,3 +1,6 @@
-# Firebase Studio
+base del proyecto version 1.0
 
-To get started, take a look at src/app/page.tsx.
+
+ingresa a la rama dev 
+par poder ejecutar los paneles completos para el sistema 
+
