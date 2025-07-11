@@ -74,10 +74,10 @@ const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; ico
         asChild
         isActive={isActive(href)}
         tooltip={{ children: label, className: "bg-card text-card-foreground border-border shadow-md" }}
-        className="justify-start data-[active=true]:font-bold"
+        className="justify-start data-[active=true]:font-bold data-[active=true]:text-sidebar-accent-foreground"
       >
         <Link href={href}>
-          <Icon />
+          <Icon className="h-6 w-6 shrink-0 text-sidebar-primary" />
           <span className="group-data-[collapsible=icon]:hidden">{label}</span>
         </Link>
       </SidebarMenuButton>
@@ -106,7 +106,7 @@ export function AdminSidebar() {
       <SidebarHeader className="p-4">
         <Link href="/" className="flex items-center gap-2 group/logo">
           <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
-          <h1 className="text-xl font-semibold text-foreground group-data-[collapsible=icon]:hidden">
+          <h1 className="text-xl font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
             Sofía Educa
           </h1>
         </Link>
@@ -164,7 +164,7 @@ export function AdminSidebar() {
             <AvatarFallback>AN</AvatarFallback>
           </Avatar>
           <div className="group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium text-foreground">Admin</p>
+            <p className="text-sm font-medium text-sidebar-foreground">Admin</p>
             <p className="text-xs text-muted-foreground">admin@sofiaeduca.com</p>
           </div>
         </div>
@@ -178,7 +178,7 @@ export function AdminSidebar() {
                   className="justify-start hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive"
                 >
                   <Link href="/logout">
-                    <LogOut />
+                    <LogOut className="h-6 w-6 shrink-0" />
                     <span className="group-data-[collapsible=icon]:hidden">Cerrar Sesión</span>
                   </Link>
                 </SidebarMenuButton>
