@@ -11,6 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import loginImg from '@/recursos/login.png';
 import { initialConfig } from '@/lib/config';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const schoolName = initialConfig.name;
+  const { login } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

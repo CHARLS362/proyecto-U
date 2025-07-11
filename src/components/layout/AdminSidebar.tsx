@@ -1,6 +1,5 @@
 
 "use client";
-
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -31,6 +30,9 @@ import {
   BookOpenText,
   ClipboardEdit,
   MessageSquare,
+  BookCopy,
+  NotebookText,
+  Bus,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -49,14 +51,18 @@ const managementNav = [
   { href: '/admin/courses', label: 'Cursos', icon: BookOpenText },
   { href: '/admin/subjects', label: 'Temas', icon: BookCopy },
   { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },
+  { href: '/admin/grades', label: 'Notas', icon: NotebookText },
   { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
-  { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
   { href: '/admin/news', label: 'Avisos', icon: Newspaper },
   { href: '/admin/calendar', label: 'Horario', icon: CalendarClock },
   { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
-  { href: '/admin/grades', label: 'Notas', icon: NotebookText },
-  { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
   { href: '/admin/bus-service', label: 'Servicio de Bus', icon: Bus },
+];
+
+const academicNav = [
+  { href: '/admin/subjects', label: 'Materias', icon: BookCopy },
+  { href: '/admin/curriculum', label: 'Programas', icon: LibraryBig },
+  { href: '/admin/feedback', label: 'Retroalimentación', icon: MessageSquare },
 ];
 
 const bottomNav = [

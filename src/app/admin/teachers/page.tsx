@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, ChevronRight, ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,10 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { mockTeachers, type Teacher, mockCourses } from '@/lib/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { useTeachers } from '@/hooks/useTeachers';
+import { useClasses } from '@/hooks/useClasses';
+import { useSubjects } from '@/hooks/useSubjects';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 const primaryGrades = [
   { value: '1-pri', label: '1º de Primaria' },
