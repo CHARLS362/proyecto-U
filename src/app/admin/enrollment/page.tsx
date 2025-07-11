@@ -43,7 +43,7 @@ export default function EnrollmentPage() {
   const [isEnrolled, setIsEnrolled] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchTerm.trim()) {
       toast({
         title: "Búsqueda vacía",
@@ -53,8 +53,9 @@ export default function EnrollmentPage() {
       return;
     }
     setIsSearching(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
       const results = students.filter(student =>
         student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         student.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -65,10 +66,17 @@ export default function EnrollmentPage() {
       } else {
         toast({ title: "Búsqueda completa", description: `Se encontraron ${results.length} estudiantes.`, variant: "info" });
       }
-      setIsSearching(false);
       setSelectedStudent(null);
       setIsEnrolled(false);
-    }, 500);
+    } catch (error) {
+       toast({
+        title: "Error en la búsqueda",
+        description: "Ocurrió un error al buscar estudiantes. Inténtelo de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+        setIsSearching(false);
+    }
   };
 
   const handleSelectStudent = (student: Student) => {
@@ -102,23 +110,25 @@ export default function EnrollmentPage() {
     });
   };
 
-  const handleSaveEnrollment = () => {
+  const handleSaveEnrollment = async () => {
     if (!selectedStudent) return;
     setIsSaving(true);
     
-    // Simulate backend update
-    setTimeout(() => {
+    try {
+        // Simulate backend update
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
         const enrolledCoursesDetails = mockCourses.filter(c => selectedCourses.has(c.id)).map(c => ({
             id: c.id,
             name: c.name,
             progress: 0 // New courses start with 0 progress
         }));
 
-        const updatedStudents = students.map(s => 
-            s.id === selectedStudent.id ? { ...s, courses: enrolledCoursesDetails } : s
-        );
-
-        setStudents(updatedStudents);
+        setStudents(prevStudents => {
+            return prevStudents.map(s => 
+                s.id === selectedStudent.id ? { ...s, courses: enrolledCoursesDetails } : s
+            );
+        });
         
         toast({
           title: "Matrícula Guardada",
@@ -126,9 +136,16 @@ export default function EnrollmentPage() {
           variant: "success"
         });
         
-        setIsSaving(false);
         setIsEnrolled(true);
-    }, 1500);
+    } catch(error) {
+        toast({
+          title: "Error al Guardar",
+          description: `No se pudo guardar la matrícula. Por favor, inténtelo de nuevo.`,
+          variant: "destructive"
+        });
+    } finally {
+        setIsSaving(false);
+    }
   };
   
   const handlePrint = () => {

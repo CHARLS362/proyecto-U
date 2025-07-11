@@ -53,6 +53,7 @@ export default function TeacherStudentsPage() {
   
   const [selectedClass, setSelectedClass] = useState<string>('all');
   const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
   // Encuentra los cursos que enseña el docente logueado
@@ -67,9 +68,14 @@ export default function TeacherStudentsPage() {
 
   // Filtra la lista de todos los estudiantes para obtener solo los que están en los cursos del docente
   const studentsOfTeacher = useMemo(() => {
-      return allStudents.filter(student => 
-          student.courses.some(course => teacherCourseIds.includes(course.id))
-      );
+      // Usamos un Set para evitar duplicados si un estudiante está en varios cursos del mismo profesor
+      const studentSet = new Set<Student>();
+      allStudents.forEach(student => {
+          if (student.courses.some(course => teacherCourseIds.includes(course.id))) {
+              studentSet.add(student);
+          }
+      });
+      return Array.from(studentSet);
   }, [allStudents, teacherCourseIds]);
   
   const availableClasses = useMemo(() => {
@@ -78,9 +84,9 @@ export default function TeacherStudentsPage() {
   }, [teacherCourses]);
   
   const classDisplayMapping: { [key: string]: string } = {
-      "12-comercio": "12 (Comercio)",
-      "11-ciencia": "11 (Ciencia)",
-      "10-arte": "10 (Arte)",
+      "5-sec": "5º de Secundaria",
+      "3-sec": "3º de Secundaria",
+      "4-sec": "4º de Secundaria",
   };
 
 
@@ -93,7 +99,9 @@ export default function TeacherStudentsPage() {
     if (selectedSection !== 'all') {
       students = students.filter(s => s.section === selectedSection);
     }
-
+    if (selectedCourse !== 'all') {
+      students = students.filter(student => student.courses.some(course => course.id === selectedCourse));
+    }
     if (searchTerm) {
       students = students.filter(s => 
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -125,7 +133,7 @@ export default function TeacherStudentsPage() {
           <CardDescription>Seleccione una clase y sección para ver la lista de estudiantes.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-end">
             <div className="grid gap-2">
               <Label htmlFor="class">Clase</Label>
                <Select value={selectedClass} onValueChange={setSelectedClass}>
@@ -151,6 +159,20 @@ export default function TeacherStudentsPage() {
                   <SelectItem value="A">A</SelectItem>
                   <SelectItem value="B">B</SelectItem>
                   <SelectItem value="C">C</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="course">Curso</Label>
+              <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                <SelectTrigger id="course">
+                  <SelectValue placeholder="Seleccionar Curso" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos mis cursos</SelectItem>
+                  {teacherCourses.map(course => (
+                    <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

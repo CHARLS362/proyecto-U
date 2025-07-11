@@ -1,3 +1,4 @@
+
   'use client';
 import { useState } from 'react';
 import Image from 'next/image';
@@ -9,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import loginImg from '@/recursos/login.png';
-import { useAuth } from '@/hooks/useAuth';
+import { initialConfig } from '@/lib/config';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -18,7 +19,7 @@ export default function LoginPage() {
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
+  const schoolName = initialConfig.name;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -128,7 +129,7 @@ export default function LoginPage() {
         <div className="hidden md:block relative">
           <Image
             src={loginImg}
-            alt="Bienvenido a Sofía Educa"
+            alt={`Bienvenido a ${schoolName}`}
             fill
             style={{ objectFit: 'cover' }}
             className="rounded-r-xl"

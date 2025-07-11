@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -95,34 +96,42 @@ export default function DashboardPage() {
         <PageTitle title="Director del panel" subtitle="Analítica" icon={LayoutGrid} />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <SimpleMetricCard
-          title="Docentes"
-          value="1"
-          icon={Users}
-          iconBgClass="bg-blue-100 dark:bg-blue-500/30"
-          iconColorClass="text-blue-500 dark:text-blue-300"
-        />
-        <SimpleMetricCard
-          title="Estudiantes"
-          value="1"
-          icon={Users}
-          iconBgClass="bg-yellow-100 dark:bg-yellow-500/30"
-          iconColorClass="text-yellow-500 dark:text-yellow-300"
-        />
-        <SimpleMetricCard
-          title="Notas"
-          value="2"
-          icon={FileTextIcon}
-          iconBgClass="bg-green-100 dark:bg-green-500/30"
-          iconColorClass="text-green-500 dark:text-green-300"
-        />
-        <SimpleMetricCard
-          title="Avisos"
-          value="6"
-          icon={Bookmark}
-          iconBgClass="bg-red-100 dark:bg-red-500/30"
-          iconColorClass="text-red-500 dark:text-red-300"
-        />
+        <Link href="/admin/teachers" className="block hover:-translate-y-1 transition-transform duration-200">
+            <SimpleMetricCard
+            title="Docentes"
+            value="1"
+            icon={Users}
+            iconBgClass="bg-blue-100 dark:bg-blue-500/30"
+            iconColorClass="text-blue-500 dark:text-blue-300"
+            />
+        </Link>
+        <Link href="/admin/students" className="block hover:-translate-y-1 transition-transform duration-200">
+            <SimpleMetricCard
+            title="Estudiantes"
+            value="1"
+            icon={Users}
+            iconBgClass="bg-yellow-100 dark:bg-yellow-500/30"
+            iconColorClass="text-yellow-500 dark:text-yellow-300"
+            />
+        </Link>
+        <Link href="/admin/grades" className="block hover:-translate-y-1 transition-transform duration-200">
+            <SimpleMetricCard
+            title="Notas"
+            value="2"
+            icon={FileTextIcon}
+            iconBgClass="bg-green-100 dark:bg-green-500/30"
+            iconColorClass="text-green-500 dark:text-green-300"
+            />
+        </Link>
+        <Link href="/admin/news" className="block hover:-translate-y-1 transition-transform duration-200">
+            <SimpleMetricCard
+            title="Avisos"
+            value="6"
+            icon={Bookmark}
+            iconBgClass="bg-red-100 dark:bg-red-500/30"
+            iconColorClass="text-red-500 dark:text-red-300"
+            />
+        </Link>
       </section>
 
       <section className="grid grid-cols-1 gap-6 lg:grid-cols-5">
@@ -173,7 +182,7 @@ export default function DashboardPage() {
             <CardHeader className="flex flex-row items-center justify-between">
                 <div className="flex items-center gap-2">
                     <StickyNote className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">Recordatorios</CardTitle>
+                    <CardTitle className="text-lg">Mi lista de pendientes</CardTitle>
                 </div>
                 <Dialog open={isReminderDialogOpen} onOpenChange={setIsReminderDialogOpen}>
                     <DialogTrigger asChild>
@@ -284,3 +293,4 @@ export default function DashboardPage() {
     </ProtectedRoute>
   );
 }
+

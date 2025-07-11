@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from '@/components/theme-provider';
 import { AuthProvider } from '@/hooks/useAuth';
 import { Inter } from 'next/font/google';
+import { initialConfig } from '@/lib/config';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -11,12 +12,14 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
+const schoolName = initialConfig.name;
+
 export const metadata: Metadata = {
   title: {
-    default: 'Sofía Educa',
-    template: '%s | Sofía Educa',
+    default: schoolName,
+    template: `%s | ${schoolName}`,
   },
-  description: 'Sofía Educa – Sistema Integral de Aprendizaje',
+  description: `${schoolName} – Sistema Integral de Aprendizaje`,
 };
 
 export default function RootLayout({

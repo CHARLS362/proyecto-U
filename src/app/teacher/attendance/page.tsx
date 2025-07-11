@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageTitle } from "@/components/common/PageTitle";
 import {
   Card,
@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Search, FileText, Filter, ClipboardCheck, Database, Calendar as CalendarIcon } from 'lucide-react';
+import { Search, FileText, ClipboardCheck, Database, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -37,75 +37,185 @@ import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { mockStudents, mockCourses, type Student } from '@/lib/mockData';
+import { useToast } from "@/hooks/use-toast";
+
+// Simula el ID del docente que ha iniciado sesión
+const LOGGED_IN_TEACHER_ID = "T1749005331";
 
 export default function TeacherAttendancePage() {
+  const { toast } = useToast();
   const [date, setDate] = useState<Date | undefined>(new Date());
+  
+  // State for filters
+  const [selectedClass, setSelectedClass] = useState<string>('all');
+  const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
+  
+  // State for student list
+  const [isSearching, setIsSearching] = useState(false);
+  const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Derivados de la carga académica del docente
+  const teacherCourses = useMemo(() => {
+    return mockCourses.filter(course => course.instructorId === LOGGED_IN_TEACHER_ID);
+  }, []);
+  
+  const teacherCourseIds = useMemo(() => {
+      return teacherCourses.map(course => course.id);
+  }, [teacherCourses]);
+  
+  const studentsOfTeacher = useMemo(() => {
+      const studentSet = new Set<Student>();
+      mockStudents.forEach(student => {
+          if (student.courses.some(course => teacherCourseIds.includes(course.id))) {
+              studentSet.add(student);
+          }
+      });
+      return Array.from(studentSet);
+  }, [teacherCourseIds]);
+
+  const availableClasses = useMemo(() => {
+    const classSet = new Set(teacherCourses.map(c => c.classId || ''));
+    return Array.from(classSet).filter(Boolean);
+  }, [teacherCourses]);
+
+  const classDisplayMapping: { [key: string]: string } = {
+      "5-sec": "5º de Secundaria",
+      "3-sec": "3º de Secundaria",
+      "4-sec": "4º de Secundaria",
+  };
+
+  const handleSearch = () => {
+    setIsSearching(true);
+    // Simulate API call
+    setTimeout(() => {
+      let students = studentsOfTeacher;
+      if (selectedClass !== 'all') {
+        students = students.filter(s => s.classId === selectedClass);
+      }
+      if (selectedSection !== 'all') {
+        students = students.filter(s => s.section === selectedSection);
+      }
+      if (selectedCourse !== 'all') {
+        students = students.filter(student => student.courses.some(course => course.id === selectedCourse));
+      }
+      
+      setFilteredStudents(students);
+      toast({
+        title: "Búsqueda Realizada",
+        description: `Se encontraron ${students.length} estudiantes.`,
+        variant: "info",
+      });
+      setIsSearching(false);
+    }, 500);
+  };
+  
+  // Initialize with all teacher's students
+  useState(() => {
+    setFilteredStudents(studentsOfTeacher);
+  });
+
+  const handleSaveAttendance = async () => {
+    if (filteredStudents.length === 0) {
+      toast({
+        title: "Sin estudiantes",
+        description: "No hay estudiantes en la lista para guardar asistencia.",
+        variant: "warning",
+      });
+      return;
+    }
+    setIsSaving(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast({
+        title: "Asistencia Guardada",
+        description: `Se ha guardado la asistencia para ${filteredStudents.length} estudiantes.`,
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "Error al Guardar",
+        description: "No se pudo guardar la asistencia. Intente de nuevo.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <PageTitle title="Asistencia" icon={ClipboardCheck} />
+      <PageTitle title="Asistencia" icon={ClipboardCheck} subtitle="Tome y revise la asistencia de sus estudiantes." />
       <Tabs defaultValue="tomar-asistencia" className="w-full animate-fade-in">
         <TabsList className="grid w-full grid-cols-2 sm:max-w-xs">
           <TabsTrigger value="tomar-asistencia">Tomar asistencia</TabsTrigger>
           <TabsTrigger value="mostrar-asistencia">Mostrar asistencia</TabsTrigger>
         </TabsList>
+
         <TabsContent value="tomar-asistencia" className="mt-6">
           <div className="space-y-6">
             <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">Tomar asistencia</CardTitle>
-                </div>
-                <Button variant="ghost" size="icon">
-                    <Filter className="h-4 w-4" />
-                </Button>
+              <CardHeader>
+                <CardTitle className="text-lg">Seleccionar clase para la asistencia</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                   <div className="grid gap-2">
-                    <Label htmlFor="class">Clase</Label>
-                    <Select defaultValue="12-comercio">
+                    <Label htmlFor="class">Grado</Label>
+                    <Select value={selectedClass} onValueChange={setSelectedClass}>
                       <SelectTrigger id="class">
-                        <SelectValue />
+                        <SelectValue placeholder="Seleccionar Grado" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                        <SelectItem value="all">Todos mis grados</SelectItem>
+                        {availableClasses.map(classId => (
+                          <SelectItem key={classId} value={classId}>{classDisplayMapping[classId] || classId}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="section">Sección</Label>
-                    <Select defaultValue="A">
+                    <Select value={selectedSection} onValueChange={setSelectedSection}>
                       <SelectTrigger id="section">
-                        <SelectValue />
+                        <SelectValue placeholder="Seleccionar Sección" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="all">Todas</SelectItem>
                         <SelectItem value="A">A</SelectItem>
                         <SelectItem value="B">B</SelectItem>
                         <SelectItem value="C">C</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button className="w-full md:w-auto">
-                    <Search className="mr-2 h-4 w-4" />
-                    Encontrar
+                  <div className="grid gap-2">
+                    <Label htmlFor="course">Curso</Label>
+                    <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                      <SelectTrigger id="course">
+                        <SelectValue placeholder="Seleccionar Curso" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos mis cursos</SelectItem>
+                        {teacherCourses.map(course => (
+                          <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button className="w-full md:w-auto" onClick={handleSearch} disabled={isSearching}>
+                    {isSearching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
+                    Encontrar Estudiantes
                   </Button>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="shadow-lg">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">Lista de estudiantes</CardTitle>
-                </div>
-                 <Button variant="ghost" size="icon">
-                    <Filter className="h-4 w-4" />
-                </Button>
+              <CardHeader>
+                <CardTitle className="text-lg">Lista de estudiantes ({filteredStudents.length})</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <Table>
@@ -114,76 +224,87 @@ export default function TeacherAttendancePage() {
                       <TableHead>#</TableHead>
                       <TableHead>Número de rollo</TableHead>
                       <TableHead>Nombre</TableHead>
-                      <TableHead className="text-center">Total de días</TableHead>
-                      <TableHead className="text-center">Presente</TableHead>
                       <TableHead className="text-center">Asistencia</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell className="font-medium">1.</TableCell>
-                      <TableCell>S1718791292</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-9 w-9">
-                            <AvatarImage src="https://placehold.co/40x40.png" alt="Estudiante kumar" data-ai-hint="robot avatar" />
-                            <AvatarFallback>EK</AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium text-foreground">Estudiante kumar</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">0</TableCell>
-                      <TableCell className="text-center">0</TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center">
-                            <Switch id="attendance-switch-1" />
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    {filteredStudents.length > 0 ? (
+                      filteredStudents.map((student, index) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">{index + 1}.</TableCell>
+                          <TableCell>{student.id}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="h-9 w-9">
+                                <AvatarImage src={student.avatarUrl} alt={student.name} data-ai-hint="student avatar" />
+                                <AvatarFallback>{student.firstName.charAt(0)}{student.lastName.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium text-foreground">{student.name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex items-center justify-center">
+                                <Switch id={`attendance-${student.id}`} />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center">
+                          No se encontraron estudiantes con los filtros seleccionados.
+                        </TableCell>
+                      </TableRow>
+                    )}
                   </TableBody>
                 </Table>
               </CardContent>
-              <CardFooter className="flex justify-end gap-2 pt-4 border-t">
-                  <Button variant="outline">Reanudar</Button>
-                  <Button>Entregar</Button>
-              </CardFooter>
+              {filteredStudents.length > 0 && (
+                <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                    <Button variant="outline">Reiniciar</Button>
+                    <Button onClick={handleSaveAttendance} disabled={isSaving}>
+                      {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ClipboardCheck className="mr-2 h-4 w-4" />}
+                      {isSaving ? 'Guardando...' : 'Guardar Asistencia'}
+                    </Button>
+                </CardFooter>
+              )}
             </Card>
           </div>
         </TabsContent>
+
         <TabsContent value="mostrar-asistencia" className="mt-6">
           <div className="space-y-6">
             <Card className="shadow-lg">
               <CardHeader>
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                  <CardTitle className="text-lg">Información</CardTitle>
-                </div>
+                <CardTitle className="text-lg">Buscar historial de asistencia</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
                   <div className="grid gap-2">
-                    <Label htmlFor="date-class">Clase</Label>
-                    <Select defaultValue="12-comercio">
+                    <Label htmlFor="date-class">Grado</Label>
+                    <Select>
                       <SelectTrigger id="date-class">
-                        <SelectValue />
+                        <SelectValue placeholder="Seleccionar Grado" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="12-comercio">12 (Comercio)</SelectItem>
-                        <SelectItem value="11-ciencia">11 (Ciencia)</SelectItem>
-                        <SelectItem value="10-arte">10 (Arte)</SelectItem>
+                        <SelectItem value="all">Todos mis grados</SelectItem>
+                        {availableClasses.map(classId => (
+                          <SelectItem key={classId} value={classId}>{classDisplayMapping[classId] || classId}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="date-section">Sección</Label>
-                    <Select defaultValue="A">
+                    <Select>
                       <SelectTrigger id="date-section">
-                        <SelectValue />
+                         <SelectValue placeholder="Seleccionar Sección" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="A">A</SelectItem>
-                        <SelectItem value="B">B</SelectItem>
-                        <SelectItem value="C">C</SelectItem>
+                         <SelectItem value="all">Todas</SelectItem>
+                         <SelectItem value="A">A</SelectItem>
+                         <SelectItem value="B">B</SelectItem>
+                         <SelectItem value="C">C</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -226,10 +347,7 @@ export default function TeacherAttendancePage() {
             
             <Card className="shadow-lg">
                 <CardHeader>
-                    <div className="flex items-center gap-3">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <CardTitle className="text-lg">Hoja de asistencia</CardTitle>
-                    </div>
+                  <CardTitle className="text-lg">Hoja de asistencia</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -250,6 +368,7 @@ export default function TeacherAttendancePage() {
                             <Database className="h-12 w-12 text-accent" />
                         </div>
                         <h3 className="text-lg font-semibold text-foreground">Sin datos</h3>
+                        <p className="text-sm text-muted-foreground">Utilice los filtros de arriba para buscar un registro de asistencia.</p>
                     </div>
                 </CardContent>
             </Card>

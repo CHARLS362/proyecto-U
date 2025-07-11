@@ -4,9 +4,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { School, Facebook, Twitter, Instagram } from 'lucide-react';
+import { initialConfig } from '@/lib/config';
 
 export function LandingFooter() {
   const [currentYear, setCurrentYear] = useState<number | null>(null);
+  const schoolConfig = initialConfig; // In a real app, this might come from a context or props
 
   useEffect(() => {
     setCurrentYear(new Date().getFullYear());
@@ -20,13 +22,13 @@ export function LandingFooter() {
             <Link href="/" className="flex items-center justify-center md:justify-start gap-2 mb-2 group">
               <School className="h-7 w-7 text-primary group-hover:animate-pulse" />
               <span className="text-lg font-semibold text-foreground">
-                Sofía Educa
+                {schoolConfig.name}
               </span>
             </Link>
             <p className="text-xs">
               {currentYear !== null ?
-                `© ${currentYear} Sofía Educa. Todos los derechos reservados.` :
-                `© Cargando año... Sofía Educa. Todos los derechos reservados.`
+                `© ${currentYear} ${schoolConfig.name}. Todos los derechos reservados.` :
+                `© Cargando año... ${schoolConfig.name}. Todos los derechos reservados.`
               }
             </p>
           </div>
@@ -37,13 +39,13 @@ export function LandingFooter() {
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="#" aria-label="Facebook" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
+            <Link href={schoolConfig.social.facebook || '#'} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
               <Facebook className="h-5 w-5" />
             </Link>
-            <Link href="#" aria-label="Twitter" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
+            <Link href={schoolConfig.social.twitter || '#'} target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
               <Twitter className="h-5 w-5" />
             </Link>
-            <Link href="#" aria-label="Instagram" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
+            <Link href={schoolConfig.social.instagram || '#'} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-primary hover:scale-125 transform transition-all duration-300 ease-in-out">
               <Instagram className="h-5 w-5" />
             </Link>
           </div>

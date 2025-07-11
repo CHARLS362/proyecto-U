@@ -21,14 +21,32 @@ const courseFormSchema = z.object({
   code: z.string().min(3, "El código debe tener al menos 3 caracteres."),
   name: z.string().min(3, "El nombre del curso es obligatorio."),
   description: z.string().optional(),
+  level: z.string({ required_error: "Debe seleccionar un nivel." }).min(1, "Debe seleccionar un nivel."),
+  gradeId: z.string({ required_error: "Debe seleccionar un grado." }).min(1, "Debe seleccionar un grado."),
+  section: z.string({ required_error: "Debe seleccionar una sección." }).min(1, "Debe seleccionar una sección."),
   instructorId: z.string({ required_error: "Debe seleccionar un instructor." }).min(1, "Debe seleccionar un instructor."),
-  classId: z.string({ required_error: "Debe seleccionar una clase." }).min(1, "Debe seleccionar una clase."),
   department: z.string().min(3, "El departamento es obligatorio."),
-  capacity: z.coerce.number().min(1, "La capacidad debe ser al menos 1.").max(100, "La capacidad no puede exceder 100."),
   schedule: z.string().min(5, "El horario es obligatorio."),
 });
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
+
+const primaryGrades = [
+  { value: '1-pri', label: '1º de Primaria' },
+  { value: '2-pri', label: '2º de Primaria' },
+  { value: '3-pri', label: '3º de Primaria' },
+  { value: '4-pri', label: '4º de Primaria' },
+  { value: '5-pri', label: '5º de Primaria' },
+  { value: '6-pri', label: '6º de Primaria' },
+];
+
+const secondaryGrades = [
+  { value: '1-sec', label: '1º de Secundaria' },
+  { value: '2-sec', label: '2º de Secundaria' },
+  { value: '3-sec', label: '3º de Secundaria' },
+  { value: '4-sec', label: '4º de Secundaria' },
+  { value: '5-sec', label: '5º de Secundaria' },
+];
 
 export default function NewCoursePage() {
   const router = useRouter();
@@ -40,13 +58,16 @@ export default function NewCoursePage() {
       code: "",
       name: "",
       description: "",
+      level: "",
+      gradeId: "",
+      section: "",
       instructorId: "",
-      classId: "",
       department: "",
-      capacity: 25,
       schedule: "",
     },
   });
+
+  const selectedLevel = form.watch('level');
 
   const onSubmit = (data: CourseFormValues) => {
     // In a real app, you would send this data to your backend
@@ -103,8 +124,58 @@ export default function NewCoursePage() {
                 </FormItem>
               )} />
               
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <FormField control={form.control} name="level" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Nivel Educativo</FormLabel>
+                        <Select onValueChange={(value) => {
+                            field.onChange(value);
+                            form.resetField('gradeId');
+                        }} value={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar Nivel --" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                                <SelectItem value="Primaria">Primaria</SelectItem>
+                                <SelectItem value="Secundaria">Secundaria</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="gradeId" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Grado</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={!selectedLevel}>
+                            <FormControl><SelectTrigger><SelectValue placeholder={!selectedLevel ? "Seleccione un nivel primero" : "-- Seleccionar Grado --"} /></SelectTrigger></FormControl>
+                            <SelectContent>
+                                {selectedLevel === 'Primaria' && primaryGrades.map(grade => (
+                                    <SelectItem key={grade.value} value={grade.value}>{grade.label}</SelectItem>
+                                ))}
+                                {selectedLevel === 'Secundaria' && secondaryGrades.map(grade => (
+                                    <SelectItem key={grade.value} value={grade.value}>{grade.label}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="section" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Sección</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                                <SelectItem value="A">A</SelectItem>
+                                <SelectItem value="B">B</SelectItem>
+                                <SelectItem value="C">C</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField control={form.control} name="instructorId" render={({ field }) => (
+                 <FormField control={form.control} name="instructorId" render={({ field }) => (
                     <FormItem>
                         <FormLabel>Instructor</FormLabel>
                         <Select onValueChange={field.onChange} value={field.value}>
@@ -129,36 +200,13 @@ export default function NewCoursePage() {
                 )} />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                 <FormField control={form.control} name="classId" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Clase</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl><SelectTrigger><SelectValue placeholder="-- Seleccionar --" /></SelectTrigger></FormControl>
-                            <SelectContent>
-                                <SelectItem value="3-sec">3º de Secundaria</SelectItem>
-                                <SelectItem value="4-sec">4º de Secundaria</SelectItem>
-                                <SelectItem value="5-sec">5º de Secundaria</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="capacity" render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Capacidad</FormLabel>
-                        <FormControl><Input type="number" min="1" {...field} /></FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="schedule" render={({ field }) => (
+               <FormField control={form.control} name="schedule" render={({ field }) => (
                   <FormItem>
                     <FormLabel>Horario</FormLabel>
                     <FormControl><Input placeholder="Ej: Lu, Mi 10-11:30" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
-              </div>
 
             </CardContent>
             <CardContent className="flex justify-end gap-2 pt-4 border-t">
