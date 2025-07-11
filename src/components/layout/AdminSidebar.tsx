@@ -12,6 +12,12 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {
   LayoutGrid, 
   Users,
   GraduationCap, 
@@ -29,6 +35,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import React from 'react';
 
 const mainNav = [
   { href: '/admin/dashboard', label: 'Panel', icon: LayoutGrid },
@@ -45,9 +52,6 @@ const academicNav = [
   { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },
   { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
   { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
-];
-
-const resourcesNav = [
   { href: '/admin/news', label: 'Avisos', icon: Newspaper },
   { href: '/admin/calendar', label: 'Horario', icon: CalendarClock },
   { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
@@ -57,7 +61,7 @@ const bottomNav = [
   { href: '/admin/settings', label: 'Configuraciones', icon: Settings },
 ];
 
-const NavGroup = ({ title, items }: { title: string, items: typeof mainNav }) => {
+const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) => {
   const pathname = usePathname();
   const isActive = (href: string) => {
     if (href.endsWith('dashboard')) return pathname === href;
@@ -65,39 +69,37 @@ const NavGroup = ({ title, items }: { title: string, items: typeof mainNav }) =>
   };
 
   return (
-    <div className="flex flex-col gap-1">
-      <p className="px-4 py-2 text-xs font-semibold tracking-wider text-sidebar-foreground/60 uppercase group-data-[collapsible=icon]:hidden">
-        {title}
-      </p>
-      {items.map((item) => (
-        <SidebarMenuItem key={item.href} className="relative">
-           <SidebarMenuButton
-            asChild
-            isActive={isActive(item.href)}
-            tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
-            className="justify-start data-[active=true]:font-bold"
-          >
-            <Link href={item.href}>
-              <item.icon />
-              <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-            </Link>
-          </SidebarMenuButton>
-          <div 
-            className={cn(
-                "absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-all duration-200",
-                isActive(item.href) ? "h-6" : "group-hover:h-4"
-            )}
-          />
-        </SidebarMenuItem>
-      ))}
-    </div>
+    <SidebarMenuItem className="relative">
+      <SidebarMenuButton
+        asChild
+        isActive={isActive(href)}
+        tooltip={{ children: label, className: "bg-card text-card-foreground border-border shadow-md" }}
+        className="justify-start data-[active=true]:font-bold"
+      >
+        <Link href={href}>
+          <Icon />
+          <span className="group-data-[collapsible=icon]:hidden">{label}</span>
+        </Link>
+      </SidebarMenuButton>
+      <div 
+        className={cn(
+            "absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-all duration-200",
+            isActive(href) ? "h-6" : "group-hover:h-4"
+        )}
+      />
+    </SidebarMenuItem>
   );
 };
 
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const isActive = (href: string) => pathname.startsWith(href);
+
+  const getActiveAccordionItem = () => {
+    if (managementNav.some(item => pathname.startsWith(item.href))) return 'gestion';
+    if (academicNav.some(item => pathname.startsWith(item.href))) return 'academico';
+    return '';
+  };
 
   return (
     <>
@@ -110,19 +112,49 @@ export function AdminSidebar() {
         </Link>
       </SidebarHeader>
       
-      <SidebarContent className="p-2 space-y-4">
-        <SidebarMenu>
-            <NavGroup title="Principal" items={mainNav} />
-        </SidebarMenu>
-        <SidebarMenu>
-            <NavGroup title="Gestión" items={managementNav} />
-        </SidebarMenu>
-        <SidebarMenu>
-            <NavGroup title="Académico" items={academicNav} />
-        </SidebarMenu>
-        <SidebarMenu>
-            <NavGroup title="Recursos" items={resourcesNav} />
-        </SidebarMenu>
+      <SidebarContent className="p-2 space-y-1">
+        <div className="px-2">
+            <p className="px-4 py-2 text-xs font-semibold tracking-wider text-sidebar-foreground/60 uppercase group-data-[collapsible=icon]:hidden">
+                PRINCIPAL
+            </p>
+            <SidebarMenu>
+                {mainNav.map((item) => <NavItem key={item.href} {...item} />)}
+            </SidebarMenu>
+        </div>
+
+        <Accordion type="single" collapsible defaultValue={getActiveAccordionItem()} className="w-full group-data-[collapsible=icon]:hidden">
+          <AccordionItem value="gestion" className="border-none">
+            <AccordionTrigger className="px-6 py-2 text-xs font-semibold tracking-wider text-sidebar-foreground/60 uppercase hover:no-underline hover:bg-sidebar-accent/50 rounded-md">
+              Gestión
+            </AccordionTrigger>
+            <AccordionContent className="pt-1">
+              <SidebarMenu>
+                {managementNav.map((item) => <NavItem key={item.href} {...item} />)}
+              </SidebarMenu>
+            </AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="academico" className="border-none">
+            <AccordionTrigger className="px-6 py-2 text-xs font-semibold tracking-wider text-sidebar-foreground/60 uppercase hover:no-underline hover:bg-sidebar-accent/50 rounded-md">
+              Académico
+            </AccordionTrigger>
+            <AccordionContent className="pt-1">
+              <SidebarMenu>
+                {academicNav.map((item) => <NavItem key={item.href} {...item} />)}
+              </SidebarMenu>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        
+        {/* Collapsed view for icon-only sidebar */}
+        <div className="hidden group-data-[collapsible=icon]:block space-y-4">
+            <SidebarMenu>
+                {managementNav.map((item) => <NavItem key={item.href} {...item} />)}
+            </SidebarMenu>
+            <Separator className="bg-sidebar-border" />
+            <SidebarMenu>
+                {academicNav.map((item) => <NavItem key={item.href} {...item} />)}
+            </SidebarMenu>
+        </div>
       </SidebarContent>
 
       <SidebarFooter className="p-4 mt-auto border-t border-sidebar-border">
@@ -136,29 +168,9 @@ export function AdminSidebar() {
             <p className="text-xs text-muted-foreground">admin@sofiaeduca.com</p>
           </div>
         </div>
-        <Separator className="my-3" />
+        <Separator className="my-3 bg-sidebar-border" />
         <SidebarMenu>
-           {bottomNav.map((item) => (
-                <SidebarMenuItem key={item.href} className="relative">
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(item.href)}
-                      tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
-                      className="justify-start data-[active=true]:font-bold"
-                    >
-                      <Link href={item.href}>
-                          <item.icon />
-                          <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                     <div 
-                        className={cn(
-                            "absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-all duration-200",
-                            isActive(item.href) ? "h-6" : "group-hover:h-4"
-                        )}
-                      />
-                </SidebarMenuItem>
-            ))}
+           {bottomNav.map((item) => <NavItem key={item.href} {...item} />)}
              <SidebarMenuItem className="relative">
                 <SidebarMenuButton
                   asChild
