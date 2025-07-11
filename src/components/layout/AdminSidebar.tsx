@@ -104,7 +104,7 @@ export function AdminSidebar() {
   return (
     <>
       <SidebarHeader className="p-4">
-        <Link href="/" className="flex items-center gap-2 group/logo">
+        <Link href="/admin/dashboard" className="flex items-center gap-2 group/logo">
           <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
           <h1 className="text-xl font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
             Sofía Educa
