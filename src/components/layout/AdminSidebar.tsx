@@ -47,15 +47,16 @@ const managementNav = [
   { href: '/admin/students', label: 'Estudiantes', icon: GraduationCap },
   { href: '/admin/enrollment', label: 'Matrículas', icon: ClipboardEdit },
   { href: '/admin/courses', label: 'Cursos', icon: BookOpenText },
-];
-
-const academicNav = [
+  { href: '/admin/subjects', label: 'Temas', icon: BookCopy },
   { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },
   { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
   { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
   { href: '/admin/news', label: 'Avisos', icon: Newspaper },
   { href: '/admin/calendar', label: 'Horario', icon: CalendarClock },
   { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
+  { href: '/admin/grades', label: 'Notas', icon: NotebookText },
+  { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
+  { href: '/admin/bus-service', label: 'Servicio de Bus', icon: Bus },
 ];
 
 const bottomNav = [
