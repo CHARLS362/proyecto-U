@@ -20,7 +20,6 @@ import {
   CalendarClock, 
   LibraryBig, 
   Award, 
-  Bus, 
   Settings,
   LogOut,
   BookOpenText,
@@ -29,34 +28,76 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
-const navItems = [
+const mainNav = [
   { href: '/admin/dashboard', label: 'Panel', icon: LayoutGrid },
-  { href: '/admin/teachers', label: 'Docentes', icon: Users },
-  { href: '/admin/students', label: 'Gestión de Estudiantes', icon: GraduationCap },
-  { href: '/admin/enrollment', label: 'Matrículas', icon: ClipboardEdit },
-  { href: '/admin/courses', label: 'Cursos', icon: BookOpenText },
-  { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },
-  { href: '/admin/news', label: 'Tabla de noticias', icon: Newspaper },
-  { href: '/admin/calendar', label: 'Horario', icon: CalendarClock },
-  { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
-  { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
-  { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
 ];
 
-const bottomNavItems = [
-    { href: '/admin/settings', label: 'Configuraciones', icon: Settings },
-]
+const managementNav = [
+  { href: '/admin/teachers', label: 'Docentes', icon: Users },
+  { href: '/admin/students', label: 'Estudiantes', icon: GraduationCap },
+  { href: '/admin/enrollment', label: 'Matrículas', icon: ClipboardEdit },
+  { href: '/admin/courses', label: 'Cursos', icon: BookOpenText },
+];
+
+const academicNav = [
+  { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },
+  { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
+  { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
+];
+
+const resourcesNav = [
+  { href: '/admin/news', label: 'Avisos', icon: Newspaper },
+  { href: '/admin/calendar', label: 'Horario', icon: CalendarClock },
+  { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
+];
+
+const bottomNav = [
+  { href: '/admin/settings', label: 'Configuraciones', icon: Settings },
+];
+
+const NavGroup = ({ title, items }: { title: string, items: typeof mainNav }) => {
+  const pathname = usePathname();
+  const isActive = (href: string) => {
+    if (href.endsWith('dashboard')) return pathname === href;
+    return pathname.startsWith(href);
+  };
+
+  return (
+    <div className="flex flex-col gap-1">
+      <p className="px-4 py-2 text-xs font-semibold tracking-wider text-sidebar-foreground/60 uppercase group-data-[collapsible=icon]:hidden">
+        {title}
+      </p>
+      {items.map((item) => (
+        <SidebarMenuItem key={item.href} className="relative">
+           <SidebarMenuButton
+            asChild
+            isActive={isActive(item.href)}
+            tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
+            className="justify-start data-[active=true]:font-bold"
+          >
+            <Link href={item.href}>
+              <item.icon />
+              <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+            </Link>
+          </SidebarMenuButton>
+          <div 
+            className={cn(
+                "absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-all duration-200",
+                isActive(item.href) ? "h-6" : "group-hover:h-4"
+            )}
+          />
+        </SidebarMenuItem>
+      ))}
+    </div>
+  );
+};
+
 
 export function AdminSidebar() {
   const pathname = usePathname();
-
-  const isActive = (href: string) => {
-    // Exact match for dashboard
-    if (href.endsWith('dashboard')) return pathname === href;
-    // Starts with for other sections to handle sub-pages like /new or /[id]
-    return pathname.startsWith(href);
-  };
+  const isActive = (href: string) => pathname.startsWith(href);
 
   return (
     <>
@@ -68,28 +109,23 @@ export function AdminSidebar() {
           </h1>
         </Link>
       </SidebarHeader>
-      <Separator />
-      <SidebarContent className="p-2">
+      
+      <SidebarContent className="p-2 space-y-4">
         <SidebarMenu>
-          {navItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-               <SidebarMenuButton
-                asChild
-                isActive={isActive(item.href)}
-                tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
-                className="justify-start"
-              >
-                <Link href={item.href}>
-                  <item.icon />
-                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+            <NavGroup title="Principal" items={mainNav} />
+        </SidebarMenu>
+        <SidebarMenu>
+            <NavGroup title="Gestión" items={managementNav} />
+        </SidebarMenu>
+        <SidebarMenu>
+            <NavGroup title="Académico" items={academicNav} />
+        </SidebarMenu>
+        <SidebarMenu>
+            <NavGroup title="Recursos" items={resourcesNav} />
         </SidebarMenu>
       </SidebarContent>
-      <Separator />
-      <SidebarFooter className="p-4">
+
+      <SidebarFooter className="p-4 mt-auto border-t border-sidebar-border">
         <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
           <Avatar className="h-9 w-9">
             <AvatarImage src="https://placehold.co/40x40.png" alt="Usuario" data-ai-hint="user profile random" />
@@ -100,33 +136,41 @@ export function AdminSidebar() {
             <p className="text-xs text-muted-foreground">admin@sofiaeduca.com</p>
           </div>
         </div>
-        <SidebarMenu className="mt-2">
-           {bottomNavItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
+        <Separator className="my-3" />
+        <SidebarMenu>
+           {bottomNav.map((item) => (
+                <SidebarMenuItem key={item.href} className="relative">
                     <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.href)}
-                    tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
-                    className="justify-start"
+                      asChild
+                      isActive={isActive(item.href)}
+                      tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
+                      className="justify-start data-[active=true]:font-bold"
                     >
-                    <Link href={item.href}>
-                        <item.icon />
-                        <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                    </Link>
+                      <Link href={item.href}>
+                          <item.icon />
+                          <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                      </Link>
                     </SidebarMenuButton>
+                     <div 
+                        className={cn(
+                            "absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-all duration-200",
+                            isActive(item.href) ? "h-6" : "group-hover:h-4"
+                        )}
+                      />
                 </SidebarMenuItem>
             ))}
-             <SidebarMenuItem>
+             <SidebarMenuItem className="relative">
                 <SidebarMenuButton
                   asChild
                   tooltip={{ children: 'Cerrar Sesión', className:"bg-destructive text-destructive-foreground border-border shadow-md" }}
-                  className="justify-start group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive hover:bg-destructive/90 hover:text-destructive-foreground"
+                  className="justify-start hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive"
                 >
                   <Link href="/logout">
                     <LogOut />
                     <span className="group-data-[collapsible=icon]:hidden">Cerrar Sesión</span>
                   </Link>
                 </SidebarMenuButton>
+                 <div className="absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-destructive transition-all duration-200 group-hover:h-4"/>
             </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

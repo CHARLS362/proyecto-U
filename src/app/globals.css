@@ -5,29 +5,29 @@
 
 @layer base {
   :root {
-    --background: 213 33% 95%; /* Light Gray F0F4F8 */
-    --foreground: 213 33% 10%; /* Dark Gray/Blue */
+    --background: 220 20% 96%; /* Lighter Gray F5F7FA */
+    --foreground: 220 15% 25%; /* Darker Blue-Gray */
 
-    --muted: 213 33% 88%;
-    --muted-foreground: 213 33% 35%;
+    --muted: 220 20% 90%;
+    --muted-foreground: 220 15% 45%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 213 33% 10%;
+    --popover-foreground: 220 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 213 33% 10%;
+    --card-foreground: 220 15% 15%;
 
-    --border: 213 33% 85%;
-    --input: 213 33% 88%;
+    --border: 220 15% 88%;
+    --input: 220 15% 92%;
 
-    --primary: 207 88% 71%; /* Soft Blue #64B5F6 */
-    --primary-foreground: 207 88% 10%; /* Dark Blue for contrast */
+    --primary: 210 90% 55%; /* Brighter Blue */
+    --primary-foreground: 210 90% 10%; 
 
     --secondary: 262 84% 60%;
     --secondary-foreground: 262 84% 10%;
 
-    --accent: 36 100% 75%; /* Light Orange #FFCC80 */
-    --accent-foreground: 36 100% 15%; /* Dark Orange/Brown for contrast */
+    --accent: 36 100% 60%; /* Vibrant Orange */
+    --accent-foreground: 36 100% 10%; 
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -38,77 +38,77 @@
     --warning: 45 93% 47%;
     --warning-foreground: 45 93% 10%;
 
-    --ring: 207 88% 65%; /* A slightly darker shade of primary for rings */
+    --ring: 210 90% 50%;
 
     --radius: 0.75rem;
 
     /* Sidebar specific colors */
-    --sidebar-background: 0 0% 100%; /* White */
-    --sidebar-foreground: 213 33% 25%; /* Dark Gray/Blue */
-    --sidebar-primary: 207 88% 71%; /* Main primary color */
-    --sidebar-primary-foreground: 207 88% 10%; /* Dark text on primary */
-    --sidebar-accent: 207 88% 92%; /* Lighter blue for hover */
-    --sidebar-accent-foreground: 207 88% 10%; /* Dark text on hover */
-    --sidebar-border: 213 33% 90%; /* Lighter gray */
-    --sidebar-ring: 207 88% 65%;
+    --sidebar-background: 224 30% 12%; /* Dark Blue */
+    --sidebar-foreground: 224 20% 88%; /* Light Gray/Blue for text */
+    --sidebar-primary: 158 75% 55%; /* Bright Green */
+    --sidebar-primary-foreground: 158 75% 10%;
+    --sidebar-accent: 224 30% 20%;  /* Slightly lighter dark blue for hover */
+    --sidebar-accent-foreground: 0 0% 100%; /* White text on hover */
+    --sidebar-border: 224 30% 18%; /* Border for dark sidebar */
+    --sidebar-ring: 158 75% 60%;
 
-    --chart-1: 207 88% 60%;
-    --chart-2: 36 100% 65%;
+    --chart-1: 210 90% 55%;
+    --chart-2: 36 100% 60%;
     --chart-3: 173 58% 39%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
   }
 
   .dark {
-    --background: 213 33% 10%;
-    --foreground: 213 33% 95%;
+    --background: 224 30% 12%; /* Dark Blue */
+    --foreground: 224 20% 92%; /* Light Gray/Blue */
 
-    --muted: 213 33% 20%;
-    --muted-foreground: 213 33% 70%;
+    --muted: 224 30% 18%;
+    --muted-foreground: 224 20% 65%;
 
-    --popover: 213 33% 12%;
-    --popover-foreground: 213 33% 95%;
+    --popover: 224 30% 10%;
+    --popover-foreground: 224 20% 92%;
 
-    --card: 213 33% 12%;
-    --card-foreground: 213 33% 95%;
+    --card: 224 30% 15%;
+    --card-foreground: 224 20% 92%;
 
-    --border: 213 33% 25%;
-    --input: 213 33% 25%;
+    --border: 224 30% 22%;
+    --input: 224 30% 20%;
 
-    --primary: 207 88% 65%;
-    --primary-foreground: 207 88% 10%;
+    --primary: 158 75% 55%; /* Bright Green */
+    --primary-foreground: 158 75% 10%;
 
     --secondary: 262 84% 70%;
     --secondary-foreground: 262 84% 95%;
     
-    --accent: 36 100% 70%; 
+    --accent: 36 100% 60%; 
     --accent-foreground: 36 100% 10%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 74% 55%;
     --destructive-foreground: 0 0% 98%;
 
     --success: 145 63% 49%;
     --success-foreground: 145 63% 95%;
 
-    --warning: 45 93% 47%;
-    --warning-foreground: 45 93% 95%;
+    --warning: 45 93% 55%;
+    --warning-foreground: 45 93% 10%;
 
-    --ring: 207 88% 60%;
+    --ring: 158 75% 60%;
 
     --radius: 0.75rem;
 
-    /* Dark Sidebar specific colors - updated to match image */
-    --sidebar-background: 220 13% 10%; /* Very dark gray, almost black */
-    --sidebar-foreground: 210 20% 90%; /* Light gray/white for text */
-    --sidebar-primary: 145 60% 40%; /* Green color for primary actions/highlights if needed */
-    --sidebar-primary-foreground: 145 60% 95%; /* Light text for on-green primary */
-    --sidebar-accent: 145 55% 35%;  /* Green for active Panel item - as per image */
-    --sidebar-accent-foreground: 145 55% 95%; /* Light green/white text for on-green accent */
-    --sidebar-border: 220 13% 20%; /* Slightly lighter border for dark sidebar */
-    --sidebar-ring: 145 60% 50%; /* Green ring */
+    /* Dark Sidebar specific colors - re-using light theme for consistency */
+    --sidebar-background: 224 30% 12%; 
+    --sidebar-foreground: 224 20% 88%; 
+    --sidebar-primary: 158 75% 55%; 
+    --sidebar-primary-foreground: 158 75% 10%;
+    --sidebar-accent: 224 30% 20%; 
+    --sidebar-accent-foreground: 0 0% 100%; 
+    --sidebar-border: 224 30% 18%;
+    --sidebar-ring: 158 75% 60%;
 
-    --chart-1: 207 88% 70%;
-    --chart-2: 36 100% 80%;
+    --chart-1: 158 75% 55%;
+    --chart-2: 36 100% 60%;
   }
 }
 
