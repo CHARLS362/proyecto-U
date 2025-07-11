@@ -7,9 +7,11 @@ import { School } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { cn } from "@/lib/utils";
+import { initialConfig } from '@/lib/config';
 
 export function LandingNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const schoolName = initialConfig.name;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,7 +34,7 @@ export function LandingNavbar() {
         <Link href="/" className="flex items-center gap-2 group">
           <School className="h-7 w-7 text-primary group-hover:scale-110 group-hover:text-primary transition-all duration-300 ease-in-out" />
           <span className="text-xl font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
-            Sofía Educa
+            {schoolName}
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium">

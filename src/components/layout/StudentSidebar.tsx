@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { initialConfig } from '@/lib/config';
 
 const navItems = [
   { href: '/student/dashboard', label: 'Panel', icon: LayoutGrid },
@@ -37,6 +38,7 @@ const navItems = [
 
 export function StudentSidebar() {
   const pathname = usePathname();
+  const schoolName = initialConfig.name;
 
   const isActive = (href: string) => {
     if (href === '/student/dashboard') return pathname === href;
@@ -49,7 +51,7 @@ export function StudentSidebar() {
         <Link href="/student/dashboard" className="flex items-center gap-2 group/logo">
           <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
           <h1 className="text-xl font-semibold text-foreground group-data-[collapsible=icon]:hidden">
-            Sofía Educa
+            {schoolName}
           </h1>
         </Link>
       </SidebarHeader>

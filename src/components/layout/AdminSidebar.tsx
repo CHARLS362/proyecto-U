@@ -36,6 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import React from 'react';
+import { initialConfig } from '@/lib/config';
 
 const mainNav = [
   { href: '/admin/dashboard', label: 'Panel', icon: LayoutGrid },
@@ -94,6 +95,7 @@ const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; ico
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const schoolName = initialConfig.name;
 
   const getActiveAccordionItem = () => {
     if (managementNav.some(item => pathname.startsWith(item.href))) return 'gestion';
@@ -107,7 +109,7 @@ export function AdminSidebar() {
         <Link href="/admin/dashboard" className="flex items-center gap-2 group/logo">
           <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
           <h1 className="text-xl font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
-            Sofía Educa
+            {schoolName}
           </h1>
         </Link>
       </SidebarHeader>
