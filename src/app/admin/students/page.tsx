@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -40,8 +39,10 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PageTitle } from '@/components/common/PageTitle';
-import { mockStudents } from '@/lib/mockData';
-import type { Student } from '@/lib/mockData';
+import { useStudents, type Student } from '@/hooks/useStudents';
+import { useClasses } from '@/hooks/useClasses';
+import { generateUniqueId } from '@/lib/idGenerator';
+import { formatDateForInput } from '@/lib/dateUtils';
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -94,7 +95,7 @@ const studentFormSchema = z.object({
   guardianName: z.string().min(2, "El nombre del apoderado es obligatorio."),
   studentDob: z.string().min(1, "La fecha de nacimiento es obligatoria."),
   studentGender: z.string({ required_error: "Por favor, seleccione un género." }),
-  studentClass: z.string({ required_error: "Por favor, seleccione una clase." }),
+  studentClass: z.string().min(1, "La clase es obligatoria."),
   studentSection: z.string({ required_error: "Por favor, seleccione una sección." }),
   studentPhoto: z.any().optional(),
 
@@ -122,7 +123,7 @@ const defaultValues: Partial<StudentFormValues> = {
   studentDob: "",
   studentGender: "",
   studentClass: "",
-  studentSection: "",
+  studentSection: "A",
   studentPhone: "",
   studentEmail: "",
   studentAddress: "",
@@ -138,8 +139,11 @@ const defaultValues: Partial<StudentFormValues> = {
 export default function StudentsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [students, setStudents] = useState<Student[]>(mockStudents);
+  const { students, loading, error, fetchStudents, createStudent, updateStudent, deleteStudent } = useStudents();
+  const { classes, loading: classesLoading } = useClasses();
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterClass, setFilterClass] = useState('');
+  const [filterSection, setFilterSection] = useState('all');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
@@ -156,6 +160,16 @@ export default function StudentsPage() {
     defaultValues,
     mode: "onChange",
   });
+  
+  // Observar cambios en la clase seleccionada para actualizar las secciones dinámicamente
+  const selectedClass = form.watch('studentClass');
+  
+  // Limpiar la sección cuando cambie la clase
+  useEffect(() => {
+    if (selectedClass) {
+      form.setValue('studentSection', 'A');
+    }
+  }, [selectedClass, form]);
   
   const handleModalChange = (open: boolean) => {
     setIsModalOpen(open);
@@ -180,162 +194,157 @@ export default function StudentsPage() {
     setModalMode('edit');
     setCurrentStudentId(student.id);
 
-    form.setValue('studentFirstName', student.firstName);
-    form.setValue('studentLastName', student.lastName);
-    form.setValue('guardianName', student.guardianName || '');
-    form.setValue('studentDob', student.dob || '');
-    form.setValue('studentGender', student.gender || '');
-    form.setValue('studentClass', student.classId || '');
-    form.setValue('studentSection', student.section || '');
-    form.setValue('studentPhone', student.phone);
-    form.setValue('studentEmail', student.email);
-    form.setValue('studentAddress', student.address);
-    form.setValue('studentDepartment', student.department || '');
-    form.setValue('studentCity', student.city || '');
-    form.setValue('guardianPhone', student.guardianContact || '');
-    form.setValue('guardianEmail', student.guardianEmail || '');
-    form.setValue('guardianAddress', student.guardianAddress || '');
-    form.setValue('guardianDob', student.guardianDob || '');
+    form.setValue('studentFirstName', student.primer_nombre);
+    form.setValue('studentLastName', student.apellido);
+    form.setValue('guardianName', student.nombre_tutor || '');
     
-    setPhotoPreview(student.avatarUrl);
-    setPhotoFileName(student.avatarUrl.split('/').pop() || 'photo.png');
+    // Formatear la fecha de nacimiento usando la función de utilidad
+    if (student.fecha_nacimiento) {
+      form.setValue('studentDob', formatDateForInput(student.fecha_nacimiento));
+    }
+    
+    form.setValue('studentGender', student.genero || '');
+    form.setValue('studentClass', student.nivel_grado || '');
+    form.setValue('studentSection', student.seccion || 'A');
+    form.setValue('studentPhone', student.telefono || '');
+    form.setValue('studentEmail', student.correo);
+    form.setValue('studentAddress', student.direccion || '');
+    form.setValue('studentDepartment', student.departamento || '');
+    form.setValue('studentCity', student.ciudad || '');
+    form.setValue('guardianPhone', student.contacto_tutor || '');
+    form.setValue('guardianEmail', student.correo_tutor || '');
+    form.setValue('guardianAddress', student.direccion_tutor || '');
+    
+    if (student.fecha_nacimiento_tutor) {
+      form.setValue('guardianDob', formatDateForInput(student.fecha_nacimiento_tutor));
+    }
+    
+    if (student.url_avatar) {
+      setPhotoPreview(student.url_avatar);
+      setPhotoFileName('Foto actual');
+    }
     
     setIsModalOpen(true);
   };
-  
+
   const openDeleteAlert = (student: Student) => {
     setStudentToDelete(student);
     setIsDeleteAlertOpen(true);
   };
 
-  const handleDeleteStudent = () => {
+  const handleDeleteStudent = async () => {
     if (!studentToDelete) return;
-    setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
-    toast({
-        title: "Estudiante Eliminado",
-        description: `El estudiante ${studentToDelete.name} ha sido eliminado.`,
-        variant: "success",
-    });
-    setIsDeleteAlertOpen(false);
-    setStudentToDelete(null);
+    
+    try {
+      await deleteStudent(studentToDelete.id);
+      toast({ 
+        title: "Estudiante Eliminado", 
+        description: `El estudiante ${studentToDelete.primer_nombre} ${studentToDelete.apellido} ha sido eliminado exitosamente.`,
+        variant: "success"
+      });
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: "No se pudo eliminar el estudiante.", 
+        variant: "destructive"
+      });
+    } finally {
+      setIsDeleteAlertOpen(false);
+      setStudentToDelete(null);
+    }
   };
-
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setPhotoFileName(file.name);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhotoPreview(reader.result as string);
-        form.setValue("studentPhoto", file);
-        setPhotoFileName(file.name);
+      reader.onload = (event) => {
+        setPhotoPreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
-    } else {
-        setPhotoPreview(null);
-        form.setValue("studentPhoto", undefined);
-        setPhotoFileName('Ningún archivo seleccionado');
     }
   };
-  
+
   const nextStep = async () => {
-    let fieldsToValidate: (keyof StudentFormValues)[] = [];
-    if (step === 1) {
-      fieldsToValidate = ['studentFirstName', 'studentLastName', 'guardianName', 'studentDob', 'studentGender', 'studentClass', 'studentSection'];
-    } else if (step === 2) {
-      fieldsToValidate = ['studentPhone', 'studentEmail', 'studentAddress', 'studentDepartment', 'studentCity'];
-    }
-    
-    const isValid = await form.trigger(fieldsToValidate);
-    if(isValid) {
-        setStep(s => s + 1);
-    } else {
-       toast({
-         variant: 'destructive',
-         title: 'Campos Incompletos',
-         description: 'Por favor, rellene todos los campos requeridos antes de continuar.',
-       });
+    const isValid = await form.trigger();
+    if (isValid) {
+      setStep(step + 1);
     }
   };
 
   const prevStep = () => {
-    setStep(s => s - 1);
+    setStep(step - 1);
   };
 
-  function onSubmit(data: StudentFormValues) {
-    const classDisplayMapping: { [key: string]: string } = {
-        "3-sec": "3º de Secundaria",
-        "4-sec": "4º de Secundaria",
-        "5-sec": "5º de Secundaria",
-    };
-    const gradeLevel = classDisplayMapping[data.studentClass] || data.studentClass;
-
-    if (modalMode === 'add') {
-        const newStudent: Student = {
-            id: `S${Date.now().toString().slice(-4)}`,
-            name: `${data.studentFirstName} ${data.studentLastName}`,
-            firstName: data.studentFirstName,
-            lastName: data.studentLastName,
-            avatarUrl: photoPreview || "https://placehold.co/100x100.png",
-            email: data.studentEmail,
-            phone: data.studentPhone,
-            courses: [],
-            enrollmentDate: new Date().toISOString().split('T')[0],
-            address: data.studentAddress,
-            gradeLevel: gradeLevel,
-            guardianName: data.guardianName,
-            guardianContact: data.guardianPhone,
-            dob: data.studentDob,
-            gender: data.studentGender as any,
-            classId: data.studentClass,
-            section: data.studentSection,
-            department: data.studentDepartment,
-            city: data.studentCity,
-            guardianEmail: data.guardianEmail,
-            guardianAddress: data.guardianAddress,
-            guardianDob: data.guardianDob,
+  async function onSubmit(data: StudentFormValues) {
+    try {
+      if (modalMode === 'add') {
+        const studentData = {
+          nombre: `${data.studentFirstName} ${data.studentLastName}`,
+          primer_nombre: data.studentFirstName,
+          apellido: data.studentLastName,
+          url_avatar: photoPreview || null,
+          correo: data.studentEmail,
+          telefono: data.studentPhone,
+          fecha_matricula: new Date().toISOString().split('T')[0],
+          direccion: data.studentAddress,
+          nivel_grado: data.studentClass,
+          nombre_tutor: data.guardianName,
+          contacto_tutor: data.guardianPhone,
+          fecha_nacimiento: data.studentDob,
+          genero: data.studentGender,
+          seccion: data.studentSection,
+          departamento: data.studentDepartment,
+          ciudad: data.studentCity,
+          correo_tutor: data.guardianEmail,
+          direccion_tutor: data.guardianAddress,
+          fecha_nacimiento_tutor: data.guardianDob
         };
-        setStudents(prev => [newStudent, ...prev]);
-        toast({
-            title: "Estudiante Agregado",
-            description: `El estudiante ${newStudent.name} ha sido registrado exitosamente.`,
-            variant: "success",
+
+        await createStudent(studentData);
+        toast({ 
+          title: "Estudiante Agregado", 
+          description: `El estudiante ${data.studentFirstName} ${data.studentLastName} ha sido registrado exitosamente.`,
+          variant: "success"
         });
-    } else if(currentStudentId) {
-        setStudents(prev => prev.map(s => {
-            if (s.id === currentStudentId) {
-                return {
-                    ...s,
-                    name: `${data.studentFirstName} ${data.studentLastName}`,
-                    firstName: data.studentFirstName,
-                    lastName: data.studentLastName,
-                    avatarUrl: photoPreview || s.avatarUrl,
-                    email: data.studentEmail,
-                    phone: data.studentPhone,
-                    address: data.studentAddress,
-                    gradeLevel: gradeLevel,
-                    guardianName: data.guardianName,
-                    guardianContact: data.guardianPhone,
-                    dob: data.studentDob,
-                    gender: data.studentGender as any,
-                    classId: data.studentClass,
-                    section: data.studentSection,
-                    department: data.studentDepartment,
-                    city: data.studentCity,
-                    guardianEmail: data.guardianEmail,
-                    guardianAddress: data.guardianAddress,
-                    guardianDob: data.guardianDob,
-                };
-            }
-            return s;
-        }));
-        toast({
-            title: "Estudiante Actualizado",
-            description: `Los datos de ${data.studentFirstName} ${data.studentLastName} han sido actualizados.`,
-            variant: "success",
+      } else if (currentStudentId) {
+        const updateData = {
+          nombre: `${data.studentFirstName} ${data.studentLastName}`,
+          primer_nombre: data.studentFirstName,
+          apellido: data.studentLastName,
+          url_avatar: photoPreview || null,
+          correo: data.studentEmail,
+          telefono: data.studentPhone,
+          direccion: data.studentAddress,
+          nivel_grado: data.studentClass,
+          nombre_tutor: data.guardianName,
+          contacto_tutor: data.guardianPhone,
+          fecha_nacimiento: data.studentDob,
+          genero: data.studentGender,
+          seccion: data.studentSection,
+          departamento: data.studentDepartment,
+          ciudad: data.studentCity,
+          correo_tutor: data.guardianEmail,
+          direccion_tutor: data.guardianAddress,
+          fecha_nacimiento_tutor: data.guardianDob
+        };
+
+        await updateStudent(currentStudentId, updateData);
+        toast({ 
+          title: "Estudiante Actualizado", 
+          description: `Los datos de ${data.studentFirstName} ${data.studentLastName} han sido actualizados.`,
+          variant: "success"
         });
+      }
+      handleModalChange(false);
+    } catch (error) {
+      toast({ 
+        title: "Error", 
+        description: modalMode === 'add' ? "No se pudo agregar el estudiante." : "No se pudo actualizar el estudiante.", 
+        variant: "destructive"
+      });
     }
-    handleModalChange(false);
   }
   
   const getStepTitle = (currentStep: number) => {
@@ -347,11 +356,52 @@ export default function StudentsPage() {
     }
   }
 
+  // Filtrado de estudiantes
+  const filteredStudents = students.filter(student => {
+    const matchesSearch = `${student.primer_nombre} ${student.apellido}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         student.id.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesClass = !filterClass || student.nivel_grado?.toLowerCase().includes(filterClass.toLowerCase());
+    const matchesSection = !filterSection || filterSection === 'all' || student.seccion === filterSection;
+    
+    return matchesSearch && matchesClass && matchesSection;
+  });
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Obtener secciones únicas para el filtro
+  const uniqueSections = Array.from(new Set(students.map(student => student.seccion).filter(Boolean)));
+
+  // Mostrar estado de carga
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <PageTitle title="Gestión de Estudiantes" subtitle="Agregue, vea o edite la información de los estudiantes." icon={Users} />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Cargando estudiantes...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar estado de error
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <PageTitle title="Gestión de Estudiantes" subtitle="Agregue, vea o edite la información de los estudiantes." icon={Users} />
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-destructive mb-4">Error al cargar los estudiantes</p>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={fetchStudents} variant="outline">
+              Reintentar
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -412,40 +462,46 @@ export default function StudentsPage() {
             <CardHeader>
               <div className="flex items-center gap-2">
                 <ListOrdered className="h-5 w-5 text-muted-foreground" />
-                <CardTitle className="text-lg">Lista de estudiantes</CardTitle>
+                <CardTitle className="text-lg">Filtros de búsqueda</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div className="grid gap-2">
-                  <Label htmlFor="class">Clase</Label>
-                   <Select>
-                    <SelectTrigger id="class">
-                      <SelectValue placeholder="Seleccionar Clase" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="3-sec">3º de Secundaria</SelectItem>
-                        <SelectItem value="4-sec">4º de Secundaria</SelectItem>
-                        <SelectItem value="5-sec">5º de Secundaria</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="class-filter">Clase</Label>
+                  <Input
+                    id="class-filter"
+                    placeholder="Buscar por clase..."
+                    value={filterClass}
+                    onChange={(e) => setFilterClass(e.target.value)}
+                  />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="section">Sección</Label>
-                  <Select>
-                    <SelectTrigger id="section">
-                      <SelectValue placeholder="Seleccionar Sección" />
+                  <Label htmlFor="section-filter">Sección</Label>
+                  <Select value={filterSection} onValueChange={setFilterSection}>
+                    <SelectTrigger id="section-filter">
+                      <SelectValue placeholder="Todas las secciones" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="A">A</SelectItem>
-                      <SelectItem value="B">B</SelectItem>
-                      <SelectItem value="C">C</SelectItem>
+                      <SelectItem value="all">Todas las secciones</SelectItem>
+                      {uniqueSections.map((section) => (
+                        <SelectItem key={section} value={section}>
+                          {section}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <Button className="w-full md:w-auto">
+                <Button 
+                  className="w-full md:w-auto"
+                  onClick={() => {
+                    setFilterClass('');
+                    setFilterSection('all');
+                    setSearchTerm('');
+                  }}
+                >
                   <SearchIcon className="mr-2 h-4 w-4" />
-                  Encontrar
+                  Limpiar filtros
                 </Button>
               </div>
             </CardContent>
@@ -456,11 +512,11 @@ export default function StudentsPage() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-2">
                     <ListOrdered className="h-5 w-5 text-muted-foreground" />
-                    <CardTitle className="text-lg">Lista de estudiantes</CardTitle>
+                    <CardTitle className="text-lg">Lista de estudiantes ({filteredStudents.length})</CardTitle>
                   </div>
                  <div className="flex w-full sm:w-auto items-center gap-2">
                     <Input
-                      placeholder="Buscar..."
+                      placeholder="Buscar por nombre o ID..."
                       className="w-full sm:w-auto bg-card"
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
@@ -478,6 +534,8 @@ export default function StudentsPage() {
                     <TableHead>#</TableHead>
                     <TableHead>Identificación de estudiante</TableHead>
                     <TableHead>Nombre</TableHead>
+                    <TableHead>Clase</TableHead>
+                    <TableHead>Sección</TableHead>
                     <TableHead className="text-right">Acción</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -489,12 +547,14 @@ export default function StudentsPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9">
-                            <AvatarImage src={student.avatarUrl} alt={student.name} data-ai-hint="student avatar" />
-                            <AvatarFallback>{student.name.substring(0, 2)}</AvatarFallback>
+                            <AvatarImage src={student.url_avatar || "https://placehold.co/40x40.png"} alt={`${student.primer_nombre} ${student.apellido}`} data-ai-hint="student avatar" />
+                            <AvatarFallback>{student.primer_nombre.substring(0, 1)}{student.apellido.substring(0, 1)}</AvatarFallback>
                           </Avatar>
-                           <span className="font-medium text-foreground">{student.name}</span>
+                           <span className="font-medium text-foreground">{`${student.primer_nombre} ${student.apellido}`}</span>
                         </div>
                       </TableCell>
+                      <TableCell>{student.nivel_grado || '-'}</TableCell>
+                      <TableCell>{student.seccion || '-'}</TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" onClick={() => handleOpenEditModal(student)}>
                           <Edit className="mr-1 h-3 w-3" /> Editar
@@ -700,14 +760,9 @@ export default function StudentsPage() {
                         <FormField control={form.control} name="studentClass" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Clase</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="---seleccionar---" /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="3-sec">3º de Secundaria</SelectItem>
-                                      <SelectItem value="4-sec">4º de Secundaria</SelectItem>
-                                      <SelectItem value="5-sec">5º de Secundaria</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <FormControl>
+                                    <Input placeholder="Ej: Primer Grado, Segundo Grado..." {...field} />
+                                </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -720,6 +775,8 @@ export default function StudentsPage() {
                                         <SelectItem value="A">A</SelectItem>
                                         <SelectItem value="B">B</SelectItem>
                                         <SelectItem value="C">C</SelectItem>
+                                        <SelectItem value="D">D</SelectItem>
+                                        <SelectItem value="E">E</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />

@@ -9,25 +9,39 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import loginImg from '@/recursos/login.png';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('Login attempt with:', { email, password });
-
-    if (email === 'juan.docente@sofiaeduca.com' && password === 'teacherpass') {
-      router.push('/teacher/dashboard');
-    } else if (email === 'ana.perez@example.com' && password === 'studentpass') {
-      router.push('/student/dashboard');
-    }
-     else {
-      router.push('/admin/dashboard');
+    
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    setNotification({ type: 'success', message: 'Iniciando sesión...' });
+    
+    try {
+      const success = await login(email, password);
+      
+      if (success) {
+        setNotification({ type: 'success', message: '¡Inicio de sesión exitoso!' });
+        // La redirección se maneja automáticamente en el hook useAuth
+      } else {
+        setNotification({ type: 'error', message: 'Credenciales inválidas' });
+      }
+    } catch (error) {
+      console.error('Error durante el login:', error);
+      setNotification({ type: 'error', message: 'No se pudo conectar con el servidor.' });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -101,8 +115,12 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full bg-foreground text-background hover:bg-foreground/90 h-11 text-base">
-              Iniciar Sesión
+            <Button 
+              type="submit" 
+              className="w-full bg-foreground text-background hover:bg-foreground/90 h-11 text-base"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </Button>
           </form>
         </div>

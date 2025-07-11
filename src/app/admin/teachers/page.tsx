@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Filter, UserPlus, ListOrdered, Search as SearchIcon, Edit, Trash2, UsersRound, Hourglass, FileText as NoLeavesIcon, UserCog, ChevronRight, ChevronsUpDown, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,13 +30,20 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { mockTeachers, type Teacher } from '@/lib/mockData';
+import { useTeachers, type Teacher } from '@/hooks/useTeachers';
+import { useClasses } from '@/hooks/useClasses';
+import { useSubjects } from '@/hooks/useSubjects';
 import { useToast } from '@/hooks/use-toast';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { generateUniqueId } from '@/lib/idGenerator';
+import { formatDateForInput } from '@/lib/dateUtils';
 
 
 export default function TeachersPage() {
   const { toast } = useToast();
-  const [teachers, setTeachers] = useState(mockTeachers);
+  const { teachers, loading, error, fetchTeachers, createTeacher, updateTeacher, deleteTeacher } = useTeachers();
+  const { classes, loading: classesLoading } = useClasses();
+  const { subjects, loading: subjectsLoading } = useSubjects();
   const [searchTerm, setSearchTerm] = useState('');
   
   // Modal and form state
@@ -67,6 +73,43 @@ export default function TeachersPage() {
   const [statusSearchTerm, setStatusSearchTerm] = useState('');
   const [isTeacherListOpen, setIsTeacherListOpen] = useState(false);
 
+  // State for delete confirmation dialog
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [teacherToDelete, setTeacherToDelete] = useState<Teacher | null>(null);
+  
+  // State for editing teacher data
+  const [teacherToEdit, setTeacherToEdit] = useState<Teacher | null>(null);
+
+
+  // useEffect para establecer los valores del formulario cuando se selecciona un profesor para editar
+  useEffect(() => {
+    if (teacherToEdit && modalMode === 'edit') {
+      // Formatear la fecha para el input de tipo date
+      let formattedDob = '';
+      if (teacherToEdit.fecha_nacimiento) {
+        try {
+          const date = new Date(teacherToEdit.fecha_nacimiento);
+          if (!isNaN(date.getTime())) {
+            formattedDob = date.toISOString().split('T')[0]; // Convierte a YYYY-MM-DD
+          }
+        } catch (error) {
+          console.error('Error formateando fecha:', error);
+        }
+      }
+      setFirstName(teacherToEdit.primer_nombre || '');
+      setLastName(teacherToEdit.apellido || '');
+      setTeacherClass(teacherToEdit.clase || '');
+      setTeacherSection(teacherToEdit.seccion || '');
+      setRelatedSubject(teacherToEdit.materia_relacionada || '');
+      setGender(teacherToEdit.genero || '');
+      setDob(formattedDob);
+      setPhoneNumber(teacherToEdit.numero_telefono || '');
+      setEmail(teacherToEdit.correo || '');
+      setAddress(teacherToEdit.direccion || '');
+      setRefContact(teacherToEdit.contacto_referencia || '');
+      setRefRelationship(teacherToEdit.relacion_referencia || '');
+    }
+  }, [teacherToEdit, modalMode, classes, subjects]);
 
   const resetForm = () => {
     setFormStep(1);
@@ -83,6 +126,7 @@ export default function TeachersPage() {
     setRefContact('');
     setRefRelationship('');
     setCurrentTeacherId(null);
+    setTeacherToEdit(null);
   };
   
   const handleModalChange = (open: boolean) => {
@@ -107,100 +151,159 @@ export default function TeachersPage() {
   };
 
   const handleOpenEditModal = (teacher: Teacher) => {
-    resetForm();
+    // Establecer el modo y el profesor a editar
     setModalMode('edit');
     setCurrentTeacherId(teacher.id);
-
-    // Populate form state from teacher data
-    setFirstName(teacher.firstName);
-    setLastName(teacher.lastName);
-    setTeacherClass(teacher.class || '');
-    setTeacherSection(teacher.section || '');
-    setRelatedSubject(teacher.relatedSubject || '');
-    setGender(teacher.gender || '');
-    setDob(teacher.dob || '');
-    setPhoneNumber(teacher.phoneNumber || '');
-    setEmail(teacher.email || '');
-    setAddress(teacher.address || '');
-    setRefContact(teacher.refContact || '');
-    setRefRelationship(teacher.refRelationship || '');
-
+    setTeacherToEdit(teacher);
     setFormStep(1);
     setIsModalOpen(true);
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const teacherDataPayload = {
-      firstName,
-      lastName,
-      avatarUrl: "https://placehold.co/40x40.png",
-      class: teacherClass,
-      section: teacherSection,
-      relatedSubject,
-      gender,
-      dob,
-      phoneNumber,
-      email,
-      address,
-      refContact,
-      refRelationship
-    };
-
     if (modalMode === 'add') {
-      const newTeacher: Teacher = {
-        id: `T${Date.now()}`,
-        status: 'Activo',
-        ...teacherDataPayload
-      };
-      setTeachers(prev => [...prev, newTeacher]);
-      toast({ title: "Docente Agregado", description: `Se ha registrado a ${firstName} ${lastName}.`, variant: "success"});
+      try {
+        // Generar identificador único de 10 cifras para profesor
+        const identificador = generateUniqueId('T');
+
+        const teacherData = {
+          primer_nombre: firstName,
+          apellido: lastName,
+          correo: email,
+          url_avatar: "default_user.png",
+          numero_telefono: phoneNumber,
+          direccion: address,
+          fecha_nacimiento: dob,
+          genero: gender,
+          clase: teacherClass,
+          seccion: teacherSection,
+          materia_relacionada: relatedSubject,
+          contacto_referencia: refContact,
+          relacion_referencia: refRelationship,
+          estado: "Activo" as const
+        };
+
+        await createTeacher(teacherData);
+        toast({ title: "Docente Agregado", description: `Se ha registrado a ${teacherData.primer_nombre} ${teacherData.apellido}.`, variant: "success"});
+        handleModalChange(false);
+      } catch (error) {
+        toast({ title: "Error", description: "No se pudo agregar el docente.", variant: "destructive"});
+      }
     } else if (currentTeacherId) {
-       setTeachers(prev => 
-            prev.map(t => 
-                t.id === currentTeacherId 
-                ? { ...t, ...teacherDataPayload } 
-                : t
-            )
-        );
-      toast({ title: "Docente Actualizado", description: `Se han guardado los cambios para ${firstName} ${lastName}.` });
+      try {
+        const updateData = {
+          primer_nombre: firstName,
+          apellido: lastName,
+          correo: email,
+          url_avatar: "default_user.png",
+          numero_telefono: phoneNumber,
+          direccion: address,
+          fecha_nacimiento: dob,
+          genero: gender,
+          clase: teacherClass,
+          seccion: teacherSection,
+          materia_relacionada: relatedSubject,
+          contacto_referencia: refContact,
+          relacion_referencia: refRelationship
+        };
+
+        await updateTeacher(currentTeacherId, updateData);
+        toast({ title: "Docente Actualizado", description: `Se han guardado los cambios para ${updateData.primer_nombre} ${updateData.apellido}.` });
+        handleModalChange(false);
+      } catch (error) {
+        toast({ title: "Error", description: "No se pudo actualizar el docente.", variant: "destructive"});
+      }
     }
-    
-    handleModalChange(false);
   };
 
   const handleSelectTeacherForStatus = (teacherId: string) => {
     const teacher = teachers.find(t => t.id === teacherId);
     if (teacher) {
         setSelectedTeacherForStatus(teacher.id);
-        setNewStatus(teacher.status);
+        setNewStatus(teacher.estado as 'Activo' | 'Inactivo');
     }
   };
 
-  const handleStatusUpdate = () => {
+  const handleStatusUpdate = async () => {
     if (!selectedTeacherForStatus) return;
-    setTeachers(prevTeachers =>
-      prevTeachers.map(teacher =>
-        teacher.id === selectedTeacherForStatus
-          ? { ...teacher, status: newStatus }
-          : teacher
-      )
-    );
-    const updatedTeacher = teachers.find(t => t.id === selectedTeacherForStatus);
-    toast({ title: "Estado Actualizado", description: `El estado de ${updatedTeacher?.firstName} ha sido cambiado a ${newStatus}.` });
-    handleStatusModalChange(false);
+    
+    try {
+      const newStatusValue = newStatus === 'Activo' ? 'Activo' : 'Inactivo';
+      await updateTeacher(selectedTeacherForStatus, { estado: newStatusValue });
+      
+      const updatedTeacher = teachers.find(t => t.id === selectedTeacherForStatus);
+      toast({ title: "Estado Actualizado", description: `El estado de ${updatedTeacher?.primer_nombre} ha sido cambiado a ${newStatus}.` });
+      handleStatusModalChange(false);
+    } catch (error) {
+      toast({ title: "Error", description: "No se pudo actualizar el estado del docente.", variant: "destructive"});
+    }
+  };
+
+  const handleDeleteClick = (teacher: Teacher) => {
+    setTeacherToDelete(teacher);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!teacherToDelete) return;
+    
+    try {
+      await deleteTeacher(teacherToDelete.id);
+      toast({ title: "Docente Eliminado", description: `${teacherToDelete.primer_nombre} ${teacherToDelete.apellido} ha sido eliminado correctamente.` });
+      setIsDeleteDialogOpen(false);
+      setTeacherToDelete(null);
+    } catch (error) {
+      toast({ title: "Error", description: "No se pudo eliminar el docente.", variant: "destructive"});
+    }
   };
 
 
   const filteredTeachers = teachers.filter(teacher => 
-    `${teacher.firstName} ${teacher.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
+    `${teacher.primer_nombre} ${teacher.apellido}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const selectedTeacherForStatusObject = teachers.find(t => t.id === selectedTeacherForStatus);
   const filteredTeachersForStatusModal = teachers.filter(t => 
-    `${t.firstName} ${t.lastName}`.toLowerCase().includes(statusSearchTerm.toLowerCase())
+    `${t.primer_nombre} ${t.apellido}`.toLowerCase().includes(statusSearchTerm.toLowerCase())
   );
+
+  // Mostrar estado de carga
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in">
+          Maestro
+        </h1>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Cargando maestros...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar estado de error
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight animate-fade-in">
+          Maestro
+        </h1>
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-destructive mb-4">Error al cargar los maestros</p>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={fetchTeachers} variant="outline">
+              Reintentar
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -294,22 +397,31 @@ export default function TeachersPage() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={teacher.avatarUrl} alt={`${teacher.firstName} ${teacher.lastName}`} data-ai-hint="teacher avatar" />
-                            <AvatarFallback>{teacher.firstName.substring(0, 1)}{teacher.lastName.substring(0, 1)}</AvatarFallback>
+                            <AvatarImage src={teacher.url_avatar || '/default-avatar.png'} alt={`${teacher.primer_nombre} ${teacher.apellido}`} data-ai-hint="teacher avatar" />
+                            <AvatarFallback>{(teacher.primer_nombre || '').substring(0, 1)}{(teacher.apellido || '').substring(0, 1)}</AvatarFallback>
                           </Avatar>
-                          {`${teacher.firstName} ${teacher.lastName}`}
+                          <div>
+                            <div className="font-medium">{`${teacher.primer_nombre} ${teacher.apellido}`}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {teacher.clase_display || 'Sin clase asignada'}
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={teacher.status === 'Activo' ? 'secondary' : 'destructive'} className={cn(teacher.status === 'Activo' && 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300')}>
-                          {teacher.status}
+                        <Badge variant={teacher.estado === 'Activo' ? 'secondary' : 'destructive'} className={cn(teacher.estado === 'Activo' && 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300')}>
+                          {teacher.estado}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button variant="outline" size="sm" className="bg-green-500 hover:bg-green-600 text-white border-green-500 hover:border-green-600" onClick={() => handleOpenEditModal(teacher)}>
                           <Edit className="mr-1 h-3 w-3" /> Editar
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => toast({ title: `Eliminar ${teacher.firstName}`, description: "Funcionalidad de eliminación próximamente.", variant: "destructive"})}>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          onClick={() => handleDeleteClick(teacher)}
+                        >
                           <Trash2 className="mr-1 h-3 w-3" /> Borrar
                         </Button>
                       </TableCell>
@@ -453,6 +565,12 @@ export default function TeachersPage() {
             <>
               <DialogHeader>
                 <DialogTitle>{modalMode === 'add' ? 'Detalles del profesor' : 'Editar Detalles del Profesor'}</DialogTitle>
+                <DialogDescription>
+                  {modalMode === 'add' 
+                    ? 'Complete la información básica del docente.' 
+                    : 'Modifique la información del docente según sea necesario.'
+                  }
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="grid gap-2">
@@ -464,28 +582,29 @@ export default function TeachersPage() {
                 </div>
                 <div className="grid gap-2">
                   <Label>Detalles del profesor de la clase</Label>
-                   <div className="grid grid-cols-2 gap-4">
-                      <Select onValueChange={setTeacherClass} value={teacherClass}>
-                          <SelectTrigger><SelectValue placeholder="Seleccionar Clase"/></SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="3-sec">3º de Secundaria</SelectItem>
-                              <SelectItem value="4-sec">4º de Secundaria</SelectItem>
-                              <SelectItem value="5-sec">5º de Secundaria</SelectItem>
-                          </SelectContent>
-                      </Select>
-                      <Select onValueChange={setTeacherSection} value={teacherSection}>
-                          <SelectTrigger><SelectValue placeholder="Sección"/></SelectTrigger>
-                          <SelectContent>
-                              <SelectItem value="A">A</SelectItem>
-                              <SelectItem value="B">B</SelectItem>
-                              <SelectItem value="C">C</SelectItem>
-                          </SelectContent>
-                      </Select>
-                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      id="teacher-class"
+                      placeholder="Clase (ej: 5-sec)"
+                      value={teacherClass}
+                      onChange={e => setTeacherClass(e.target.value)}
+                    />
+                    <Input
+                      id="teacher-section"
+                      placeholder="Sección (ej: A)"
+                      value={teacherSection}
+                      onChange={e => setTeacherSection(e.target.value)}
+                    />
+                  </div>
                 </div>
                 <div className="grid gap-2">
-                   <Label htmlFor="related-subject">Tema relacionado</Label>
-                   <Input id="related-subject" placeholder="Ej: Matemáticas" value={relatedSubject} onChange={e => setRelatedSubject(e.target.value)} />
+                  <Label htmlFor="related-subject">Asignatura</Label>
+                  <Input
+                    id="related-subject"
+                    placeholder="Asignatura (ej: Matemáticas)"
+                    value={relatedSubject}
+                    onChange={e => setRelatedSubject(e.target.value)}
+                  />
                 </div>
                  <div className="grid gap-2">
                    <Label htmlFor="gender">Género</Label>
@@ -581,7 +700,7 @@ export default function TeachersPage() {
                     className="w-full justify-between"
                   >
                     {selectedTeacherForStatusObject
-                        ? `${selectedTeacherForStatusObject.firstName} ${selectedTeacherForStatusObject.lastName}`
+                        ? `${selectedTeacherForStatusObject.primer_nombre} ${selectedTeacherForStatusObject.apellido}`
                         : "Buscar un docente..."}
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
@@ -614,7 +733,7 @@ export default function TeachersPage() {
                                     selectedTeacherForStatus === teacher.id ? "opacity-100" : "opacity-0"
                                 )}
                             />
-                            {teacher.firstName} {teacher.lastName}
+                            {teacher.primer_nombre} {teacher.apellido}
                           </Button>
                         ))
                       ) : (
@@ -648,6 +767,18 @@ export default function TeachersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmación de eliminación */}
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Eliminar Docente"
+        description={`¿Estás seguro de que quieres eliminar a ${teacherToDelete?.primer_nombre} ${teacherToDelete?.apellido}? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={handleConfirmDelete}
+        variant="destructive"
+      />
     </div>
   );
 }

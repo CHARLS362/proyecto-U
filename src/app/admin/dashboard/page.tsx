@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { PageTitle } from "@/components/common/PageTitle";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
 import { mockNotices, mockReminders, mockRecentActivities, type Reminder } from "@/lib/mockData";
 import { 
@@ -89,8 +90,9 @@ export default function DashboardPage() {
   const reminderColors = ['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--destructive))', 'hsl(var(--chart-3))'];
 
   return (
-    <div className="space-y-6 md:space-y-8">
-      <PageTitle title="Director del panel" subtitle="Analítica" icon={LayoutGrid} />
+    <ProtectedRoute allowedRoles={['admin', 'propietario']}>
+      <div className="space-y-6 md:space-y-8">
+        <PageTitle title="Director del panel" subtitle="Analítica" icon={LayoutGrid} />
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <SimpleMetricCard
@@ -278,6 +280,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </section>
-    </div>
+      </div>
+    </ProtectedRoute>
   );
 }

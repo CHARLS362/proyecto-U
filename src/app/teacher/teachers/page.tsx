@@ -453,6 +453,12 @@ export default function TeachersPage() {
             <>
               <DialogHeader>
                 <DialogTitle>{modalMode === 'add' ? 'Detalles del profesor' : 'Editar Detalles del Profesor'}</DialogTitle>
+                <DialogDescription>
+                  {modalMode === 'add' 
+                    ? 'Complete la información básica del docente.' 
+                    : 'Modifique la información del docente según sea necesario.'
+                  }
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="grid gap-2">
