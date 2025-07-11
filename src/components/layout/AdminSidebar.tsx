@@ -31,6 +31,8 @@ import {
   BookOpenText,
   ClipboardEdit,
   MessageSquare,
+  NotebookText,
+  School,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -47,17 +49,17 @@ const managementNav = [
   { href: '/admin/students', label: 'Estudiantes', icon: GraduationCap },
   { href: '/admin/enrollment', label: 'Matrículas', icon: ClipboardEdit },
   { href: '/admin/courses', label: 'Cursos', icon: BookOpenText },
-  { href: '/admin/subjects', label: 'Temas', icon: BookCopy },
   { href: '/admin/attendance', label: 'Asistencias', icon: ClipboardCheck },
-  { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
-  { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
   { href: '/admin/news', label: 'Avisos', icon: Newspaper },
+];
+
+const academicNav = [
   { href: '/admin/calendar', label: 'Horario', icon: CalendarClock },
   { href: '/admin/curriculum', label: 'Programas de estudio', icon: LibraryBig },
-  { href: '/admin/grades', label: 'Notas', icon: NotebookText },
+  { href: '/admin/grades', label: 'Retroalimentación', icon: MessageSquare },
   { href: '/admin/qualifications', label: 'Calificaciones', icon: Award },
-  { href: '/admin/bus-service', label: 'Servicio de Bus', icon: Bus },
 ];
+
 
 const bottomNav = [
   { href: '/admin/settings', label: 'Configuraciones', icon: Settings },
@@ -66,7 +68,9 @@ const bottomNav = [
 const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) => {
   const pathname = usePathname();
   const isActive = (href: string) => {
+    // Exact match for dashboard
     if (href.endsWith('dashboard')) return pathname === href;
+    // Starts with for other parent routes
     return pathname.startsWith(href);
   };
 
