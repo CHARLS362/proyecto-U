@@ -27,6 +27,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { initialConfig } from '@/lib/config';
+import { cn } from '@/lib/utils';
+import React from 'react';
 
 const navItems = [
   { href: '/teacher/dashboard', label: 'Panel', icon: LayoutGrid },
@@ -40,84 +42,89 @@ const navItems = [
   { href: '/teacher/curriculum', label: 'Programa de estudios', icon: LibraryBig },
 ];
 
-export function TeacherSidebar() {
-  const pathname = usePathname();
-  const schoolName = initialConfig.name;
+const bottomNav = [
+  { href: '/teacher/settings', label: 'Configuraciones', icon: Settings },
+];
 
+const NavItem = ({ href, label, icon: Icon }: { href: string; label: string; icon: React.ElementType }) => {
+  const pathname = usePathname();
   const isActive = (href: string) => {
-    // Check for dashboard specifically
-    if (href === '/teacher/dashboard') return pathname === href;
-    // For other sections, use startsWith to handle sub-pages
+    if (href.endsWith('dashboard')) return pathname === href;
     return pathname.startsWith(href);
   };
+
+  return (
+    <SidebarMenuItem className="relative">
+      <SidebarMenuButton
+        asChild
+        isActive={isActive(href)}
+        tooltip={{ children: label, className: "bg-card text-card-foreground border-border shadow-md" }}
+        className="justify-start data-[active=true]:font-bold data-[active=true]:text-sidebar-accent-foreground"
+      >
+        <Link href={href}>
+          <Icon className="h-6 w-6 shrink-0 text-sidebar-primary" />
+          <span className="group-data-[collapsible=icon]:hidden">{label}</span>
+        </Link>
+      </SidebarMenuButton>
+      <div 
+        className={cn(
+            "absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-sidebar-primary transition-all duration-200",
+            isActive(href) ? "h-6" : "group-hover:h-4"
+        )}
+      />
+    </SidebarMenuItem>
+  );
+};
+
+
+export function TeacherSidebar() {
+  const schoolName = initialConfig.name;
 
   return (
     <>
       <SidebarHeader className="p-4">
         <Link href="/teacher/dashboard" className="flex items-center gap-2 group/logo">
           <LayoutGrid className="h-8 w-8 text-primary group-hover/logo:animate-pulse" /> 
-          <h1 className="text-xl font-semibold text-foreground group-data-[collapsible=icon]:hidden">
+          <h1 className="text-xl font-semibold text-sidebar-foreground group-data-[collapsible=icon]:hidden">
             {schoolName}
           </h1>
         </Link>
       </SidebarHeader>
-      <Separator />
+      
       <SidebarContent className="p-2">
         <SidebarMenu>
           {navItems.map((item) => (
-            <SidebarMenuItem key={item.href}>
-               <SidebarMenuButton
-                asChild
-                isActive={isActive(item.href)}
-                tooltip={{ children: item.label, className:"bg-card text-card-foreground border-border shadow-md" }}
-                className="justify-start"
-              >
-                <Link href={item.href}>
-                  <item.icon />
-                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+            <NavItem key={item.href} {...item} />
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <Separator />
-      <SidebarFooter className="p-4">
+
+      <SidebarFooter className="p-4 mt-auto border-t border-sidebar-border">
         <div className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center">
           <Avatar className="h-9 w-9">
             <AvatarImage src="https://placehold.co/40x40.png" alt="Usuario" data-ai-hint="teacher avatar" />
             <AvatarFallback>JD</AvatarFallback>
           </Avatar>
           <div className="group-data-[collapsible=icon]:hidden">
-            <p className="text-sm font-medium text-foreground">Juan Docente</p>
+            <p className="text-sm font-medium text-sidebar-foreground">Juan Docente</p>
             <p className="text-xs text-muted-foreground">juan.docente@sofiaeduca.com</p>
           </div>
         </div>
-        <SidebarMenu className="mt-2">
-           <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith('/teacher/settings')}
-                  tooltip={{ children: 'Configuraciones', className:"bg-card text-card-foreground border-border shadow-md" }}
-                  className="justify-start"
-                >
-                  <Link href="/teacher/settings">
-                    <Settings />
-                    <span className="group-data-[collapsible=icon]:hidden">Configuraciones</span>
-                  </Link>
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-             <SidebarMenuItem>
+        <Separator className="my-3 bg-sidebar-border" />
+        <SidebarMenu>
+           {bottomNav.map((item) => <NavItem key={item.href} {...item} />)}
+             <SidebarMenuItem className="relative">
                 <SidebarMenuButton
                   asChild
                   tooltip={{ children: 'Cerrar Sesión', className:"bg-destructive text-destructive-foreground border-border shadow-md" }}
-                  className="justify-start group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive hover:bg-destructive/90 hover:text-destructive-foreground"
+                  className="justify-start hover:bg-destructive/10 hover:text-destructive group-data-[collapsible=icon]:bg-destructive/20 group-data-[collapsible=icon]:hover:bg-destructive/30 group-data-[collapsible=icon]:text-destructive"
                 >
                   <Link href="/logout">
-                    <LogOut />
+                    <LogOut className="h-6 w-6 shrink-0" />
                     <span className="group-data-[collapsible=icon]:hidden">Cerrar Sesión</span>
                   </Link>
                 </SidebarMenuButton>
+                 <div className="absolute left-0 top-1/2 h-0 w-1 -translate-y-1/2 rounded-r-full bg-destructive transition-all duration-200 group-hover:h-4"/>
             </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
