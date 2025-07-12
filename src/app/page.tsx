@@ -9,7 +9,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { LandingShell } from "../components/layout/LandingShell";
 import React, { useState, useEffect, useCallback } from "react";
 import Autoplay from "embla-carousel-autoplay";
-import type { EmblaApiType } from 'embla-carousel-react';
+import type { EmblaCarouselType } from 'embla-carousel-react';
 
 import portadaImg from "@/recursos/portada.png";
 import carousel1Img from "@/recursos/carousel1.jpg";
@@ -63,7 +63,7 @@ const carouselImages = [
 ];
 
 export default function RootPage() {
-  const [emblaApi, setEmblaApi] = useState<EmblaApiType | undefined>();
+  const [emblaApi, setEmblaApi] = useState<EmblaCarouselType | undefined>();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
 
@@ -72,11 +72,11 @@ export default function RootPage() {
     []
   );
 
-  const onInit = useCallback((api: EmblaApiType) => {
+  const onInit = useCallback((api: EmblaCarouselType) => {
     setScrollSnaps(api.scrollSnapList());
   }, []);
 
-  const onSelect = useCallback((api: EmblaApiType) => {
+  const onSelect = useCallback((api: EmblaCarouselType) => {
     setSelectedIndex(api.selectedScrollSnap());
   }, []);
 
