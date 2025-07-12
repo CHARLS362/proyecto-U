@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -16,6 +15,7 @@ import {
   CheckCircle2,
   Paperclip,
   FileDown,
+  Loader2,
 } from 'lucide-react';
 import { PageTitle } from '@/components/common/PageTitle';
 import {
@@ -52,6 +52,14 @@ export default function CourseDetailPage() {
   const { toast } = useToast();
   const [fileName, setFileName] = useState('Ningún archivo seleccionado');
   const [isUploading, setIsUploading] = useState(false);
+
+  if (!params) {
+    return (
+        <div className="flex justify-center items-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+    );
+  }
 
   const course = mockCourses.find((c) => c.id === params.id);
   const assignments = mockAssignments.filter((a) => a.courseId === params.id);
