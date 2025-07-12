@@ -46,34 +46,42 @@ export default function StudentDashboardPage() {
             <PageTitle title="Panel del Estudiante" subtitle={`¡Bienvenida de nuevo, ${student.firstName}!`} />
 
             <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <SimpleMetricCard
-                    title="Cursos Inscritos"
-                    value={student.courses.length}
-                    icon={BookOpen}
-                    iconBgClass="bg-blue-100 dark:bg-blue-500/30"
-                    iconColorClass="text-blue-500 dark:text-blue-300"
-                />
-                <SimpleMetricCard
-                    title="Promedio General"
-                    value="14.5"
-                    icon={Target}
-                    iconBgClass="bg-green-100 dark:bg-green-500/30"
-                    iconColorClass="text-green-500 dark:text-green-300"
-                />
-                <SimpleMetricCard
-                    title="Próximas Tareas"
-                    value="3"
-                    icon={CalendarClock}
-                    iconBgClass="bg-yellow-100 dark:bg-yellow-500/30"
-                    iconColorClass="text-yellow-500 dark:text-yellow-300"
-                />
-                 <SimpleMetricCard
-                    title="Notificaciones"
-                    value="2"
-                    icon={Bell}
-                    iconBgClass="bg-purple-100 dark:bg-purple-500/30"
-                    iconColorClass="text-purple-500 dark:text-purple-300"
-                />
+                <Link href="/student/courses" className="block hover:-translate-y-1 transition-transform duration-200">
+                    <SimpleMetricCard
+                        title="Cursos Inscritos"
+                        value={student.courses.length}
+                        icon={BookOpen}
+                        iconBgClass="bg-blue-100 dark:bg-blue-500/30"
+                        iconColorClass="text-blue-500 dark:text-blue-300"
+                    />
+                </Link>
+                <Link href="/student/grades" className="block hover:-translate-y-1 transition-transform duration-200">
+                    <SimpleMetricCard
+                        title="Promedio General"
+                        value="14.5"
+                        icon={Target}
+                        iconBgClass="bg-green-100 dark:bg-green-500/30"
+                        iconColorClass="text-green-500 dark:text-green-300"
+                    />
+                </Link>
+                <Link href="/student/courses" className="block hover:-translate-y-1 transition-transform duration-200">
+                    <SimpleMetricCard
+                        title="Próximas Tareas"
+                        value="3"
+                        icon={CalendarClock}
+                        iconBgClass="bg-yellow-100 dark:bg-yellow-500/30"
+                        iconColorClass="text-yellow-500 dark:text-yellow-300"
+                    />
+                </Link>
+                 <Link href="/student/news" className="block hover:-translate-y-1 transition-transform duration-200">
+                    <SimpleMetricCard
+                        title="Notificaciones"
+                        value="2"
+                        icon={Bell}
+                        iconBgClass="bg-purple-100 dark:bg-purple-500/30"
+                        iconColorClass="text-purple-500 dark:text-purple-300"
+                    />
+                </Link>
             </section>
 
             <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
