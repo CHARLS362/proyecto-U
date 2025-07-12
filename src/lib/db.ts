@@ -1,12 +1,11 @@
 import mysql from 'mysql2/promise';
 
-// Configuración usando variables de entorno
+// Configuración usando los datos proporcionados
 const pool = mysql.createPool({
-  host: process.env.MYSQL_HOST || 'localhost',
-  port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT) : 3306,
-  user: process.env.MYSQL_USER || '',
-  password: process.env.MYSQL_PASSWORD || '',
-  database: process.env.MYSQL_DATABASE || '',
+  host: 'MYSQL1003.site4now.net',
+  user: 'abb6c5_gestion',
+  password: 'gestion23',
+  database: 'db_abb6c5_gestion',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
