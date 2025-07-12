@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -117,9 +118,9 @@ export default function StudentDashboardPage() {
                                 <ul className="space-y-3">
                                     {upcomingEvents.map(event => (
                                         <li key={event.id} className="flex items-center gap-3">
-                                            <div className="p-2 bg-accent/20 rounded-md">
+                                            <div className="flex flex-col items-center justify-center p-2 bg-accent/20 rounded-md w-12 text-center">
                                                 <span className="font-bold text-sm text-accent-foreground">{format(event.date, 'd')}</span>
-                                                <span className="text-xs text-accent-foreground/80">{format(event.date, 'MMM', { locale: es })}</span>
+                                                <span className="text-xs text-accent-foreground/80 uppercase">{format(event.date, 'MMM', { locale: es })}</span>
                                             </div>
                                             <div>
                                                 <p className="text-sm font-medium text-foreground">{event.title}</p>
