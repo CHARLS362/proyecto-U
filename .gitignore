@@ -42,6 +42,7 @@ next-env.d.ts
 .env.local
 .src/lib/schema.sql
 .db/*
+@/db
 
 # firebase
 firebase-debug.log
