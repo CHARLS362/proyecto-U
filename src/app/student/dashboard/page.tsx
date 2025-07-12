@@ -5,8 +5,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { PageTitle } from "@/components/common/PageTitle";
 import { SimpleMetricCard } from "@/components/dashboard/SimpleMetricCard";
-import { mockStudents, mockEvents, mockNotices, type SchoolEvent } from "@/lib/mockData";
-import { BookOpen, CalendarClock, Target, Bell } from "lucide-react";
+import { BookOpen, CalendarClock, Target, Bell, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -15,41 +14,110 @@ import { Badge } from '@/components/ui/badge';
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { StudentAttendanceChart } from '@/components/dashboard/StudentAttendanceChart';
+import { useAuth } from '@/hooks/useAuth';
 
-// Assuming we have the student's ID, e.g., 'S001' for Ana Pérez
-const student = mockStudents.find(s => s.id === 'S001');
-const recentNotices = mockNotices.slice(0, 2);
+interface Course {
+  id: string;
+  nombre: string;
+  progreso: number;
+}
+
+interface SchoolEvent {
+  id: string;
+  titulo: string;
+  fecha: string;
+  tipo: string;
+}
+
+interface Notice {
+  titulo: string;
+  fecha: string;
+  remitente?: string;
+}
+
+interface Task {
+  titulo: string;
+  fecha_entrega: string;
+  curso: string;
+}
+
+interface ApiResponse {
+  cursos?: Course[];
+  eventos?: SchoolEvent[];
+  notificaciones?: { avisos: Notice[], anuncios: Notice[] };
+  promedio?: { promedio_general: number };
+  tareas?: Task[];
+}
 
 export default function StudentDashboardPage() {
-    const [upcomingEvents, setUpcomingEvents] = React.useState<SchoolEvent[]>([]);
-    const [isClient, setIsClient] = React.useState(false);
+    const { usuario } = useAuth();
+    const [data, setData] = React.useState<ApiResponse>({});
+    const [isLoading, setIsLoading] = React.useState(true);
 
     React.useEffect(() => {
-        // This effect runs only on the client, after the initial render
-        const today = new Date();
-        const filteredEvents = mockEvents.filter(event => event.date >= today).slice(0, 3);
-        setUpcomingEvents(filteredEvents);
-        setIsClient(true);
-    }, []);
+        if (!usuario?.identificador) {
+            setIsLoading(false);
+            return;
+        }
 
+        const fetchData = async (endpoint: string) => {
+            try {
+                const res = await fetch(`/api/estudiantes/${usuario.identificador}/${endpoint}`);
+                if (!res.ok) {
+                    console.error(`Error fetching ${endpoint}:`, res.statusText);
+                    return null;
+                }
+                return await res.json();
+            } catch (error) {
+                console.error(`Error fetching ${endpoint}:`, error);
+                return null;
+            }
+        };
 
-    if (!student) {
+        const fetchAllData = async () => {
+            setIsLoading(true);
+            const [cursos, eventos, notificaciones, promedio, tareas] = await Promise.all([
+                fetchData('cursos'),
+                fetchData('eventos'),
+                fetchData('notificaciones'),
+                fetchData('promedio'),
+                fetchData('tareas'),
+            ]);
+            setData({ cursos, eventos, notificaciones, promedio, tareas });
+            setIsLoading(false);
+        };
+
+        fetchAllData();
+    }, [usuario?.identificador]);
+
+    const { cursos = [], eventos = [], notificaciones, promedio, tareas = [] } = data;
+    const allNotices = [...(notificaciones?.avisos || []), ...(notificaciones?.anuncios || [])].slice(0, 4);
+
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center h-full">
-                <p>Estudiante no encontrado.</p>
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+    
+    if (!usuario) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <p>Por favor inicie sesión para ver su panel.</p>
             </div>
         );
     }
     
     return (
         <div className="space-y-6 md:space-y-8">
-            <PageTitle title="Panel del Estudiante" subtitle={`¡Bienvenida de nuevo, ${student.firstName}!`} />
+            <PageTitle title="Panel del Estudiante" subtitle={`¡Bienvenida de nuevo, ${usuario.correo}!`} />
 
             <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Link href="/student/courses" className="block hover:-translate-y-1 transition-transform duration-200">
                     <SimpleMetricCard
                         title="Cursos Inscritos"
-                        value={student.courses.length}
+                        value={cursos.length}
                         icon={BookOpen}
                         iconBgClass="bg-blue-100 dark:bg-blue-500/30"
                         iconColorClass="text-blue-500 dark:text-blue-300"
@@ -58,7 +126,7 @@ export default function StudentDashboardPage() {
                 <Link href="/student/grades" className="block hover:-translate-y-1 transition-transform duration-200">
                     <SimpleMetricCard
                         title="Promedio General"
-                        value="14.5"
+                        value={promedio?.promedio_general || 'N/A'}
                         icon={Target}
                         iconBgClass="bg-green-100 dark:bg-green-500/30"
                         iconColorClass="text-green-500 dark:text-green-300"
@@ -67,7 +135,7 @@ export default function StudentDashboardPage() {
                 <Link href="/student/courses" className="block hover:-translate-y-1 transition-transform duration-200">
                     <SimpleMetricCard
                         title="Próximas Tareas"
-                        value="3"
+                        value={tareas.length}
                         icon={CalendarClock}
                         iconBgClass="bg-yellow-100 dark:bg-yellow-500/30"
                         iconColorClass="text-yellow-500 dark:text-yellow-300"
@@ -76,7 +144,7 @@ export default function StudentDashboardPage() {
                  <Link href="/student/news" className="block hover:-translate-y-1 transition-transform duration-200">
                     <SimpleMetricCard
                         title="Notificaciones"
-                        value="2"
+                        value={allNotices.length}
                         icon={Bell}
                         iconBgClass="bg-purple-100 dark:bg-purple-500/30"
                         iconColorClass="text-purple-500 dark:text-purple-300"
@@ -91,15 +159,15 @@ export default function StudentDashboardPage() {
                         <CardDescription>Tu progreso en los cursos actuales.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {student.courses.length > 0 ? (
+                        {cursos.length > 0 ? (
                             <div className="space-y-6">
-                                {student.courses.map(course => (
+                                {cursos.map(course => (
                                     <div key={course.id} className="p-4 border rounded-lg bg-muted/30">
                                         <div className="flex justify-between items-center mb-2">
-                                            <h4 className="font-semibold text-md text-primary">{course.name}</h4>
-                                            <span className="text-sm font-medium text-foreground">{course.progress}%</span>
+                                            <h4 className="font-semibold text-md text-primary">{course.nombre}</h4>
+                                            <span className="text-sm font-medium text-foreground">{course.progreso}%</span>
                                         </div>
-                                        <Progress value={course.progress} className="w-full h-2" />
+                                        <Progress value={course.progreso} className="w-full h-2" />
                                         <Button variant="link" size="sm" asChild className="px-0 mt-1">
                                             <Link href={`/student/courses/${course.id}`}>Ir al curso</Link>
                                         </Button>
@@ -107,7 +175,7 @@ export default function StudentDashboardPage() {
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-muted-foreground">No estás inscrito en ningún curso.</p>
+                            <p className="text-muted-foreground text-center py-8">No estás inscrito en ningún curso.</p>
                         )}
                     </CardContent>
                 </Card>
@@ -120,19 +188,17 @@ export default function StudentDashboardPage() {
                     <CardContent className="space-y-4">
                         <div>
                              <h4 className="text-sm font-semibold mb-2 text-foreground">Eventos</h4>
-                             {!isClient ? (
-                                <p className="text-xs text-muted-foreground">Cargando eventos...</p>
-                             ) : upcomingEvents.length > 0 ? (
+                             {eventos.length > 0 ? (
                                 <ul className="space-y-3">
-                                    {upcomingEvents.map(event => (
+                                    {eventos.map(event => (
                                         <li key={event.id} className="flex items-center gap-3">
                                             <div className="flex flex-col items-center justify-center p-2 bg-accent/20 rounded-md w-12 text-center">
-                                                <span className="font-bold text-sm text-accent-foreground">{format(event.date, 'd')}</span>
-                                                <span className="text-xs text-accent-foreground/80 uppercase">{format(event.date, 'MMM', { locale: es })}</span>
+                                                <span className="font-bold text-sm text-accent-foreground">{format(new Date(event.fecha), 'd')}</span>
+                                                <span className="text-xs text-accent-foreground/80 uppercase">{format(new Date(event.fecha), 'MMM', { locale: es })}</span>
                                             </div>
                                             <div>
-                                                <p className="text-sm font-medium text-foreground">{event.title}</p>
-                                                <p className="text-xs text-muted-foreground">{event.type}</p>
+                                                <p className="text-sm font-medium text-foreground">{event.titulo}</p>
+                                                <p className="text-xs text-muted-foreground">{event.tipo}</p>
                                             </div>
                                         </li>
                                     ))}
@@ -144,16 +210,14 @@ export default function StudentDashboardPage() {
                         <Separator />
                         <div>
                              <h4 className="text-sm font-semibold mb-2 text-foreground">Avisos Recientes</h4>
-                             {!isClient ? (
-                                <p className="text-xs text-muted-foreground">Cargando avisos...</p>
-                             ) : recentNotices.length > 0 ? (
+                             {allNotices.length > 0 ? (
                                 <ul className="space-y-3">
-                                    {recentNotices.map(notice => (
-                                        <li key={notice.id}>
-                                            <p className="text-sm font-medium text-foreground">{notice.title}</p>
+                                    {allNotices.map((notice, index) => (
+                                        <li key={index}>
+                                            <p className="text-sm font-medium text-foreground">{notice.titulo}</p>
                                             <div className="flex items-center justify-between">
-                                                <p className="text-xs text-muted-foreground">{notice.sender}</p>
-                                                <Badge variant="outline" className="text-xs">{format(new Date(notice.date), "d MMM", { locale: es })}</Badge>
+                                                <p className="text-xs text-muted-foreground">{notice.remitente || 'Anuncio'}</p>
+                                                <Badge variant="outline" className="text-xs">{format(new Date(notice.fecha), "d MMM", { locale: es })}</Badge>
                                             </div>
                                         </li>
                                     ))}
