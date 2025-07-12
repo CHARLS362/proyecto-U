@@ -30,12 +30,15 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { mockTeachers, type Teacher, mockCourses } from '@/lib/mockData';
+import { mockTeachers } from '@/lib/mockData';
+import type { Teacher } from '@/hooks/useTeachers';
 import { useToast } from '@/hooks/use-toast';
 import { useTeachers } from '@/hooks/useTeachers';
 import { useClasses } from '@/hooks/useClasses';
 import { useSubjects } from '@/hooks/useSubjects';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useCourses } from '@/hooks/useCourses';
+import { generateUniqueId } from '@/lib/idGenerator';
 
 const primaryGrades = [
   { value: '1-pri', label: '1º de Primaria' },
@@ -60,6 +63,7 @@ export default function TeachersPage() {
   const { teachers, loading, error, fetchTeachers, createTeacher, updateTeacher, deleteTeacher } = useTeachers();
   const { classes, loading: classesLoading } = useClasses();
   const { subjects, loading: subjectsLoading } = useSubjects();
+  const { courses, loading: coursesLoading } = useCourses();
   const [searchTerm, setSearchTerm] = useState('');
   
   // Modal and form state
@@ -113,11 +117,26 @@ export default function TeachersPage() {
           console.error('Error formateando fecha:', error);
         }
       }
+
       setFirstName(teacherToEdit.primer_nombre || '');
       setLastName(teacherToEdit.apellido || '');
-      setTeacherClass(teacherToEdit.clase || '');
+
+      // Reconstruir el valor de Grado
+      const nivel = teacherToEdit.nivel || 'Primaria';
+      setTeacherLevel(nivel);
+      const grado = teacherToEdit.grado ? `${teacherToEdit.grado}-${nivel === 'Primaria' ? 'pri' : 'sec'}` : '';
+      setTeacherGrade(grado);
+
       setTeacherSection(teacherToEdit.seccion || '');
-      setRelatedSubject(teacherToEdit.materia_relacionada || '');
+
+      // Buscar el curso asignado por nombre o id
+      let cursoId = '';
+      if (teacherToEdit.materia_relacionada) {
+        const curso = courses.find(c => c.nombre === teacherToEdit.materia_relacionada || c.id === teacherToEdit.materia_relacionada);
+        if (curso) cursoId = curso.id;
+      }
+      setTeacherCourse(cursoId);
+
       setGender(teacherToEdit.genero || '');
       setDob(formattedDob);
       setPhoneNumber(teacherToEdit.numero_telefono || '');
@@ -126,7 +145,12 @@ export default function TeachersPage() {
       setRefContact(teacherToEdit.contacto_referencia || '');
       setRefRelationship(teacherToEdit.relacion_referencia || '');
     }
-  }, [teacherToEdit, modalMode, classes, subjects]);
+  }, [teacherToEdit, modalMode, courses]);
+
+  useEffect(() => {
+    console.log('teacherGrade:', teacherGrade);
+    console.log('courses con id_clase:', courses.map(c => ({ nombre: c.nombre, id_clase: c.id_clase })));
+  }, [teacherGrade, courses]);
 
   const resetForm = () => {
     setFormStep(1);
@@ -172,23 +196,7 @@ export default function TeachersPage() {
     // Establecer el modo y el profesor a editar
     setModalMode('edit');
     setCurrentTeacherId(teacher.id);
-  
-    const course = mockCourses.find(c => c.name === teacher.relatedSubject);
-    const level = course ? course.level : '';
-  
-    setFirstName(teacher.firstName);
-    setLastName(teacher.lastName);
-    setTeacherLevel(level);
-    setTeacherGrade(teacher.class || '');
-    setTeacherSection(teacher.section || '');
-    setTeacherCourse(course ? course.id : '');
-    setGender(teacher.gender || '');
-    setDob(teacher.dob || '');
-    setPhoneNumber(teacher.phoneNumber || '');
-    setEmail(teacher.email || '');
-    setAddress(teacher.address || '');
-    setRefContact(teacher.refContact || '');
-    setRefRelationship(teacher.refRelationship || '');
+    setTeacherToEdit(teacher);
   
     setFormStep(1);
     setIsModalOpen(true);
@@ -196,9 +204,7 @@ export default function TeachersPage() {
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const courseName = mockCourses.find(c => c.id === teacherCourse)?.name || '';
-
+    const courseName = courses.find(c => c.id === teacherCourse)?.nombre || '';
     const teacherDataPayload = {
       firstName,
       lastName,
@@ -229,9 +235,10 @@ export default function TeachersPage() {
           direccion: address,
           fecha_nacimiento: dob,
           genero: gender,
-          clase: teacherClass,
+          nivel: teacherLevel,  
+          grado: parseInt(teacherGrade.split('-')[0]),  
           seccion: teacherSection,
-          materia_relacionada: relatedSubject,
+          materia_relacionada: courseName,
           contacto_referencia: refContact,
           relacion_referencia: refRelationship,
           estado: "Activo" as const
@@ -254,9 +261,9 @@ export default function TeachersPage() {
           direccion: address,
           fecha_nacimiento: dob,
           genero: gender,
-          clase: teacherClass,
+          clase: teacherGrade,
           seccion: teacherSection,
-          materia_relacionada: relatedSubject,
+          materia_relacionada: courseName,
           contacto_referencia: refContact,
           relacion_referencia: refRelationship
         };
@@ -681,9 +688,16 @@ export default function TeachersPage() {
                     <Select onValueChange={setTeacherCourse} value={teacherCourse} disabled={!teacherGrade}>
                       <SelectTrigger><SelectValue placeholder={!teacherGrade ? "Seleccione grado" : "-- Curso --"}/></SelectTrigger>
                       <SelectContent>
-                        {mockCourses.filter(c => c.classId === teacherGrade).map(c => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
+                      {courses.filter(c => {
+                        
+                        if (teacherGrade) {
+                          return c.id_clase === teacherGrade;
+                        }
+                        
+                        return false;
+                      }).map(c => (
+                        <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
+                      ))}
                       </SelectContent>
                     </Select>
                   </div>

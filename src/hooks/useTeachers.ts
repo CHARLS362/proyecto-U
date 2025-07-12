@@ -16,6 +16,8 @@ export interface Teacher {
   contacto_referencia: string | null;
   relacion_referencia: string | null;
   estado: 'Activo' | 'Inactivo';
+  grado?: number; // <-- agregado
+  nivel?: string; // <-- agregado
   // Campos adicionales para compatibilidad con el frontend
   firstName?: string;
   lastName?: string;
@@ -90,6 +92,8 @@ export const useTeachers = () => {
         contacto_referencia: profesor.contacto_referencia || null,
         relacion_referencia: profesor.relacion_referencia || null,
         estado: profesor.estado || 'Activo',
+        grado: profesor.grado, // <-- agregado
+        nivel: profesor.nivel, // <-- agregado
         // Campos adicionales para compatibilidad con el frontend
         firstName: profesor.primer_nombre || '',
         lastName: profesor.apellido || '',

@@ -12,7 +12,8 @@ interface Profesor {
   direccion: string | null;
   fecha_nacimiento: string | null;
   genero: string | null;
-  clase: string | null;
+  nivel: string;
+  grado: number;
   seccion: string | null;
   materia_relacionada: string | null;
   contacto_referencia: string | null;
@@ -29,7 +30,8 @@ interface ProfesorInput {
   direccion?: string;
   fecha_nacimiento?: string;
   genero?: string;
-  clase?: string;
+  nivel?: string;
+  grado?: number;
   seccion?: string;
   materia_relacionada?: string;
   contacto_referencia?: string;
@@ -54,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const [profesores] = await conn.query(`
           SELECT 
             p.*,
-            CONCAT(p.clase, ' - ', p.seccion) as clase_display
+            CONCAT(p.nivel, ' ', p.grado, 'º - ', COALESCE(p.seccion, '')) as clase_display
           FROM profesores p
           ORDER BY p.primer_nombre, p.apellido
         `);
@@ -67,6 +69,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         
         if (!profesorData.primer_nombre || !profesorData.apellido || !profesorData.correo) {
           return res.status(400).json({ error: 'Nombre, apellido y correo son requeridos' });
+        }
+
+        if (!profesorData.nivel || !profesorData.grado) {
+          return res.status(400).json({ error: 'Nivel y grado son requeridos' });
         }
 
         const [existingUser] = await conn.query(
@@ -84,9 +90,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const [result] = await conn.query(`
           INSERT INTO profesores (
             id, primer_nombre, apellido, url_avatar, correo, numero_telefono,
-            direccion, fecha_nacimiento, genero, clase, seccion, materia_relacionada,
+            direccion, fecha_nacimiento, genero, nivel, grado, seccion, materia_relacionada,
             contacto_referencia, relacion_referencia, estado
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
           profesorId,
           profesorData.primer_nombre,
@@ -97,7 +103,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           profesorData.direccion || null,
           profesorData.fecha_nacimiento || null,
           profesorData.genero || null,
-          profesorData.clase || null,
+          profesorData.nivel,  
+          profesorData.grado, 
           profesorData.seccion || null,
           profesorData.materia_relacionada || null,
           profesorData.contacto_referencia || null,

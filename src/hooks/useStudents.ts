@@ -10,7 +10,8 @@ export interface Student {
   telefono: string | null;
   fecha_matricula: string;
   direccion: string | null;
-  nivel_grado: string | null;
+  nivel: 'Primaria' | 'Secundaria';
+  grado: number;
   nombre_tutor: string | null;
   contacto_tutor: string | null;
   fecha_nacimiento: string | null;

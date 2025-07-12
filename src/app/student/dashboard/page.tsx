@@ -15,7 +15,6 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { StudentAttendanceChart } from '@/components/dashboard/StudentAttendanceChart';
 
-// Assuming we have the student's ID, e.g., 'S001' for Ana Pérez
 const student = mockStudents.find(s => s.id === 'S001');
 const recentNotices = mockNotices.slice(0, 2);
 
@@ -24,13 +23,11 @@ export default function StudentDashboardPage() {
     const [isClient, setIsClient] = React.useState(false);
 
     React.useEffect(() => {
-        // This effect runs only on the client, after the initial render
         const today = new Date();
         const filteredEvents = mockEvents.filter(event => event.date >= today).slice(0, 3);
         setUpcomingEvents(filteredEvents);
         setIsClient(true);
     }, []);
-
 
     if (!student) {
         return (

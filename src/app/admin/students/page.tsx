@@ -41,7 +41,7 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PageTitle } from '@/components/common/PageTitle';
-import { mockStudents, mockCourses, type Student } from '@/lib/mockData';
+import type { Student } from '@/hooks/useStudents';
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -87,53 +87,56 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
+import { useCourses } from "@/hooks/useCourses";
+import axios from 'axios';
 
 
 const studentFormSchema = z.object({
-  // Paso 1
-  studentFirstName: z.string().min(2, "El nombre es obligatorio."),
-  studentLastName: z.string().min(2, "El apellido es obligatorio."),
-  guardianName: z.string().min(2, "El nombre del apoderado es obligatorio."),
-  studentDob: z.string().min(1, "La fecha de nacimiento es obligatoria."),
-  studentGender: z.string({ required_error: "Por favor, seleccione un género." }),
-  studentClass: z.string().min(1, "La clase es obligatoria."),
-  studentSection: z.string({ required_error: "Por favor, seleccione una sección." }),
-  studentPhoto: z.any().optional(),
-
-  // Paso 2
-  studentPhone: z.string().length(9, "El número de celular debe tener 9 dígitos."),
-  studentEmail: z.string().email("Correo electrónico inválido."),
-  studentAddress: z.string().min(5, "La dirección es obligatoria."),
-  studentDepartment: z.string().min(2, "El departamento es obligatorio."),
-  studentCity: z.string().min(2, "La ciudad es obligatoria."),
-  
-  // Paso 3
-  guardianPhone: z.string().length(9, "El celular del apoderado debe tener 9 dígitos."),
-  guardianEmail: z.string().email("Correo electrónico del apoderado inválido."),
-  guardianAddress: z.string().min(5, "La dirección del apoderado es obligatoria."),
-  guardianDob: z.string().min(1, "La fecha de nacimiento del apoderado es obligatoria."),
+  primer_nombre: z.string().min(2, "El nombre es obligatorio."),
+  apellido: z.string().min(2, "El apellido es obligatorio."),
+  nombre_tutor: z.string().min(2, "El nombre del apoderado es obligatorio."),
+  fecha_nacimiento: z.string().min(1, "La fecha de nacimiento es obligatoria."),
+  genero: z.string({ required_error: "Por favor, seleccione un género." }),
+  nivel: z.enum(["Primaria", "Secundaria"], { required_error: "El nivel es obligatorio." }),
+  grado: z.string().min(1, "El grado es obligatorio."),
+  seccion: z.string({ required_error: "Por favor, seleccione una sección." }),
+  fecha_matricula: z.string().min(1, "La fecha de matrícula es obligatoria."),
+  id_clase: z.string().optional(),
+  url_avatar: z.any().optional(),
+  telefono: z.string().length(9, "El número de celular debe tener 9 dígitos."),
+  correo: z.string().email("Correo electrónico inválido."),
+  direccion: z.string().min(5, "La dirección es obligatoria."),
+  departamento: z.string().min(2, "El departamento es obligatorio."),
+  ciudad: z.string().min(2, "La ciudad es obligatoria."),
+  contacto_tutor: z.string().length(9, "El celular del apoderado debe tener 9 dígitos."),
+  correo_tutor: z.string().email("Correo electrónico del apoderado inválido."),
+  direccion_tutor: z.string().min(5, "La dirección del apoderado es obligatoria."),
+  fecha_nacimiento_tutor: z.string().min(1, "La fecha de nacimiento del apoderado es obligatoria."),
 });
-
 
 type StudentFormValues = z.infer<typeof studentFormSchema>;
 
 const defaultValues: Partial<StudentFormValues> = {
-  studentFirstName: "",
-  studentLastName: "",
-  guardianName: "",
-  studentDob: "",
-  studentGender: "",
-  studentClass: "",
-  studentSection: "A",
-  studentPhone: "",
-  studentEmail: "",
-  studentAddress: "",
-  studentDepartment: "",
-  studentCity: "",
-  guardianPhone: "",
-  guardianEmail: "",
-  guardianAddress: "",
-  guardianDob: "",
+  primer_nombre: "",
+  apellido: "",
+  nombre_tutor: "",
+  fecha_nacimiento: "",
+  genero: "",
+  nivel: undefined,
+  grado: "",
+  seccion: "A",
+  fecha_matricula: new Date().toISOString().split('T')[0],
+  id_clase: "",
+  telefono: "",
+  correo: "",
+  direccion: "",
+  departamento: "",
+  ciudad: "",
+  contacto_tutor: "",
+  correo_tutor: "",
+  direccion_tutor: "",
+  fecha_nacimiento_tutor: "",
+  url_avatar: "",
 };
 
 const primaryGrades = [
@@ -153,16 +156,41 @@ const secondaryGrades = [
   { value: '5-sec', label: '5º de Secundaria' },
 ];
 
+// Función para mapear grado a texto
+const gradoToTexto = (grado: number) => {
+  const nombres = [
+    'Primer Grado',
+    'Segundo Grado',
+    'Tercer Grado',
+    'Cuarto Grado',
+    'Quinto Grado',
+    'Sexto Grado'
+  ];
+  return nombres[grado];
+};
+
+// Función para mapear texto a número
+const textoToGrado = (texto: string) => {
+  const nombres = [
+    'Primer Grado',
+    'Segundo Grado',
+    'Tercer Grado',
+    'Cuarto Grado',
+    'Quinto Grado',
+    'Sexto Grado'
+  ];
+  return nombres.findIndex(n => n === texto);
+};
+
 
 export default function StudentsPage() {
   const router = useRouter();
   const { toast } = useToast();
   const { students, loading, error, fetchStudents, createStudent, updateStudent, deleteStudent } = useStudents();
   const { classes, loading: classesLoading } = useClasses();
+  const { courses, loading: coursesLoading } = useCourses();
   const [searchTerm, setSearchTerm] = useState('');
   
-  const [selectedLevel, setSelectedLevel] = useState('');
-  const [selectedGrade, setSelectedGrade] = useState('');
   const [selectedSection, setSelectedSection] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
 
@@ -178,11 +206,31 @@ export default function StudentsPage() {
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
 
+  // Estado para el modal de eliminación rápida
+  const [isQuickDeleteOpen, setIsQuickDeleteOpen] = useState(false);
+  const [quickDeleteSearch, setQuickDeleteSearch] = useState("");
+
   // State for Comment Tab
   const [selectedLevelComment, setSelectedLevelComment] = useState('');
   const [selectedGradeComment, setSelectedGradeComment] = useState('');
   const [selectedSectionComment, setSelectedSectionComment] = useState('');
   const [selectedStudentIdComment, setSelectedStudentIdComment] = useState('');
+  const [comentarios, setComentarios] = useState<any[]>([]);
+  const [comentarioNuevo, setComentarioNuevo] = useState('');
+  const [comentariosLoading, setComentariosLoading] = useState(false);
+
+  const [filterNivel, setFilterNivel] = useState("");
+  const [filterGrado, setFilterGrado] = useState("");
+  const [filterSeccion, setFilterSeccion] = useState("");
+  const [filterCurso, setFilterCurso] = useState("");
+
+  // Función para limpiar filtros
+  const handleClearFilters = () => {
+    setFilterNivel("");
+    setFilterGrado("");
+    setFilterSeccion("");
+    setFilterCurso("");
+  };
 
   const form = useForm<StudentFormValues>({
     resolver: zodResolver(studentFormSchema),
@@ -190,15 +238,12 @@ export default function StudentsPage() {
     mode: "onChange",
   });
   
-  // Observar cambios en la clase seleccionada para actualizar las secciones dinámicamente
-  const selectedClass = form.watch('studentClass');
-  
   // Limpiar la sección cuando cambie la clase
   useEffect(() => {
-    if (selectedClass) {
-      form.setValue('studentSection', 'A');
+    if (form.watch('nivel')) {
+      form.setValue('seccion', 'A');
     }
-  }, [selectedClass, form]);
+  }, [form.watch('nivel'), form]);
   
   const handleModalChange = (open: boolean) => {
     setIsModalOpen(open);
@@ -218,34 +263,45 @@ export default function StudentsPage() {
     setIsModalOpen(true);
   };
   
-  const handleOpenEditModal = (student: Student) => {
-    handleModalChange(false);
+  const handleOpenEditModal = async (student: Student) => {
+    // No llamar handleModalChange(false) aquí porque resetea el formulario
+    setIsModalOpen(false); // Solo cerrar el modal si está abierto
     setModalMode('edit');
     setCurrentStudentId(student.id);
 
-    form.setValue('studentFirstName', student.primer_nombre);
-    form.setValue('studentLastName', student.apellido);
-    form.setValue('guardianName', student.nombre_tutor || '');
+    // Resetear el formulario manualmente sin usar handleModalChange
+    form.reset();
+    setStep(1);
+    setPhotoPreview(null);
+    setPhotoFileName('Ningún archivo seleccionado');
+
+    // Ahora setear los valores del estudiante
+    form.setValue('primer_nombre', student.primer_nombre);
+    form.setValue('apellido', student.apellido);
+    form.setValue('nombre_tutor', student.nombre_tutor || '');
     
     // Formatear la fecha de nacimiento usando la función de utilidad
     if (student.fecha_nacimiento) {
-      form.setValue('studentDob', formatDateForInput(student.fecha_nacimiento));
+      form.setValue('fecha_nacimiento', student.fecha_nacimiento);
     }
     
-    form.setValue('studentGender', student.genero || '');
-    form.setValue('studentClass', student.nivel_grado || '');
-    form.setValue('studentSection', student.seccion || 'A');
-    form.setValue('studentPhone', student.telefono || '');
-    form.setValue('studentEmail', student.correo);
-    form.setValue('studentAddress', student.direccion || '');
-    form.setValue('studentDepartment', student.departamento || '');
-    form.setValue('studentCity', student.ciudad || '');
-    form.setValue('guardianPhone', student.contacto_tutor || '');
-    form.setValue('guardianEmail', student.correo_tutor || '');
-    form.setValue('guardianAddress', student.direccion_tutor || '');
+    form.setValue('genero', student.genero || '');
+    form.setValue('nivel', student.nivel || 'Primaria');
+    form.setValue('grado', student.grado ? String(student.grado) : '1');
+    form.setValue('seccion', student.seccion || 'A');
+    form.setValue('fecha_matricula', student.fecha_matricula || new Date().toISOString().split('T')[0]);
+    form.setValue('id_clase', student.id_clase || '');
+    form.setValue('telefono', student.telefono || '');
+    form.setValue('correo', student.correo);
+    form.setValue('direccion', student.direccion || '');
+    form.setValue('departamento', student.departamento || '');
+    form.setValue('ciudad', student.ciudad || '');
+    form.setValue('contacto_tutor', student.contacto_tutor || '');
+    form.setValue('correo_tutor', student.correo_tutor || '');
+    form.setValue('direccion_tutor', student.direccion_tutor || '');
     
     if (student.fecha_nacimiento_tutor) {
-      form.setValue('guardianDob', formatDateForInput(student.fecha_nacimiento_tutor));
+      form.setValue('fecha_nacimiento_tutor', student.fecha_nacimiento_tutor);
     }
     
     if (student.url_avatar) {
@@ -253,6 +309,7 @@ export default function StudentsPage() {
       setPhotoFileName('Foto actual');
     }
     
+    await form.trigger(); // Llama a form.trigger() para actualizar la validez del formulario
     setIsModalOpen(true);
   };
 
@@ -266,24 +323,33 @@ export default function StudentsPage() {
     setIsDeleting(true);
 
     try {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        setStudents(prev => prev.filter(s => s.id !== studentToDelete.id));
-        toast({
-            title: "Estudiante Eliminado",
-            description: `El estudiante ${studentToDelete.name} ha sido eliminado.`,
-            variant: "success",
-        });
-        setIsDeleteAlertOpen(false);
-        setStudentToDelete(null);
-    } catch(error) {
-        toast({
-            title: "Error al Eliminar",
-            description: "No se pudo eliminar al estudiante. Por favor, inténtelo de nuevo.",
-            variant: "destructive",
-        });
+      console.log('Intentando eliminar estudiante con ID:', studentToDelete.id);
+      console.log('Datos del estudiante a eliminar:', studentToDelete);
+      
+      const result = await deleteStudent(studentToDelete.id);
+      console.log('Resultado de eliminación:', result);
+      
+      toast({
+        title: "Estudiante Eliminado",
+        description: `El estudiante ${studentToDelete.primer_nombre} ${studentToDelete.apellido} ha sido eliminado.`,
+        variant: "success",
+      });
+      setIsDeleteAlertOpen(false);
+      setStudentToDelete(null);
+    } catch (error) {
+      console.error('Error al eliminar estudiante:', error);
+      console.error('Detalles del error:', {
+        message: error instanceof Error ? error.message : 'Error desconocido',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      toast({
+        title: "Error al Eliminar",
+        description: error instanceof Error ? error.message : "No se pudo eliminar al estudiante. Por favor, inténtelo de nuevo.",
+        variant: "destructive",
+      });
     } finally {
-        setIsDeleting(false);
+      setIsDeleting(false);
     }
   };
 
@@ -300,7 +366,29 @@ export default function StudentsPage() {
   };
 
   const nextStep = async () => {
-    const isValid = await form.trigger();
+    let isValid = false;
+    
+    if (step === 1) {
+        isValid = await form.trigger([
+          'primer_nombre',
+          'apellido', 
+          'nombre_tutor',
+          'fecha_nacimiento',
+          'genero',
+          'nivel',
+          'grado',
+          'seccion'
+        ]);
+      } else if (step === 2) {
+        isValid = await form.trigger([
+          'telefono',
+          'correo',
+          'direccion',
+          'departamento',
+          'ciudad'
+        ]);
+    }
+    
     if (isValid) {
       setStep(step + 1);
     }
@@ -313,90 +401,83 @@ export default function StudentsPage() {
   async function onSubmit(data: StudentFormValues) {
     setIsSaving(true);
     try {
-        // Simulate API Call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-
-        const classDisplayMapping: { [key: string]: string } = {
-            "3-sec": "3º de Secundaria",
-            "4-sec": "4º de Secundaria",
-            "5-sec": "5º de Secundaria",
+      if (modalMode === 'add') {
+        const studentData = {
+          nombre: `${data.primer_nombre} ${data.apellido}`,
+          primer_nombre: data.primer_nombre,
+          apellido: data.apellido,
+          url_avatar: photoPreview || "https://placehold.co/100x100.png",
+          correo: data.correo,
+          telefono: data.telefono,
+          fecha_matricula: data.fecha_matricula,
+          direccion: data.direccion,
+          id_clase: data.id_clase,
+          nombre_tutor: data.nombre_tutor,
+          contacto_tutor: data.contacto_tutor,
+          fecha_nacimiento: data.fecha_nacimiento,
+          genero: data.genero as any,
+          seccion: data.seccion,
+          departamento: data.departamento,
+          ciudad: data.ciudad,
+          correo_tutor: data.correo_tutor,
+          direccion_tutor: data.direccion_tutor,
+          fecha_nacimiento_tutor: data.fecha_nacimiento_tutor,
+          nivel: data.nivel,
+          grado: Number(data.grado),
         };
-        const gradeLevel = classDisplayMapping[data.studentClass] || data.studentClass;
 
-        if (modalMode === 'add') {
-            const newStudent: Student = {
-                id: `S${Date.now().toString().slice(-4)}`,
-                name: `${data.studentFirstName} ${data.studentLastName}`,
-                firstName: data.studentFirstName,
-                lastName: data.studentLastName,
-                avatarUrl: photoPreview || "https://placehold.co/100x100.png",
-                email: data.studentEmail,
-                phone: data.studentPhone,
-                courses: [],
-                enrollmentDate: new Date().toISOString().split('T')[0],
-                address: data.studentAddress,
-                gradeLevel: gradeLevel,
-                guardianName: data.guardianName,
-                guardianContact: data.guardianPhone,
-                dob: data.studentDob,
-                gender: data.studentGender as any,
-                classId: data.studentClass,
-                section: data.studentSection,
-                department: data.studentDepartment,
-                city: data.studentCity,
-                guardianEmail: data.guardianEmail,
-                guardianAddress: data.guardianAddress,
-                guardianDob: data.guardianDob,
-            };
-            setStudents(prev => [newStudent, ...prev]);
-            toast({
-                title: "Estudiante Agregado",
-                description: `El estudiante ${newStudent.name} ha sido registrado exitosamente.`,
-                variant: "success",
-            });
-        } else if(currentStudentId) {
-            setStudents(prev => prev.map(s => {
-                if (s.id === currentStudentId) {
-                    return {
-                        ...s,
-                        name: `${data.studentFirstName} ${data.studentLastName}`,
-                        firstName: data.studentFirstName,
-                        lastName: data.studentLastName,
-                        avatarUrl: photoPreview || s.avatarUrl,
-                        email: data.studentEmail,
-                        phone: data.studentPhone,
-                        address: data.studentAddress,
-                        gradeLevel: gradeLevel,
-                        guardianName: data.guardianName,
-                        guardianContact: data.guardianPhone,
-                        dob: data.studentDob,
-                        gender: data.studentGender as any,
-                        classId: data.studentClass,
-                        section: data.studentSection,
-                        department: data.studentDepartment,
-                        city: data.studentCity,
-                        guardianEmail: data.guardianEmail,
-                        guardianAddress: data.guardianAddress,
-                        guardianDob: data.guardianDob,
-                    };
-                }
-                return s;
-            }));
-            toast({
-                title: "Estudiante Actualizado",
-                description: `Los datos de ${data.studentFirstName} ${data.studentLastName} han sido actualizados.`,
-                variant: "success",
-            });
-        }
-        handleModalChange(false);
-    } catch (error) {
+        await createStudent(studentData);
+        
         toast({
-            title: "Error al Guardar",
-            description: "No se pudo guardar el estudiante. Por favor, inténtelo de nuevo.",
-            variant: "destructive"
+          title: "Estudiante Agregado",
+          description: `El estudiante ${data.primer_nombre} ${data.apellido} ha sido registrado exitosamente.`,
+          variant: "success",
         });
+      } else if (currentStudentId) {
+        // Actualizar estudiante existente
+        const updateData = {
+          nombre: `${data.primer_nombre} ${data.apellido}`,
+          primer_nombre: data.primer_nombre,
+          apellido: data.apellido,
+          url_avatar: photoPreview,
+          correo: data.correo,
+          telefono: data.telefono,
+          fecha_matricula: data.fecha_matricula,
+          direccion: data.direccion,
+          id_clase: data.id_clase,
+          nombre_tutor: data.nombre_tutor,
+          contacto_tutor: data.contacto_tutor,
+          fecha_nacimiento: data.fecha_nacimiento,
+          genero: data.genero as any,
+          seccion: data.seccion,
+          departamento: data.departamento,
+          ciudad: data.ciudad,
+          correo_tutor: data.correo_tutor,
+          direccion_tutor: data.direccion_tutor,
+          fecha_nacimiento_tutor: data.fecha_nacimiento_tutor,
+          nivel: data.nivel,
+          grado: Number(data.grado),
+        };
+
+        await updateStudent(currentStudentId, updateData);
+        
+        toast({
+          title: "Estudiante Actualizado",
+          description: `Los datos de ${data.primer_nombre} ${data.apellido} han sido actualizados.`,
+          variant: "success",
+        });
+      }
+      
+      handleModalChange(false);
+    } catch (error) {
+      console.error('Error al guardar estudiante:', error);
+      toast({
+        title: "Error al Guardar",
+        description: error instanceof Error ? error.message : "No se pudo guardar el estudiante. Por favor, inténtelo de nuevo.",
+        variant: "destructive"
+      });
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
   }
   
@@ -409,23 +490,73 @@ export default function StudentsPage() {
     }
   }
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Reemplaza el filtro de estudiantes por uno seguro:
+  const filteredStudents = useMemo(() => {
+    let filtered = students || [];
+    if (filterNivel && filterNivel !== "all") filtered = filtered.filter(s => s.nivel === filterNivel);
+    if (filterGrado && filterGrado !== "all") {
+      // El valor de filterGrado es tipo '1-pri' o '2-sec', pero en la BD es número y nivel
+      const [grado, tipo] = filterGrado.split("-");
+      filtered = filtered.filter(s => String(s.grado) === grado && (tipo === 'pri' ? s.nivel === 'Primaria' : s.nivel === 'Secundaria'));
+    }
+    if (filterSeccion && filterSeccion !== "all") filtered = filtered.filter(s => s.seccion === filterSeccion);
+    if (filterCurso && filterCurso !== "all") {
+      // Filtrar por curso: solo estudiantes que pertenezcan a la clase asociada al curso
+      const curso = courses.find(c => c.id === filterCurso);
+      if (curso && curso.id_clase) {
+        filtered = filtered.filter(s => s.id_clase === String(curso.id_clase));
+      } else {
+        filtered = [];
+      }
+    }
+    return filtered;
+  }, [students, filterNivel, filterGrado, filterSeccion, filterCurso, courses]);
 
   const filteredStudentsForComment = useMemo(() => {
     if (!selectedGradeComment || !selectedSectionComment) {
       return [];
     }
+    const gradoNumber = selectedGradeComment.split('-')[0];
     return students.filter(student => 
-      student.classId === selectedGradeComment && student.section === selectedSectionComment
+      student.nivel === selectedLevelComment &&
+      String(student.grado) === gradoNumber &&
+      student.seccion === selectedSectionComment
     );
-  }, [students, selectedGradeComment, selectedSectionComment]);
+  }, [students, selectedLevelComment, selectedGradeComment, selectedSectionComment]);
 
   const selectedStudentForComment = useMemo(() => {
     return students.find(s => s.id === selectedStudentIdComment);
   }, [students, selectedStudentIdComment]);
+
+  // Fetch comentarios cuando cambia el alumno seleccionado en la pestaña Comentario
+  useEffect(() => {
+    if (selectedStudentIdComment) {
+      setComentariosLoading(true);
+      axios.get(`/api/estudiantes/comentarios-estudiantes?id_estudiante=${selectedStudentIdComment}`)
+        .then(res => setComentarios(res.data))
+        .catch(() => setComentarios([]))
+        .finally(() => setComentariosLoading(false));
+    } else {
+      setComentarios([]);
+    }
+  }, [selectedStudentIdComment]);
+
+  // Handler para enviar comentario
+  const handleEnviarComentario = async () => {
+    if (!comentarioNuevo.trim() || !selectedStudentIdComment) return;
+    await axios.post('/api/estudiantes/comentarios-estudiantes', {
+      id_estudiante: selectedStudentIdComment,
+      autor: 'admin@sofiaeduca.com',
+      comentario: comentarioNuevo.trim(),
+    });
+    setComentarioNuevo('');
+    // Refrescar comentarios
+    setComentariosLoading(true);
+    axios.get(`/api/estudiantes/comentarios-estudiantes?id_estudiante=${selectedStudentIdComment}`)
+      .then(res => setComentarios(res.data))
+      .catch(() => setComentarios([]))
+      .finally(() => setComentariosLoading(false));
+  };
 
   return (
     <>
@@ -468,6 +599,7 @@ export default function StudentsPage() {
                 <Button
                   variant="outline"
                   className="h-auto p-4 flex items-center justify-start space-x-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:-translate-y-1 group border-border bg-card hover:bg-muted/50 text-foreground"
+                  onClick={() => setIsQuickDeleteOpen(true)}
                 >
                   <div className="bg-red-100 dark:bg-red-900/40 p-4 rounded-lg group-hover:bg-red-200 dark:group-hover:bg-red-900/60 transition-colors">
                     <UserMinus className="h-8 w-8 text-red-600 dark:text-red-400" />
@@ -493,38 +625,38 @@ export default function StudentsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                 <div className="grid gap-2">
                     <Label htmlFor="level">Nivel</Label>
-                    <Select value={selectedLevel} onValueChange={(value) => {
-                        setSelectedLevel(value);
-                        setSelectedGrade('');
-                    }}>
+                    <Select value={filterNivel || 'all'} onValueChange={v => { setFilterNivel(v); setFilterGrado(''); }}>
                         <SelectTrigger id="level">
                             <SelectValue placeholder="Seleccionar Nivel" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="primaria">Primaria</SelectItem>
-                            <SelectItem value="secundaria">Secundaria</SelectItem>
+                            <SelectItem value="all">Todos</SelectItem>
+                            <SelectItem value="Primaria">Primaria</SelectItem>
+                            <SelectItem value="Secundaria">Secundaria</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="grade">Grado</Label>
-                    <Select value={selectedGrade} onValueChange={setSelectedGrade} disabled={!selectedLevel}>
+                    <Select value={filterGrado || 'all'} onValueChange={setFilterGrado} disabled={!filterNivel || filterNivel === 'all'}>
                         <SelectTrigger id="grade">
-                            <SelectValue placeholder={!selectedLevel ? "Seleccione un nivel" : "Seleccionar Grado"} />
+                            <SelectValue placeholder="Seleccione un nivel" />
                         </SelectTrigger>
                         <SelectContent>
-                            {selectedLevel === 'primaria' && primaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
-                            {selectedLevel === 'secundaria' && secondaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                            <SelectItem value="all">Todos</SelectItem>
+                            {filterNivel === 'Primaria' && primaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
+                            {filterNivel === 'Secundaria' && secondaryGrades.map(g => <SelectItem key={g.value} value={g.value}>{g.label}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="section">Sección</Label>
-                    <Select value={selectedSection} onValueChange={setSelectedSection}>
+                    <Select value={filterSeccion || 'all'} onValueChange={setFilterSeccion}>
                         <SelectTrigger id="section">
                             <SelectValue placeholder="Seleccionar Sección" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="all">Todas</SelectItem>
                             <SelectItem value="A">A</SelectItem>
                             <SelectItem value="B">B</SelectItem>
                             <SelectItem value="C">C</SelectItem>
@@ -533,21 +665,23 @@ export default function StudentsPage() {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="course">Curso</Label>
-                    <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+                    <Select value={filterCurso || 'all'} onValueChange={setFilterCurso} disabled={coursesLoading || !courses.length}>
                         <SelectTrigger id="course">
-                            <SelectValue placeholder="Seleccionar Curso" />
+                            <SelectValue placeholder={coursesLoading ? "Cargando..." : (!courses.length ? "Sin cursos" : "Seleccionar Curso")}/>
                         </SelectTrigger>
                         <SelectContent>
-                            {mockCourses.map(course => (
-                                <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+                            <SelectItem value="all">Todos</SelectItem>
+                            {courses.map(curso => (
+                                <SelectItem key={curso.id} value={curso.id}>{curso.nombre}</SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
-                <Button className="w-full lg:w-auto">
-                    <SearchIcon className="mr-2 h-4 w-4" />
-                    Encontrar
-                </Button>
+                <div className="flex items-center mt-4 lg:mt-0">
+                  <Button className="bg-green-500 hover:bg-green-600 text-white" onClick={handleClearFilters} type="button">
+                    <Filter className="mr-1 h-4 w-4" /> Limpiar filtro
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -566,7 +700,7 @@ export default function StudentsPage() {
                       value={searchTerm}
                       onChange={e => setSearchTerm(e.target.value)}
                     />
-                    <Button>
+                    <Button onClick={() => setSearchTerm(searchTerm)}>
                         <SearchIcon className="h-4 w-4" />
                     </Button>
                  </div>
@@ -585,7 +719,11 @@ export default function StudentsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredStudents.map((student, index) => (
+                  {filteredStudents.filter(student => {
+                    const nombre = student?.primer_nombre || '';
+                    const apellido = student?.apellido || '';
+                    return `${nombre} ${apellido}`.toLowerCase().includes((searchTerm || '').toLowerCase()) || student.id.toLowerCase().includes((searchTerm || '').toLowerCase());
+                  }).map((student, index) => (
                     <TableRow key={student.id} className="hover:bg-muted/50 transition-colors">
                       <TableCell className="font-medium">{index + 1}.</TableCell>
                       <TableCell className="text-muted-foreground">{student.id}</TableCell>
@@ -598,7 +736,9 @@ export default function StudentsPage() {
                            <span className="font-medium text-foreground">{`${student.primer_nombre} ${student.apellido}`}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{student.nivel_grado || '-'}</TableCell>
+                      <TableCell>
+                        {student.clase_display || `${student.grado}° de ${student.nivel}`}
+                      </TableCell>
                       <TableCell>{student.seccion || '-'}</TableCell>
                       <TableCell className="text-right space-x-2">
                         <Button size="sm" className="bg-green-500 hover:bg-green-600 text-white" onClick={() => handleOpenEditModal(student)}>
@@ -650,8 +790,8 @@ export default function StudentsPage() {
                             <SelectValue placeholder="Seleccionar Nivel" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="primaria">Primaria</SelectItem>
-                            <SelectItem value="secundaria">Secundaria</SelectItem>
+                            <SelectItem value="Primaria">Primaria</SelectItem>
+                            <SelectItem value="Secundaria">Secundaria</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -665,8 +805,8 @@ export default function StudentsPage() {
                             <SelectValue placeholder={!selectedLevelComment ? "Seleccione nivel" : "Seleccionar Grado"} />
                         </SelectTrigger>
                         <SelectContent>
-                            {selectedLevelComment === 'primaria' && primaryGrades.map(g => <SelectItem key={`comment-p-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
-                            {selectedLevelComment === 'secundaria' && secondaryGrades.map(g => <SelectItem key={`comment-s-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                            {selectedLevelComment === 'Primaria' && primaryGrades.map(g => <SelectItem key={`comment-p-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
+                            {selectedLevelComment === 'Secundaria' && secondaryGrades.map(g => <SelectItem key={`comment-s-${g.value}`} value={g.value}>{g.label}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
@@ -694,7 +834,7 @@ export default function StudentsPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {filteredStudentsForComment.map(student => (
-                        <SelectItem key={`comment-stud-${student.id}`} value={student.id}>{student.name}</SelectItem>
+                        <SelectItem key={`comment-stud-${student.id}`} value={student.id}>{student.primer_nombre} {student.apellido}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -712,14 +852,14 @@ export default function StudentsPage() {
                     {selectedStudentForComment ? (
                         <>
                             <Avatar className="h-32 w-32 mb-4 border-2 border-border">
-                                <AvatarImage src={selectedStudentForComment.avatarUrl} alt={selectedStudentForComment.name} data-ai-hint="student avatar" />
-                                <AvatarFallback>{selectedStudentForComment.name.slice(0,2)}</AvatarFallback>
+                                <AvatarImage src={selectedStudentForComment.url_avatar || ''} alt={selectedStudentForComment.primer_nombre} data-ai-hint="student avatar" />
+                                <AvatarFallback>{selectedStudentForComment.primer_nombre.slice(0,2)}</AvatarFallback>
                             </Avatar>
-                            <h3 className="text-xl font-semibold text-foreground">{selectedStudentForComment.name}</h3>
+                            <h3 className="text-xl font-semibold text-foreground">{selectedStudentForComment.primer_nombre} {selectedStudentForComment.apellido}</h3>
                             <div className="text-left text-sm text-muted-foreground mt-4 space-y-2 w-full bg-muted/30 p-4 rounded-lg">
                                 <p><span className="font-medium text-foreground/80">Identificación:</span> {selectedStudentForComment.id}</p>
-                                <p><span className="font-medium text-foreground/80">Teléfono:</span> {selectedStudentForComment.phone}</p>
-                                <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> {new Date(selectedStudentForComment.dob || '').toLocaleDateString('es-ES')}</p>
+                                <p><span className="font-medium text-foreground/80">Teléfono:</span> {selectedStudentForComment.telefono}</p>
+                                <p><span className="font-medium text-foreground/80">Fecha de nacimiento:</span> {selectedStudentForComment.fecha_nacimiento ? new Date(selectedStudentForComment.fecha_nacimiento).toLocaleDateString('es-ES') : ''}</p>
                             </div>
                         </>
                     ) : (
@@ -736,19 +876,43 @@ export default function StudentsPage() {
                 <CardHeader>
                     <CardTitle>Comentarios</CardTitle>
                 </CardHeader>
-                <CardContent className="flex-grow flex items-center justify-center bg-muted/50 rounded-md min-h-[200px]">
-                    <p className="text-muted-foreground">Sin comentarios</p>
-                </CardContent>
-                <CardFooter className="p-2 border-t mt-auto">
-                    <div className="relative w-full">
-                        <Textarea placeholder="Escribe un comentario..." className="pr-12 bg-card resize-none" rows={1} />
-                        <Button size="icon" className="absolute right-2 bottom-2 h-8 w-8">
-                            <Send className="h-4 w-4"/>
-                            <span className="sr-only">Enviar comentario</span>
-                        </Button>
+                <CardContent className="flex-grow flex flex-col gap-2 bg-muted/50 rounded-md min-h-[200px]">
+                    {comentariosLoading ? (
+                      <p className="text-muted-foreground">Cargando comentarios...</p>
+                    ) : comentarios.length === 0 ? (
+                      <p className="text-muted-foreground">Sin comentarios</p>
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        {comentarios.map(c => (
+                          <div key={c.id} className="bg-background rounded-md p-3 border border-border">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
+                              <span className="font-semibold text-foreground">{c.autor}</span>
+                              <span>•</span>
+                              <span>{new Date(c.fecha).toLocaleString('es-PE')}</span>
+                            </div>
+                            <div className="text-foreground text-sm">{c.comentario}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                  <CardFooter className="p-2 border-t mt-auto">
+                    <div className="relative w-full flex gap-2">
+                      <Textarea
+                        placeholder="Escribe un comentario..."
+                        className="pr-12 bg-card resize-none"
+                        rows={1}
+                        value={comentarioNuevo}
+                        onChange={e => setComentarioNuevo(e.target.value)}
+                        disabled={!selectedStudentIdComment || comentariosLoading}
+                      />
+                      <Button size="icon" className="h-8 w-8" onClick={handleEnviarComentario} disabled={!comentarioNuevo.trim() || !selectedStudentIdComment || comentariosLoading}>
+                        <Send className="h-4 w-4" />
+                        <span className="sr-only">Enviar comentario</span>
+                      </Button>
                     </div>
-                </CardFooter>
-            </Card>
+                  </CardFooter>
+                </Card>
           </div>
         </TabsContent>
       </Tabs>
@@ -770,7 +934,7 @@ export default function StudentsPage() {
                     <div className="grid grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
-                        name="studentFirstName"
+                        name="primer_nombre"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Nombre completo</FormLabel>
@@ -783,7 +947,7 @@ export default function StudentsPage() {
                       />
                       <FormField
                         control={form.control}
-                        name="studentLastName"
+                        name="apellido"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-transparent select-none">Apellido</FormLabel>
@@ -796,7 +960,7 @@ export default function StudentsPage() {
                       />
                     </div>
 
-                    <FormField control={form.control} name="guardianName" render={({ field }) => (
+                    <FormField control={form.control} name="nombre_tutor" render={({ field }) => (
                         <FormItem>
                             <FormLabel>Nombre del padre</FormLabel>
                             <FormControl><Input {...field} /></FormControl>
@@ -805,14 +969,14 @@ export default function StudentsPage() {
                     )} />
 
                     <div className="grid grid-cols-2 gap-4">
-                        <FormField control={form.control} name="studentDob" render={({ field }) => (
+                        <FormField control={form.control} name="fecha_nacimiento" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Fecha de nacimiento</FormLabel>
                                 <FormControl><Input type="date" placeholder="dd/mm/aaaa" {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <FormField control={form.control} name="studentGender" render={({ field }) => (
+                        <FormField control={form.control} name="genero" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Género</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -829,16 +993,43 @@ export default function StudentsPage() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <FormField control={form.control} name="studentClass" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Clase</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Ej: Primer Grado, Segundo Grado..." {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <FormField control={form.control} name="studentSection" render={({ field }) => (
+                        <FormField control={form.control} name="nivel" render={({ field }) => (
+  <FormItem>
+    <FormLabel>Nivel</FormLabel>
+    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+      <SelectTrigger>
+        <SelectValue placeholder="Seleccionar Nivel" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="Primaria">Primaria</SelectItem>
+        <SelectItem value="Secundaria">Secundaria</SelectItem>
+      </SelectContent>
+    </Select>
+    <FormMessage />
+  </FormItem>
+)} />
+<FormField control={form.control} name="grado" render={({ field }) => (
+  <FormItem>
+    <FormLabel>Grado</FormLabel>
+    <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
+      <SelectTrigger>
+        <SelectValue placeholder="Seleccionar Grado" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="1">1</SelectItem>
+        <SelectItem value="2">2</SelectItem>
+        <SelectItem value="3">3</SelectItem>
+        <SelectItem value="4">4</SelectItem>
+        <SelectItem value="5">5</SelectItem>
+        <SelectItem value="6">6</SelectItem>
+      </SelectContent>
+    </Select>
+    <FormMessage />
+  </FormItem>
+)} />
+                    </div>
+
+                    <FormField control={form.control} name="seccion" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Sección</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -854,24 +1045,6 @@ export default function StudentsPage() {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                    </div>
-
-                    <FormField control={form.control} name="studentPhoto" render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Foto</FormLabel>
-                             <div className="flex items-center gap-2">
-                                <FormControl>
-                                    <Label htmlFor="photo-upload-modal" className={cn(buttonVariants({ variant: "outline" }), "cursor-pointer font-normal")}>
-                                        Seleccionar archivo
-                                        <Input id="photo-upload-modal" type="file" className="sr-only" accept="image/*" onChange={handlePhotoChange} />
-                                    </Label>
-                                </FormControl>
-                                <span className="text-sm text-muted-foreground truncate">{photoFileName}</span>
-                            </div>
-                            <FormMessage />
-                             {photoPreview && <Avatar className="mt-4 h-24 w-24"><AvatarImage src={photoPreview} alt="Vista previa de foto" /></Avatar>}
-                        </FormItem>
-                    )} />
                   </div>
                 )}
                 {step === 2 && (
@@ -879,7 +1052,7 @@ export default function StudentsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                          <FormField
                           control={form.control}
-                          name="studentPhone"
+                          name="telefono"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Número de Celular</FormLabel>
@@ -892,7 +1065,7 @@ export default function StudentsPage() {
                         />
                          <FormField
                           control={form.control}
-                          name="studentEmail"
+                          name="correo"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Correo Electrónico</FormLabel>
@@ -906,7 +1079,7 @@ export default function StudentsPage() {
                       </div>
                       <FormField
                         control={form.control}
-                        name="studentAddress"
+                        name="direccion"
                         render={({ field }) => (
                             <FormItem>
                             <FormLabel>Dirección</FormLabel>
@@ -920,7 +1093,7 @@ export default function StudentsPage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                          <FormField
                           control={form.control}
-                          name="studentDepartment"
+                          name="departamento"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Departamento</FormLabel>
@@ -933,7 +1106,7 @@ export default function StudentsPage() {
                         />
                          <FormField
                           control={form.control}
-                          name="studentCity"
+                          name="ciudad"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Ciudad</FormLabel>
@@ -949,11 +1122,11 @@ export default function StudentsPage() {
                 )}
                 {step === 3 && (
                      <div className="space-y-8 animate-fade-in">
-                        <h3 className="text-lg font-medium text-foreground">Datos del Apoderado: {form.getValues("guardianName")}</h3>
+                        <h3 className="text-lg font-medium text-foreground">Datos del Apoderado: {form.getValues("nombre_tutor")}</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                            <FormField
                             control={form.control}
-                            name="guardianPhone"
+                            name="contacto_tutor"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Celular del Apoderado</FormLabel>
@@ -966,7 +1139,7 @@ export default function StudentsPage() {
                           />
                            <FormField
                             control={form.control}
-                            name="guardianEmail"
+                            name="correo_tutor"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Correo del Apoderado</FormLabel>
@@ -980,7 +1153,7 @@ export default function StudentsPage() {
                         </div>
                         <FormField
                           control={form.control}
-                          name="guardianAddress"
+                          name="direccion_tutor"
                           render={({ field }) => (
                               <FormItem>
                               <FormLabel>Dirección del Apoderado</FormLabel>
@@ -993,7 +1166,7 @@ export default function StudentsPage() {
                         />
                         <FormField
                             control={form.control}
-                            name="guardianDob"
+                            name="fecha_nacimiento_tutor"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Fecha de Nacimiento del Apoderado</FormLabel>
@@ -1050,6 +1223,63 @@ export default function StudentsPage() {
         </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
+
+    {/* Modal de eliminación rápida */}
+    <Dialog open={isQuickDeleteOpen} onOpenChange={setIsQuickDeleteOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Eliminar Alumno</DialogTitle>
+          <DialogDescription>
+            Busca y selecciona el alumno que deseas eliminar.
+          </DialogDescription>
+        </DialogHeader>
+        <Input
+          placeholder="Buscar por nombre o ID..."
+          value={quickDeleteSearch}
+          onChange={e => setQuickDeleteSearch(e.target.value)}
+          className="mb-4"
+        />
+        <div className="max-h-72 overflow-y-auto divide-y divide-border">
+          {(students || [])
+            .filter(student => {
+              const nombre = student?.primer_nombre || '';
+              const apellido = student?.apellido || '';
+              return (
+                `${nombre} ${apellido}`.toLowerCase().includes(quickDeleteSearch.toLowerCase()) ||
+                student.id.toLowerCase().includes(quickDeleteSearch.toLowerCase())
+              );
+            })
+            .map(student => (
+              <div key={student.id} className="flex items-center justify-between py-2 gap-2">
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={student.url_avatar || "https://placehold.co/40x40.png"} alt={`${student.primer_nombre} ${student.apellido}`} />
+                    <AvatarFallback>{student.primer_nombre.substring(0, 1)}{student.apellido.substring(0, 1)}</AvatarFallback>
+                  </Avatar>
+                  <span className="font-medium text-foreground">{student.primer_nombre} {student.apellido}</span>
+                  <span className="text-xs text-muted-foreground ml-2">{student.id}</span>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    setIsQuickDeleteOpen(false);
+                    openDeleteAlert(student);
+                  }}
+                >
+                  <Trash2 className="h-4 w-4 mr-1" /> Eliminar
+                </Button>
+              </div>
+            ))}
+          {students.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">No hay estudiantes registrados.</p>
+          )}
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsQuickDeleteOpen(false)}>Cerrar</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     </>
   );
 }

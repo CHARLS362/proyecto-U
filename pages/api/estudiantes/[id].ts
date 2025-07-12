@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const [estudiantes] = await conn.query(`
           SELECT 
             e.*,
-            CONCAT(e.nivel_grado, ' - ', e.seccion) as clase_display
+            CONCAT(e.grado, '° de ', e.nivel) as clase_display
           FROM estudiantes e
           WHERE e.id = ?
         `, [id]);
@@ -61,20 +61,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         break;
 
       case 'DELETE':
-        const [studentToDelete] = await conn.query(
-          'SELECT id FROM estudiantes WHERE id = ?',
-          [id]
-        );
+        try {
+          // Primero verificar si el estudiante existe
+          const [studentToDelete] = await conn.query(
+            'SELECT id FROM estudiantes WHERE id = ?',
+            [id]
+          );
 
-        if (!Array.isArray(studentToDelete) || studentToDelete.length === 0) {
-          return res.status(404).json({ error: 'Estudiante no encontrado' });
+          if (!Array.isArray(studentToDelete) || studentToDelete.length === 0) {
+            return res.status(404).json({ error: 'Estudiante no encontrado' });
+          }
+
+          // Eliminar registros relacionados en el orden correcto para evitar errores de clave foránea
+          console.log('Eliminando registros relacionados para estudiante:', id);
+          
+          // 1. Eliminar de valores_puntuaciones_notas (si existe)
+          await conn.query('DELETE vpn FROM valores_puntuaciones_notas vpn JOIN puntuaciones_notas pn ON vpn.id_puntuacion_nota = pn.id WHERE pn.id_estudiante = ?', [id]);
+          
+          // 2. Eliminar de puntuaciones_notas
+          await conn.query('DELETE FROM puntuaciones_notas WHERE id_estudiante = ?', [id]);
+          
+          // 3. Eliminar de entradas_notas (si existe)
+          await conn.query('DELETE en FROM entradas_notas en JOIN notas_bimestre nb ON en.id_nota_bimestre = nb.id WHERE nb.id_estudiante = ?', [id]);
+          
+          // 4. Eliminar de notas_bimestre
+          await conn.query('DELETE FROM notas_bimestre WHERE id_estudiante = ?', [id]);
+          
+          // 5. Eliminar de registros_asistencia
+          await conn.query('DELETE FROM registros_asistencia WHERE id_estudiante = ?', [id]);
+          
+          // 6. Eliminar de estudiantes_cursos
+          await conn.query('DELETE FROM estudiantes_cursos WHERE id_estudiante = ?', [id]);
+          
+          // 7. Eliminar de entregas (si existe)
+          await conn.query('DELETE FROM entregas WHERE id_estudiante = ?', [id]);
+          
+          // 8. Finalmente eliminar el estudiante
+          await conn.query('DELETE FROM estudiantes WHERE id = ?', [id]);
+          
+          // 9. Eliminar el usuario asociado
+          await conn.query('DELETE FROM usuarios WHERE identificador = ?', [id]);
+
+          console.log('Estudiante eliminado exitosamente:', id);
+          res.status(200).json({ mensaje: 'Estudiante eliminado exitosamente' });
+        } catch (deleteError) {
+          console.error('Error específico al eliminar estudiante:', deleteError);
+          res.status(500).json({ error: 'Error al eliminar estudiante: ' + (deleteError as Error).message });
         }
-
-        await conn.query('DELETE FROM usuarios WHERE identificador = ?', [id]);
-        
-        await conn.query('DELETE FROM estudiantes WHERE id = ?', [id]);
-
-        res.status(200).json({ mensaje: 'Estudiante eliminado exitosamente' });
         break;
 
       default:
