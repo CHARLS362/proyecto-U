@@ -1,3 +1,4 @@
+// pages/api/auth/login.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getConnection } from '@/lib/db';
 import bcrypt from 'bcryptjs';
@@ -24,10 +25,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const conn = await getConnection();
-    const [rows] = await conn.query(
-      'SELECT * FROM usuarios WHERE correo = ?',
-      [correo]
-    );
+    const [rows] = await conn.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
     conn.release();
 
     if (!Array.isArray(rows) || rows.length === 0) {
@@ -41,9 +39,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Credenciales inválidas' });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // Excluir contraseña antes de enviar al frontend
     const { contrasena: _, ...usuarioSinContrasena } = usuario;
-    res.status(200).json({ mensaje: 'Login exitoso', usuario: usuarioSinContrasena });
+
+    res.status(200).json({
+      mensaje: 'Login exitoso',
+      usuario: usuarioSinContrasena
+    });
 
   } catch (error) {
     console.error('Error interno del servidor:', error);
